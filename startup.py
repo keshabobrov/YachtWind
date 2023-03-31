@@ -1,0 +1,110 @@
+from flask import Flask, render_template, request, redirect, url_for, jsonify
+import json
+import db_access
+
+app = Flask(__name__)
+
+
+@app.route('/')
+def home():
+    return render_template("index.html")
+
+
+@app.route('/ident', methods=['POST'])
+def userIdent():
+    jsonData = request.json
+    tgid = jsonData[0]['value']
+    userinfo = db_access.Users(tgid)
+    if hasattr(userinfo, 'UID'):
+        return jsonify(userinfo.Role), 200
+    return jsonify("User not found, please register"), 200
+
+
+@app.route('/register', methods=['POST'])
+def userRegistration():
+    jsonData = request.json
+    tgid = jsonData[0]['value']
+    userinfo = db_access.Users(tgid)
+    if hasattr(userinfo, 'UID'):
+        return jsonify("User already in system! UID: " + str(userinfo.UID)), 409
+    userinfo.Role = 'regular'
+    userinfo.Name = jsonData[1]['value']
+    userinfo.StudyIn = jsonData[2]['value']
+    userinfo.BD = jsonData[3]['value']
+    userinfo.user_setup()
+    return jsonify("User has been created!"), 200
+
+
+@app.route('/create_event', methods=['POST'])
+def eventCreation():
+    jsonData = request.json
+    tgid = jsonData[0]['value']
+    event = db_access.Trainings(tgid)
+    event.event_date = jsonData[1]['value']
+    event.event_time = jsonData[2]['value']
+    event.user_slots = jsonData[3]['value']
+    res = event.create()
+    return jsonify(res), 200
+
+
+@app.route('/event_request', methods=['POST'])
+def eventRequest():
+    user_id_dict = []
+    event_UID_dict = []
+    user_name_dict = []
+    event_data_dict = []
+    event_time_dict = []
+    all_slots_dict = []
+    available_slots_dict = []
+    quantity = []
+    k = 0
+    event_class_object = db_access.Trainings(0)
+    event_list = event_class_object.request()
+    for i in event_list:
+        parse_slots = []
+        event_UID_dict.insert(k, str(i[0]))
+        user_id_dict.insert(k, str(i[1]))
+        event_data_dict.insert(k, str(i[3]))
+        event_time_dict.insert(k, str(i[4]))
+        all_slots_dict.insert(k, str(i[5]))
+        iter = 0
+        for n in i[6:]:
+            if n is not None:
+                parse_slots.insert(iter, k)
+                iter += 1
+        slots_quantity = i[5] - len(parse_slots)
+        available_slots_dict.insert(k, slots_quantity)
+        k += 1
+    for index, i in enumerate(user_id_dict):
+        trainer = db_access.Users(i)
+        user_name_dict.insert(index, trainer.Name)
+    result = event_UID_dict + user_name_dict + event_data_dict + event_time_dict + all_slots_dict + available_slots_dict
+    quantity.insert(0, len(user_id_dict))
+    return jsonify(quantity + result), 200
+
+
+@app.route('/team_parse', methods=['POST'])
+def teamParse():
+    users = []
+    event_id = request.json
+    event = db_access.teamParse(event_id)[0]
+    for index, x in enumerate(event[6:]):
+        if x is not None:
+            user = db_access.Users(x)
+            users.insert(index, user.Name)
+    return jsonify(users)
+
+
+@app.route('/enroll_event', methods=['POST'])
+def enrollEvent():
+    enroll_data = request.json
+    tgid = enroll_data[0]
+    event_id = enroll_data[1]
+    user = db_access.Users(tgid)
+    if not hasattr(user, 'UID'):
+        return jsonify("User not registred")
+    res = db_access.enrollEvent(tgid, event_id)
+    return jsonify(res)
+
+if __name__ == "__main__":
+    app.run(host="localhost", port=8080, debug=True)
