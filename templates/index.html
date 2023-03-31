@@ -1,85 +1,43 @@
 <!doctype html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport"
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <link href="static/main.css" rel="stylesheet" type="text/css">
-    <title>Document</title>
-<!--    <style>-->
-<!--        h1 {text-align: center;}-->
-<!--        p {text-align: center;}-->
-<!--        div {text-align: center;}-->
-<!--    </style>-->
-</head>
-<body>
+    <link href="/static/main.css" rel="stylesheet" type="text/css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
-    <table>
-        <tr><td><br><span style="font-weight:bold">Initialisation</span></td></tr>
-        <tr>
-            <form action="" id="initForm" method="post">
-            <td><label for="tgid">Your Telegram id:</label></td>
-            <td><input type="text" id="tgid" name="tgid"></td>
-            <td><button onclick="setup();" type="button">Submit</button></td>
-        </form>
-        </tr>
-        <tr><td><br><span style="font-weight:bold">Registration</span></td></tr>
-        <tr>
-            <form action="" id="regForm" method="post">
-                <td><label for="tgid1">Your Telegram id:</label><br></td>
-                <td><input type="text" id="tgid1" name="tgid1"><br></td>
-                <td><label for="name">Full Name:</label><br></td>
-                <td><input type="text" id="name" name="name"></td>
-                <td><label for="study">University:</label><br></td>
-                <td><input type="text" id="study" name="study"><br></td>
-                <td><label for="birth">Date of birth:</label><br></td>
-                <td><input type="date" id="birth" name="birth" value="2001-01-01"></td>
-                <td><button onclick="userRegistration()" type="button">Register</button></td>
-            </form>
-        </tr>
-        <tr><td><br><span style="font-weight:bold">Creating event</span></td></tr>
-        <tr>
-            <form action="" id="eventCreationForm" method="post">
-                <td><label for="tgid2">Your Telegram id:</label><br></td>
-                <td><input type="text" id="tgid2" name="tgid2"><br></td>
-                <td><label for="eventDate">Event date</label><br></td>
-                <td><input type="date" id="eventDate" name="eventDate"></td>
-                <td><label for="eventTime">Event time</label><br></td>
-                <td><input type="time" id="eventTime" name="eventTime"><br></td>
-                <td><label for="eventSlots">Event Slots</label><br></td>
-                <td><input type="text" id="eventSlots" name="eventSlots" value="8"></td>
-                <td><button onclick="eventCreation()" type="button">Create</button></td>
-            </form>
-        </tr>
-    </table>
-    <table id="eventlist">
-        <tr>
-            <th>User</th>
-            <th>Date</th>
-            <th>Time</th>
-            <th>All slots</th>
-            <th>Available slots</th>
-<!--            <th>UID</th>-->
-        </tr>
-    </table>
-    <div id="response">Info</div>
-    <div id="overlay">
-        <div id="text">Enroll to training</div>
-        <table id="enroll_table">
-            <tr>
-                <th>Trainer</th>
-                <th>Date</th>
-                <th>Time</th>
-                <th>All slots</th>
-                <th>Available slots</th>
-                <th>UID</th>
-            </tr>
-        </table>
-        <div><button id="enroll_button" type="button" onclick="enrollEvent()">Enroll</button></div>
-        <div><button id="close_button" type="button" onclick="document.getElementById('overlay').style.display = 'none'">X</button></div>
+    <title>RegularUser</title>
+</head>
+<body>
+    <div class="container">
+        <nav class="mainMenu">
+            <div class="rows" id="my_teams">
+                <div class="buttons"><button type="button" onclick="document.getElementById('overlay').style.display = 'flex'">Мои команды</button></div>
+                <div class="arrow_div"><i class="arrow right"></i></div>
+            </div>
+            <div class="rows" id="sign_training">
+                <div class="buttons"><button type="button" onclick="document.getElementById('overlay').style.display = 'flex'">Запись на выход</button></div>
+                <div class="arrow_div"><i class="arrow right"></i></div>
+            </div>
+            <div class="rows" id="statistics">
+                <div class="buttons"><button type="button" onclick="document.getElementById('overlay').style.display = 'flex'">Мои выходы</button></div>
+                <div class="arrow_div"><i class="arrow right"></i></div>
+            </div>
+            <div class="rows" id="feedback">
+                <div class="buttons"><button type="button" onclick="document.getElementById('overlay').style.display = 'flex'">Обратная связь</button></div>
+                <div class="arrow_div"><i class="arrow right"></i></div>
+            </div>
+        </nav>
+        <div class="overlay" id="overlay">
+            <div class="mainMenu">
+                test
+            </div>
+        </div>
     </div>
-    <script src="static/main.js"></script>
+    <script>
+        Telegram.WebApp.MainButton.show();
+    </script>
 </body>
 </html>
