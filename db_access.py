@@ -21,15 +21,13 @@ class Users:
             self.UID = user_data[0]
             self.Role = user_data[1]
             self.Name = user_data[3]
-            self.StudyIn = user_data[4]
-            self.BD = user_data[5]
+            self.Access = user_data[4]
 
     def user_setup(self):
         write_new_user(
             TgId=self.TgId,
             Name=self.Name,
-            StudyIn=self.StudyIn,
-            BirthDay=self.BD,
+            Access=self.Access,
             Role=self.Role
         )
 
@@ -93,14 +91,14 @@ def parse_slots(slot):
 
 
 @access_db
-def write_new_user(TgId, Name, StudyIn, BirthDay, Role, cursor):
+def write_new_user(TgId, Name, Access, Role, cursor):
     try:
         RegDate = date.today()
         new_user = ("INSERT INTO users "
-                    "(Role, TgId, Name, StudyIn, BirthDay, RegDate) "
-                    "VALUES (%s, %s, %s, %s, %s, %s)")
+                    "(Role, TgId, Name, Access, RegDate) "
+                    "VALUES (%s, %s, %s, %s, %s)")
 
-        user_data = (Role, TgId, Name, StudyIn, BirthDay, RegDate)
+        user_data = (Role, TgId, Name, Access, RegDate)
         cursor.execute(new_user, user_data)
         logging.info('DB: User has been created!')
 

@@ -56,6 +56,12 @@ input {
     width: 100%;
 }
 
+.submit_button {
+    display: block;
+    width: 100%;
+    border: 2px solid blue;
+}
+
 .inputBlock {
     display: flex;
     flex-direction: row;

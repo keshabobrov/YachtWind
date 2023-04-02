@@ -29,16 +29,31 @@ function ajaxRequest(formData, url) {
     });
 }
 
-function setup() {
+function get_id() {
+    let telegram = window.Telegram.WebApp;
+        try {
+            const tgID = telegram.initDataUnsafe.user.id;
+            return tgID
+        }
+        catch (err) {
+            // TODO: REMOVE THIS BEFORE PRODUCTION
+            console.log("Telegram app not found!");
+            const tgID = 12345678;
+            return tgID
+        };
+}
+
+function setup(tgID) {
     /** Функция идентифицирования пользователя. Отправляет на сервер id пользователя и возвращает
      * роль пользователя в системе или сообщение об отсутствии пользователя в системе.*/
         // TODO: Сделать автоматическое определение айди пользователя и выполнение функции при старте.
         // TODO: Перевод на страницу с регистрацией.
-    let formData = JSON.stringify($("#initForm").serializeArray());
-    let url = "/ident";
-    ajaxRequest(formData, url).then((value) => {
-        document.getElementById("response").innerHTML = value
-        alert(value)
+    return new Promise((resolve, reject) => {
+        let url = "/ident";
+        let data = JSON.stringify(tgID);
+        ajaxRequest(data, url).then((value) => {
+            resolve (value)
+        });
     });
 };
 
@@ -47,10 +62,17 @@ function userRegistration() {
     /** Функция регистрации пользователя.
      * Данные на входе: форма
      * Данные на выходе: Сообщение: Пользователь уже зарегистрирован, успешная регистрация*/
-    let formData = JSON.stringify($("#regForm").serializeArray());
+    let dict = $("#regForm").serializeArray()
+    dict.push({
+        name: "id",
+        value: get_id()
+    })
+    let data = JSON.stringify(dict);
     let url = "/register";
-    ajaxRequest(formData, url).then((value) => {
-        document.getElementById("response").innerHTML = value
+    ajaxRequest(data, url).then((value) => {
+        window.location.replace("/");
+    }).catch((value) => {
+        window.location.replace("/");
     });
 };
 
@@ -66,6 +88,18 @@ function eventCreation() {
     ajaxRequest(formData, url).then((value) => {
         location.reload()
     });
+};
+
+function appStart() {
+    const tgID = get_id()
+    // Promise to wait until role will be received.
+    setup(tgID).then((role) => {
+        console.log(role)
+        if (role == 0) {
+            window.location.replace("/reg_form")
+        }
+    });
+    // loadEvents();
 };
 
 
@@ -162,4 +196,4 @@ function enrollEvent() {
     })
 }
 
-window.onload = loadEvents();
+if (window.location.pathname == "/") {appStart()}

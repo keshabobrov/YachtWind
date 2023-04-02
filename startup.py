@@ -1,5 +1,4 @@
 from flask import Flask, render_template, request, redirect, url_for, jsonify
-import json
 import db_access
 
 app = Flask(__name__)
@@ -9,28 +8,30 @@ app = Flask(__name__)
 def home():
     return render_template("index.html")
 
+@app.route('/reg_form')
+def reg_form():
+    return render_template("registration.html")
+
 
 @app.route('/ident', methods=['POST'])
 def userIdent():
-    jsonData = request.json
-    tgid = jsonData[0]['value']
+    tgid = request.json
     userinfo = db_access.Users(tgid)
     if hasattr(userinfo, 'UID'):
         return jsonify(userinfo.Role), 200
-    return jsonify("User not found, please register"), 200
+    return jsonify(0), 200
 
 
 @app.route('/register', methods=['POST'])
 def userRegistration():
     jsonData = request.json
-    tgid = jsonData[0]['value']
+    tgid = jsonData[3]['value']
     userinfo = db_access.Users(tgid)
     if hasattr(userinfo, 'UID'):
         return jsonify("User already in system! UID: " + str(userinfo.UID)), 409
     userinfo.Role = 'regular'
-    userinfo.Name = jsonData[1]['value']
-    userinfo.StudyIn = jsonData[2]['value']
-    userinfo.BD = jsonData[3]['value']
+    userinfo.Name = jsonData[0]['value'] + " " + jsonData[1]['value'] + " " + jsonData[2]['value']
+    userinfo.Access = True
     userinfo.user_setup()
     return jsonify("User has been created!"), 200
 
