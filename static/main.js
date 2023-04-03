@@ -94,12 +94,17 @@ function appStart() {
     const tgID = get_id()
     // Promise to wait until role will be received.
     setup(tgID).then((role) => {
-        console.log(role)
         if (role == 0) {
             window.location.replace("/reg_form")
         }
+        if (role == "admin") {
+            document.getElementById('administration').style.display = 'flex'
+        }
+        if (role == "admin") {
+            document.getElementById('create_overlay').style.display = 'flex'
+        }
     });
-    // loadEvents();
+    loadEvents();
 };
 
 
@@ -112,22 +117,24 @@ function loadEvents() {
     let formData = ''
     let url = "/event_request"
     ajaxRequest(formData, url).then((value) => {
-        let table = document.getElementById('eventlist')
+        let table = document.getElementById('enroll_table')
         for (let i = 0; i < value[0]; i++) {
             let row = table.insertRow(i+1);
-            let uid_row = value[i + 1]
             let user_row = value[i + 1 + value[0]]
-            let date_row = value[i + 1 + value[0] * 2]
+            // let date_row = value[i + 1 + value[0] * 2]
             let time_row = value[i + 1 + value[0] * 3]
-            let all_slots_row = value[i + 1 + value[0] * 4]
+            time_row = time_row.slice(0, -3)
+            let lastIndex = user_row.lastIndexOf(" ")
+            user_row = user_row.substring(0, lastIndex)
             let slots_row = value[i + 1 + value[0] * 5]
             row.className = "dynamicrows"
-            row.insertCell(0).innerHTML = user_row
-            row.insertCell(1).innerHTML = date_row
-            row.insertCell(2).innerHTML = time_row
-            row.insertCell(3).innerHTML = all_slots_row
-            row.insertCell(4).innerHTML = slots_row
-            row.insertCell(5).innerHTML = uid_row
+            row.insertCell(0).innerHTML = time_row
+            row.insertCell(1).innerHTML = user_row
+            row.insertCell(2).innerHTML = slots_row
+            let cell_time = row.cells[0]
+            let cell_trainer = row.cells[1]
+            cell_time.className = "time_td"
+            cell_trainer.className = "trainer_td"
         }
         /** добавление обработчика нажатий на строки таблицы*/
         addRowHandlers()
@@ -139,7 +146,7 @@ function addRowHandlers() {
     /** Функция обработчика нажатий на строки в таблице.
      * При нажатии активируется оверлэй и выполняется функция подгрузки данных.
      * Функции подгрузки данных передается целиком строка*/
-  let table = document.getElementById("eventlist");
+  let table = document.getElementById("enroll_table");
   let rows = table.getElementsByTagName("tr");
   for (i = 0; i < rows.length; i++) {
     let currentRow = table.rows[i];

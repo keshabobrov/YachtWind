@@ -8,7 +8,7 @@
     <link href="/static/main.css" rel="stylesheet" type="text/css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
-    <title>RegularUser</title>
+    <title>YachtingBot</title>
 </head>
 <body>
     <div class="container">
@@ -17,8 +17,8 @@
                 <div class="buttons"><button type="button" onclick="document.getElementById('overlay').style.display = 'flex'">Мои команды</button></div>
                 <div class="arrow_div"><i class="arrow right"></i></div>
             </div>
-            <div class="rows" id="sign_training">
-                <div class="buttons"><button type="button" onclick="document.getElementById('overlay').style.display = 'flex'">Запись на выход</button></div>
+            <div class="rows" id="enroll_training">
+                <div class="buttons"><button type="button" onclick="document.getElementById('overlay_enroll').style.display = 'flex'">Запись на выход</button></div>
                 <div class="arrow_div"><i class="arrow right"></i></div>
             </div>
             <div class="rows" id="statistics">
@@ -29,10 +29,43 @@
                 <div class="buttons"><button type="button" onclick="document.getElementById('overlay').style.display = 'flex'">Обратная связь</button></div>
                 <div class="arrow_div"><i class="arrow right"></i></div>
             </div>
+            <div class="rows" id="administration">
+                <div class="buttons"><button type="button" onclick="">Администрирование</button></div>
+                <div class="arrow_div"><i class="arrow right"></i></div>
+            </div>
         </nav>
-        <div class="overlay" id="overlay">
-            <div class="mainMenu">
-                test
+        <div class="overlay" id="overlay_enroll">
+            <div class="enroll_menu">
+                <div id="textbox_enroll_overlay">Запись на выход</div>
+                <div class="arrow_div" onclick="document.getElementById('overlay_enroll').style.display = 'none'"><i class="arrow left"></i></div>
+                <table id="enroll_table">
+                    <tr>
+                        <td class="time_td">8:30</td>
+                        <td class="trainer_td">Иван Никитин</td>
+                        <td class="slots_td">3</td>
+                    </tr>
+                    <tr>
+                        <td class="time_td">8:30</td>
+                        <td class="trainer_td">Иван Никитин</td>
+                        <td class="slots_td">3</td>
+                    </tr>
+                    <tr>
+                        <td class="time_td">8:30</td>
+                        <td class="trainer_td">Иван Никитин</td>
+                        <td class="slots_td">3</td>
+                    </tr>
+                </table>
+                <div class="submit_button" id="create_overlay"><button type="button" onclick="document.getElementById('event_creation').style.display = 'flex'">Создать</button></div>
+            </div>
+        </div>
+        <div class="overlay" id="event_creation">
+            <div class="enroll_menu">
+                <div id="textbox_create_overlay">Создание события</div>
+                <div class="arrow_div" onclick="document.getElementById('event_creation').style.display = 'none'"><i class="arrow left"></i></div>
+            </div>
+            <div class="enroll_menu" id="creation_form">
+                <div><label class="create_form_label" for="date_form">Дата события:</label></div>
+                <div><input class="create_input_box" type="date" id="date_form" name="date_form"></div>
             </div>
         </div>
     </div>

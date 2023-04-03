@@ -1,3 +1,5 @@
+import time
+
 from flask import Flask, render_template, request, redirect, url_for, jsonify
 import db_access
 
@@ -59,7 +61,7 @@ def eventRequest():
     available_slots_dict = []
     quantity = []
     k = 0
-    event_class_object = db_access.Trainings(0)
+    event_class_object = db_access.Trainings()
     event_list = event_class_object.request()
     for i in event_list:
         parse_slots = []
