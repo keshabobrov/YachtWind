@@ -41,11 +41,11 @@ def userRegistration():
 @app.route('/create_event', methods=['POST'])
 def eventCreation():
     jsonData = request.json
-    tgid = jsonData[0]['value']
+    tgid = jsonData[3]['value']
     event = db_access.Trainings(tgid)
-    event.event_date = jsonData[1]['value']
-    event.event_time = jsonData[2]['value']
-    event.user_slots = jsonData[3]['value']
+    event.event_date = jsonData[0]['value']
+    event.event_time = jsonData[1]['value']
+    event.user_slots = jsonData[2]['value']
     res = event.create()
     return jsonify(res), 200
 
@@ -61,7 +61,7 @@ def eventRequest():
     available_slots_dict = []
     quantity = []
     k = 0
-    event_class_object = db_access.Trainings()
+    event_class_object = db_access.Trainings(0)
     event_list = event_class_object.request()
     for i in event_list:
         parse_slots = []

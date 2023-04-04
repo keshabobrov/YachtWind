@@ -83,10 +83,19 @@ function eventCreation() {
      * 2. Юзер не обладает полномочиями
      * 3. Событие создано
      * Обновление страницы после выполнения кода.*/
-    let formData = JSON.stringify($("#eventCreationForm").serializeArray());
+    if (document.getElementById("slots_form").value <= 1 || document.getElementById("slots_form").value >= 8) {
+        alert("Неверное число слотов для записи. (1-8)");
+    }
+    let dict = $("#event_create_form").serializeArray();
+    dict.push({
+        name: "id",
+        value: get_id()
+    })
+    let data = JSON.stringify(dict);
     let url = "/create_event";
-    ajaxRequest(formData, url).then((value) => {
-        location.reload()
+    ajaxRequest(data, url).then((value) => {
+        alert("Событие создано!")
+        loadEvents()
     });
 };
 

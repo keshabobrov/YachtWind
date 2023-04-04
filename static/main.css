@@ -62,7 +62,7 @@ input {
 }
 
 .submit_button {
-    margin: 0px;
+    margin: 10px;
     display: block;
     width: 100%;
     border: 2px solid blue;
@@ -136,11 +136,6 @@ input {
     background-image: url("/static/src/feedback.png");
 }
 
-#create_button {
-    margin-top: 20px;
-    display: none;
-}
-
 .overlay {
     display: none;
     flex-direction: column;
@@ -159,6 +154,10 @@ input {
     margin-top: 0px;
     width: 100%;
     right: 0px;
+}
+
+#create_overlay {
+    width: auto;
 }
 
 table {
@@ -182,14 +181,18 @@ table {
     text-align: right;
 }
 
-#creation_form {
+.create_row {
+    display: flex;
     flex-direction: row;
 }
 
-/*.create_input_box {*/
-/*    margin-left: 20px;*/
-/*}*/
+.create_form_input {
+    margin: 0px 20px;
+    width: 100%;
+}
 
-/*.create_form_label {*/
-/*    margin: auto;*/
-/*}*/
+.create_form_label {
+    margin: 10px;
+    width: 100%;
+    text-align: left;
+}

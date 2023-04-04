@@ -39,24 +39,10 @@
                 <div id="textbox_enroll_overlay">Запись на выход</div>
                 <div class="arrow_div" onclick="document.getElementById('overlay_enroll').style.display = 'none'"><i class="arrow left"></i></div>
                 <table id="enroll_table">
-                    <tr>
-                        <td class="time_td">8:30</td>
-                        <td class="trainer_td">Иван Никитин</td>
-                        <td class="slots_td">3</td>
-                    </tr>
-                    <tr>
-                        <td class="time_td">8:30</td>
-                        <td class="trainer_td">Иван Никитин</td>
-                        <td class="slots_td">3</td>
-                    </tr>
-                    <tr>
-                        <td class="time_td">8:30</td>
-                        <td class="trainer_td">Иван Никитин</td>
-                        <td class="slots_td">3</td>
-                    </tr>
+                    <tr></tr>
                 </table>
-                <div class="submit_button" id="create_overlay"><button type="button" onclick="document.getElementById('event_creation').style.display = 'flex'">Создать</button></div>
             </div>
+            <div class="submit_button" id="create_overlay"><button type="button" onclick="document.getElementById('event_creation').style.display = 'flex'">Создать</button></div>
         </div>
         <div class="overlay" id="event_creation">
             <div class="enroll_menu">
@@ -64,8 +50,23 @@
                 <div class="arrow_div" onclick="document.getElementById('event_creation').style.display = 'none'"><i class="arrow left"></i></div>
             </div>
             <div class="enroll_menu" id="creation_form">
-                <div><label class="create_form_label" for="date_form">Дата события:</label></div>
-                <div><input class="create_input_box" type="date" id="date_form" name="date_form"></div>
+                <form id="event_create_form">
+                    <div class="create_row">
+                        <div class="create_form_label"><label for="date_form">Дата события:</label></div>
+                        <div class="create_form_input"><input type="date" id="date_form" name="date_form" max="2040-12-31"></div>
+                    </div>
+                    <div class="create_row">
+                        <div class="create_form_label"><label for="time_form">Время события:</label></div>
+                        <div class="create_form_input"><input type="time" id="time_form" name="time_form"></div>
+                    </div>
+                    <div class="create_row">
+                        <div class="create_form_label"><label for="slots_form">Количество слотов:</label></div>
+                        <div class="create_form_input"><input type="number" id="slots_form" name="slots_form" placeholder="(1-8)"></div>
+                    </div>
+                </form>
+            </div>
+            <div class="create_row">
+                <div class="submit_button" id="create_button"><button type="button" onclick="eventCreation()">Создать</button></div>
             </div>
         </div>
     </div>

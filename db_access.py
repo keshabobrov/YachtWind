@@ -34,8 +34,8 @@ class Users:
 
 class Trainings:
     """Класс для тренировок: создание, чтение"""
-    def __init__(self):
-        # self.user = Users(TgId)
+    def __init__(self, TgId):
+        self.user = Users(TgId)
         self.event_date = None
         self.event_time = None
         self.user_slots = None
