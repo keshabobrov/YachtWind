@@ -25,6 +25,22 @@ body {
     width: auto;
 }
 
+.date_picker {
+    display: flex;
+    flex-direction: row;
+    margin: 20px 60px;
+}
+
+#date_picker_text {
+    width: 100%;
+    text-align: center;
+    cursor: pointer;
+}
+
+#arrow_date_left, #arrow_date_right {
+    padding: 0px 10px;
+}
+
 button {
     display: block;
     box-sizing: border-box;
@@ -82,7 +98,7 @@ input {
     width: 200px;
 }
 
-.rows {
+.rows, .rows_invisible {
     display: flex;
     margin-bottom: 10px;
     flex-direction: row;
@@ -91,6 +107,10 @@ input {
     background-size: 40px;
     background-position: 2% 50%;
     -webkit-tap-highlight-color: rgba(126, 126, 133, 0.3);
+}
+
+.rows_invisible {
+    display: none;
 }
 
 .arrow {
