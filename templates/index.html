@@ -42,6 +42,12 @@
                     <tr></tr>
                 </table>
             </div>
+            <div class="date_picker" id="date_picker">
+                <div class="arrow_div" id="arrow_date_left" onclick="listHandler(0)"><i class="arrow left"></i></div>
+                <div id="date_picker_text">04 апреля</div>
+                <div id="time_stamp" style="display: none"></div>
+                <div class="arrow_div" id="arrow_date_right" onclick="listHandler(1)"><i class="arrow right"></i></div>
+            </div>
             <div class="submit_button" id="create_overlay"><button type="button" onclick="document.getElementById('event_creation').style.display = 'flex'">Создать</button></div>
         </div>
         <div class="overlay" id="event_creation">

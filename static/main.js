@@ -9,6 +9,31 @@
 // }
 
 
+function request_events() {
+    return new Promise((resolve, reject) => {
+        let formData = '';
+        let url = "/event_request";
+        const array = new Map()
+        ajaxRequest(formData, url).then((value) => {
+            for (let i = 1; i <= value[0]; i++) {
+                let uid_name = "uid_" + i;
+                let user_name = "user_" + i;
+                let date_name = "date_" + i;
+                let time_name = "time_" + i;
+                let all_sl_name = "all_sl_" + i;
+                let free_sl_name = "free_sl_" + i;
+                array.set(uid_name, value[i]);
+                array.set(user_name, value[i + value[0]]);
+                array.set(date_name, value[i + value[0] * 2]);
+                array.set(time_name, value[i + value[0] * 3]);
+                array.set(all_sl_name, value[i + value[0] * 4]);
+                array.set(free_sl_name, value[i + value[0] * 5]);
+            }
+            resolve(array)
+        });
+    });
+}
+
 function ajaxRequest(formData, url) {
     /** Функция, возвращающая Promise, выполняющая запросы на сервер. Получает на входе две переменные:
      * Данные для передачи и url-адрес запроса.*/
@@ -95,7 +120,7 @@ function eventCreation() {
     let url = "/create_event";
     ajaxRequest(data, url).then((value) => {
         alert("Событие создано!")
-        loadEvents()
+        showEvents()
     });
 };
 
@@ -113,8 +138,95 @@ function appStart() {
             document.getElementById('create_overlay').style.display = 'flex'
         }
     });
-    loadEvents();
+    showEvents();
 };
+
+function showEvents() {
+    request_events().then((value) => {
+        let table = document.getElementById('enroll_table');
+        for (i=1; i <= (value.size / 6); i++) {
+            let user = value.get("user_" + i);
+            let date = value.get("date_" + i);
+            let time = value.get("time_" + i);
+            let free_sl = value.get("free_sl_" + i);
+            let row = table.insertRow(i);
+            row.insertCell(0).innerHTML = time.slice(0, -3);
+            row.insertCell(1).innerHTML = user;
+            row.insertCell(2).innerHTML = free_sl;
+            row.insertCell(3).innerHTML = date;
+            row.className = "rows_invisible";
+            row.cells[3].style.display = "none"
+            let cell_time = row.cells[0];
+            let cell_trainer = row.cells[1];
+            cell_time.className = "time_td";
+            cell_trainer.className = "trainer_td";
+            if (date === value.get("date_1")) {
+                row.className = "rows";
+                let date = new Date(value.get("date_1"))
+                document.getElementById("time_stamp").innerHTML = value.get("date_1")
+                document.getElementById("date_picker_text").innerHTML = date.toLocaleString("ru", {
+                    month: "long",
+                    day: "numeric"
+                })
+            }
+        }
+    })
+}
+
+function listHandler(direction) {
+    let table = document.getElementById("enroll_table");
+    let date_vis = document.getElementById("time_stamp").innerHTML
+    let next_date = ""
+    let prev_date = ""
+    let i = 1
+    while (next_date === "") {
+        if (table.rows[i].cells[3].innerHTML > date_vis && next_date === "") {
+            next_date = table.rows[i].cells[3].innerHTML;
+        }
+        if (table.rows[i].cells[3].innerHTML === date_vis && prev_date === "") {
+            if (table.rows[i].cells[3].innerHTML === table.rows[1].cells[3].innerHTML) {
+                prev_date = table.rows[1].cells[3].innerHTML
+            } else {
+                prev_date = table.rows[i - 1].cells[3].innerHTML;
+            }
+        }
+        if (i === table.rows.length - 1) {
+            if (direction === 0) {break}
+            return
+        }
+        i += 1
+    }
+    if (direction === 0) {
+        document.getElementById("time_stamp").innerHTML = prev_date
+        for (let i = 1; i < table.rows.length; i++) {
+            if (table.rows[i].cells[3].innerHTML !== prev_date) {
+                table.rows[i].className = "rows_invisible"
+            }
+            if (table.rows[i].cells[3].innerHTML === prev_date) {
+                table.rows[i].className = "rows"
+            }
+        }
+        prev_date = new Date(prev_date)
+        document.getElementById("date_picker_text").innerHTML = prev_date.toLocaleString("ru", {
+            month: "long",
+            day: "numeric"})
+    }
+    if (direction === 1) {
+        document.getElementById("time_stamp").innerHTML = next_date
+        for (let i = 1; i < table.rows.length; i++) {
+            if (table.rows[i].cells[3].innerHTML !== next_date) {
+                table.rows[i].className = "rows_invisible"
+            }
+            if (table.rows[i].cells[3].innerHTML === next_date) {
+                table.rows[i].className = "rows"
+            }
+        }
+        next_date = new Date(next_date)
+        document.getElementById("date_picker_text").innerHTML = next_date.toLocaleString("ru", {
+            month: "long",
+            day: "numeric"})
+    }
+}
 
 
 function loadEvents() {
@@ -148,7 +260,7 @@ function loadEvents() {
         /** добавление обработчика нажатий на строки таблицы*/
         addRowHandlers()
     });
-};
+}
 
 
 function addRowHandlers() {
