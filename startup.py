@@ -105,7 +105,7 @@ def enrollEvent():
     event_id = enroll_data[1]
     user = db_access.Users(tgid)
     if not hasattr(user, 'UID'):
-        return jsonify("User not registred")
+        return jsonify(3)
     res = db_access.enrollEvent(tgid, event_id)
     return jsonify(res)
 

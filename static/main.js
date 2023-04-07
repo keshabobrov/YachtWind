@@ -8,6 +8,27 @@
 //     console.log(dataOne.value)
 // }
 
+function ajaxRequest(formData, url) {
+    /** Функция, возвращающая Promise, выполняющая запросы на сервер. Получает на входе две переменные:
+     * Данные для передачи и url-адрес запроса.*/
+    return new Promise((resolve, reject) => {
+        $.ajax({
+            url: url,
+            type: 'POST',
+            contentType: 'application/json',
+            dataType: 'json',
+            data: formData,
+            success: function (response) {
+                resolve(response);
+            },
+            error: function (response) {
+            alert("RQ: Error has been occurred");
+                reject();
+            }
+        });
+    });
+}
+
 
 function request_events() {
     return new Promise((resolve, reject) => {
@@ -34,25 +55,6 @@ function request_events() {
     });
 }
 
-function ajaxRequest(formData, url) {
-    /** Функция, возвращающая Promise, выполняющая запросы на сервер. Получает на входе две переменные:
-     * Данные для передачи и url-адрес запроса.*/
-    return new Promise((resolve, reject) => {
-        $.ajax({
-            url: url,
-            type: 'POST',
-            contentType: 'application/json',
-            dataType: 'json',
-            data: formData,
-            success: function (response) {
-                resolve(response);
-            },
-            error: function (response) {
-                reject(alert('Error has been occurred'));
-            }
-        });
-    });
-}
 
 function get_id() {
     let telegram = window.Telegram.WebApp;
@@ -108,8 +110,8 @@ function eventCreation() {
      * 2. Юзер не обладает полномочиями
      * 3. Событие создано
      * Обновление страницы после выполнения кода.*/
-    if (document.getElementById("slots_form").value <= 1 || document.getElementById("slots_form").value >= 8) {
-        alert("Неверное число слотов для записи. (1-8)");
+    if (document.getElementById("slots_form").value <= 1 || document.getElementById("slots_form").value >= 10) {
+        alert("Неверное число слотов для записи. (1-10)");
     }
     let dict = $("#event_create_form").serializeArray();
     dict.push({
@@ -122,19 +124,19 @@ function eventCreation() {
         alert("Событие создано!")
         showEvents()
     });
-};
+}
 
 function appStart() {
     const tgID = get_id()
     // Promise to wait until role will be received.
     setup(tgID).then((role) => {
-        if (role == 0) {
+        if (role === 0) {
             window.location.replace("/reg_form")
         }
-        if (role == "admin") {
+        if (role === "admin") {
             document.getElementById('administration').style.display = 'flex'
         }
-        if (role == "admin") {
+        if (role === "admin") {
             document.getElementById('create_overlay').style.display = 'flex'
         }
     });
@@ -145,6 +147,7 @@ function showEvents() {
     request_events().then((value) => {
         let table = document.getElementById('enroll_table');
         for (i=1; i <= (value.size / 6); i++) {
+            let uid = value.get("uid_" + i);
             let user = value.get("user_" + i);
             let date = value.get("date_" + i);
             let time = value.get("time_" + i);
@@ -154,8 +157,10 @@ function showEvents() {
             row.insertCell(1).innerHTML = user;
             row.insertCell(2).innerHTML = free_sl;
             row.insertCell(3).innerHTML = date;
+            row.insertCell(4).innerHTML = uid;
             row.className = "rows_invisible";
-            row.cells[3].style.display = "none"
+            row.cells[3].style.display = "none";
+            row.cells[4].style.display = "none";
             let cell_time = row.cells[0];
             let cell_trainer = row.cells[1];
             cell_time.className = "time_td";
@@ -170,6 +175,8 @@ function showEvents() {
                 })
             }
         }
+        /** добавление обработчика нажатий на строки таблицы*/
+        addRowHandlers()
     })
 }
 
@@ -228,100 +235,66 @@ function listHandler(direction) {
     }
 }
 
-
-function loadEvents() {
-    /** Функция загрузки всех событий. Выполняется при загрузке страницы.
-     * Отправляет запрос на сервер. Получает ответ в виде массива с только будущими событиями.
-     * Сортировка по дате и времени.
-     * Присваивает класс dynamicrows всем создаваемым строкам таблицы.
-     * Вставляет строки в таблицу с событиями.*/
-    let formData = ''
-    let url = "/event_request"
-    ajaxRequest(formData, url).then((value) => {
-        let table = document.getElementById('enroll_table')
-        for (let i = 0; i < value[0]; i++) {
-            let row = table.insertRow(i+1);
-            let user_row = value[i + 1 + value[0]]
-            // let date_row = value[i + 1 + value[0] * 2]
-            let time_row = value[i + 1 + value[0] * 3]
-            time_row = time_row.slice(0, -3)
-            let lastIndex = user_row.lastIndexOf(" ")
-            user_row = user_row.substring(0, lastIndex)
-            let slots_row = value[i + 1 + value[0] * 5]
-            row.className = "dynamicrows"
-            row.insertCell(0).innerHTML = time_row
-            row.insertCell(1).innerHTML = user_row
-            row.insertCell(2).innerHTML = slots_row
-            let cell_time = row.cells[0]
-            let cell_trainer = row.cells[1]
-            cell_time.className = "time_td"
-            cell_trainer.className = "trainer_td"
-        }
-        /** добавление обработчика нажатий на строки таблицы*/
-        addRowHandlers()
-    });
-}
-
-
 function addRowHandlers() {
     /** Функция обработчика нажатий на строки в таблице.
-     * При нажатии активируется оверлэй и выполняется функция подгрузки данных.
-     * Функции подгрузки данных передается целиком строка*/
-  let table = document.getElementById("enroll_table");
-  let rows = table.getElementsByTagName("tr");
-  for (i = 0; i < rows.length; i++) {
-    let currentRow = table.rows[i];
-    let createClickHandler = function(row) {
-      return function() {
-        let rowdata = row.getElementsByTagName("td");
-        document.getElementById("overlay").style.display = "block";
-        loadTeam(rowdata)
-      };
-    };
-    currentRow.onclick = createClickHandler(currentRow);
-  }
-}
-
-
-function loadTeam(rowdata) {
-    /** Функция подгрузки команды и отображения данных в оверлее.
-     * На входе получает сырую строку нажатой строки в таблице.
-     * Создает строки внутренней таблицы с данными.
-     * Удаляет предыдущие строки из таблице при закрытии оверлеея.*/
-    let uid = rowdata[5].innerHTML;
+     * При нажатии вызывается функция eventViewer, которой передается строка.*/
     let table = document.getElementById("enroll_table");
-    for (let i = 0; i < rowdata.length; i++) {
-        table.getElementsByTagName("th")[i].innerHTML = rowdata[i].innerHTML;
-    }
-    ajaxRequest(uid, '/team_parse').then((value) => {
-        let tableLen = document.getElementById('enroll_table').rows.length;
-        /** Удаление предыдущих строк*/
-        if (tableLen > 1) {
-            for (let i = tableLen; i >= tableLen - 2; i--) {
-                table.deleteRow(i-1);
+    let rows = table.getElementsByTagName("tr");
+    for (let i=1; i < rows.length; i++) {
+        let current_row = rows[i];
+        let create_click_handler = (row) => {
+            return function () {
+                document.getElementById("overlay_event").style.display = "flex";
+                eventViewer(row);
             }
         }
-        /** Добавление участников в таблицу*/
-        for (let i = 0; i < value.length; i++) {
-            let row = table.insertRow(i+1);
-            row.insertCell(0).innerHTML = value[i]
-        }
-    })
-};
-
-
-function enrollEvent() {
-    let table = document.getElementById("enroll_table");
-    let uid = table.getElementsByTagName("th")[5].innerHTML;
-    console.log(uid)
-    let tgid = window.prompt('Tgid:')
-    let array = [];
-    array.unshift(tgid, uid)
-    let data = JSON.stringify(array);
-    ajaxRequest(data, "/enroll_event").then((value) => {
-        alert(value);
-        location.reload()
-    })
+        current_row.onclick = create_click_handler(current_row);
+    }
 }
 
-if (window.location.pathname == "/") {appStart()}
+
+function eventViewer(row) {
+    let uid = row.cells[4].innerHTML
+    let table = document.getElementById("team_list")
+    document.getElementById("info_trainer").innerHTML = row.cells[1].innerHTML
+    document.getElementById("info_date").innerHTML = row.cells[3].innerHTML
+    document.getElementById("info_time").innerHTML = row.cells[0].innerHTML
+    document.getElementById("info_available").innerHTML = row.cells[2].innerHTML
+    ajaxRequest(uid, "/team_parse").then((value) => {
+        for (let i = 0; i < value.length; i++) {
+            let row = table.insertRow(i + 1)
+            row.insertCell(0).innerHTML = value[i]
+        }
+    });
+    let button = document.getElementById("enroll_button")
+    button.onclick = enrollEvent(row)
+}
+
+function enrollEvent(row) {
+    console.log("we are here")
+    return function () {
+        let tgId = get_id()
+        let uid = row.cells[4].innerHTML
+        let array = []
+        array.unshift(tgId, uid)
+        let data = JSON.stringify(array);
+        ajaxRequest(data, "/enroll_event").then((value) => {
+            if (value === 0) {alert("Вы записаны")}
+            if (value === 1) {alert("Вы отменили запись!")}
+            if (value === 2) {alert("Команда уже набрана.")}
+            if (value === 3) {alert("Пользователь не найден")}
+            location.reload()
+        })
+    }
+}
+
+function clearTable() {
+    let table = document.getElementById("team_list")
+    for (let  i = 1; i < table.rows.length; i++) {
+            table.deleteRow(i)
+        }
+    document.getElementById('overlay_event').style.display = 'none'
+}
+
+
+if (window.location.pathname === "/") {appStart()}

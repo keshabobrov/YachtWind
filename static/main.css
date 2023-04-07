@@ -169,7 +169,7 @@ input {
     z-index: 1;
 }
 
-#textbox_enroll_overlay, #textbox_create_overlay {
+.overlay_header {
     position: absolute;
     margin-top: 0px;
     width: 100%;
@@ -185,6 +185,7 @@ table {
     margin-top: 20px;
     text-align: left;
     border-spacing: 0px;
+    min-height: 170px;
 }
 
 .time_td {
@@ -201,7 +202,7 @@ table {
     text-align: right;
 }
 
-.create_row {
+.create_row, .block_row {
     display: flex;
     flex-direction: row;
 }
@@ -215,4 +216,17 @@ table {
     margin: 10px;
     width: 100%;
     text-align: left;
+}
+
+.block_info {
+    background-color: #b1c3d5;
+    border-radius: 5px;
+}
+
+.block_row {
+    margin: 20px;
+}
+
+#team_list {
+    display: flex;
 }
