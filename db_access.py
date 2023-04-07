@@ -174,13 +174,16 @@ def enrollEvent(tgid, event_id, cursor):
         request_result = cursor.fetchone()
         max = request_result[5] + 6
         for index, i in enumerate(request_result[6:max]):
-            if str(i) == tgid:
-                return ("User already enrolled!")
+            if i == tgid:
+                enroll_event = ("UPDATE trainings SET U%s" % (index + 1) + " = NULL" + " WHERE UID = %s" % event_id)
+                print(enroll_event)
+                cursor.execute(enroll_event)
+                return 1
             if i is None:
                 enroll_event = ("UPDATE trainings SET U%s" % (index + 1) + " = %s" % tgid + " WHERE UID = %s" % event_id)
                 cursor.execute(enroll_event)
-                return ("Enrolled successfully!")
-        return ("Team already combined")
+                return 0
+        return 2
 
     except:
         logging.error("DB: Exit code 1: error in read_db_training", exc_info=True)
