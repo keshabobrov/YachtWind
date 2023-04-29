@@ -27,11 +27,20 @@
                     <div class="textInput"><label for="middleName">Отчество:</label></div>
                     <div class="inputBoxes"><input type="text" id="middleName" name="middleName"></div>
                 </div>
-                <div class="submit_button"><button type="button" onclick="userRegistration()">Submit</button></div>
+<!--                TODO: REMOVE THIS BEFORE PRODUCTION-->
+                <div><button type="button" onclick="userRegistration()">Register</button></div>
             </form>
         </div>
     </div>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="static/main.js"></script>
+    <script>
+        Telegram.WebApp.MainButton.setParams({
+            text: 'Зарегистрироваться',
+            is_visible: true
+        }).onClick(function () {
+            userRegistration()
+        })
+    </script>
 </body>
 </html>

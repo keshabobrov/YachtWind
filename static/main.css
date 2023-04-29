@@ -176,7 +176,8 @@ input {
     right: 0px;
 }
 
-#create_overlay {
+#creation_overlay {
+    display: none;
     width: auto;
 }
 
@@ -185,12 +186,13 @@ table {
     margin-top: 20px;
     text-align: left;
     border-spacing: 0px;
-    min-height: 170px;
+    min-height: 200px;
 }
 
 .time_td {
     padding: 10px;
-    background-color: red;
+    background-color: #2ea6ff;
+    min-width: 50px;
 }
 
 .trainer_td {
@@ -229,4 +231,5 @@ table {
 
 #team_list {
     display: flex;
+    min-height: 30px;
 }

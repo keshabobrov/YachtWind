@@ -165,6 +165,7 @@ def teamParse(event_id, cursor):
     except:
         logging.error("DB: Exit code 1: error in read_db_training", exc_info=True)
 
+
 @access_db
 def enrollEvent(tgid, event_id, cursor):
     try:
@@ -174,9 +175,8 @@ def enrollEvent(tgid, event_id, cursor):
         request_result = cursor.fetchone()
         max = request_result[5] + 6
         for index, i in enumerate(request_result[6:max]):
-            if i == tgid:
+            if str(i) == str(tgid):
                 enroll_event = ("UPDATE trainings SET U%s" % (index + 1) + " = NULL" + " WHERE UID = %s" % event_id)
-                print(enroll_event)
                 cursor.execute(enroll_event)
                 return 1
             if i is None:
@@ -185,5 +185,21 @@ def enrollEvent(tgid, event_id, cursor):
                 return 0
         return 2
 
+    except:
+        logging.error("DB: Exit code 1: error in read_db_training", exc_info=True)
+
+
+@access_db
+def get_statistics(tgId, cursor):
+    try:
+        today_date = date.today()
+        d1 = today_date.strftime("%Y.%m.%d")
+        request_events = ("SELECT * FROM trainings" +
+                          " WHERE CONCAT_WS(\"\", U1, U2, U3, U4, U5, U6, U7, U8, U9, U10)" +
+                          " LIKE \"%s\"" %tgId + " AND event_date <= \"%s\"" %d1)
+        cursor.execute(request_events)
+        request_result = cursor.fetchall()
+        print(request_events)
+        return request_result
     except:
         logging.error("DB: Exit code 1: error in read_db_training", exc_info=True)
