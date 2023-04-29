@@ -18,11 +18,11 @@
                 <div class="arrow_div"><i class="arrow right"></i></div>
             </div>
             <div class="rows" id="enroll_training">
-                <div class="buttons"><button type="button" onclick="document.getElementById('overlay_enroll').style.display = 'flex'">Запись на выход</button></div>
+                <div class="buttons"><button type="button" onclick="overlayEvents(1)">Запись на выход</button></div>
                 <div class="arrow_div"><i class="arrow right"></i></div>
             </div>
             <div class="rows" id="statistics">
-                <div class="buttons"><button type="button" onclick="document.getElementById('overlay').style.display = 'flex'">Мои выходы</button></div>
+                <div class="buttons"><button type="button" onclick="getStatistics()">Мои выходы</button></div>
                 <div class="arrow_div"><i class="arrow right"></i></div>
             </div>
             <div class="rows" id="feedback">
@@ -37,7 +37,7 @@
         <div class="overlay" id="overlay_enroll">
             <div class="enroll_menu">
                 <div class="overlay_header">Запись на выход</div>
-                <div class="arrow_div" onclick="document.getElementById('overlay_enroll').style.display = 'none'"><i class="arrow left"></i></div>
+                <div class="arrow_div" onclick="overlayEvents(0)"><i class="arrow left"></i></div>
                 <table id="enroll_table">
                     <tr></tr>
                 </table>
@@ -48,12 +48,11 @@
                 <div id="time_stamp" style="display: none"></div>
                 <div class="arrow_div" id="arrow_date_right" onclick="listHandler(1)"><i class="arrow right"></i></div>
             </div>
-            <div class="submit_button" id="create_overlay"><button type="button" onclick="document.getElementById('event_creation').style.display = 'flex'">Создать</button></div>
         </div>
         <div class="overlay" id="event_creation">
             <div class="enroll_menu">
                 <div class="overlay_header">Создание события</div>
-                <div class="arrow_div" onclick="document.getElementById('event_creation').style.display = 'none'"><i class="arrow left"></i></div>
+                <div class="arrow_div" onclick="overlayCreation(0)"><i class="arrow left"></i></div>
             </div>
             <div class="enroll_menu" id="creation_form">
                 <form id="event_create_form">
@@ -71,9 +70,6 @@
                     </div>
                 </form>
             </div>
-            <div class="create_row">
-                <div class="submit_button" id="create_button"><button type="button" onclick="eventCreation()">Создать</button></div>
-            </div>
         </div>
         <div class="overlay" id="overlay_event">
             <div class="enroll_menu">
@@ -82,6 +78,9 @@
             </div>
             <div class="enroll_menu">
                 <div class="block_info">
+                    <div class="block_row" style="display: none">
+                        <div id="info_uid"></div>
+                    </div>
                     <div class="block_row">
                         <div id="info_trainer">Тренер</div>
                     </div>
@@ -102,12 +101,10 @@
                         </table>
                     </div>
                 </div>
-                <div class="block_row">
-                    <div class="submit_button" id="enroll_button"><button type="button">Записаться</button></div>
-                </div>
             </div>
         </div>
     </div>
     <script src="/static/main.js"></script>
+    <script src="/static/overlays.js"></script>
 </body>
 </html>

@@ -47,6 +47,8 @@ def eventCreation():
     event.event_time = jsonData[1]['value']
     event.user_slots = jsonData[2]['value']
     res = event.create()
+    if res == "User not permitted!":
+        return jsonify(res), 401
     return jsonify(res), 200
 
 
@@ -109,5 +111,12 @@ def enrollEvent():
     res = db_access.enrollEvent(tgid, event_id)
     return jsonify(res)
 
+@app.route('/stat_request', methods=['POST'])
+def getStat():
+    tgId = request.json
+    res = db_access.get_statistics(tgId)
+    print(res)
+    return jsonify("test")
+
 if __name__ == "__main__":
-    app.run(host="localhost", port=8080, debug=True)
+    app.run(host="0.0.0.0", port=8080, debug=True)
