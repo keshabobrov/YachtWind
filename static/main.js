@@ -278,22 +278,19 @@ function eventViewer(row) {
     });
 }
 
-function enrollEvent(row) {
-    return function () {
-        let tgId = get_id()
-        let uid = row.cells[4].innerHTML
-        let array = []
-        array.unshift(tgId, uid)
-        let data = JSON.stringify(array);
-        ajaxRequest(data, "/enroll_event").then((value) => {
-            window.Telegram.WebApp.HapticFeedback.notificationOccurred("success")
-            if (value === 0) {alert("Вы записаны")}
-            if (value === 1) {alert("Вы отменили запись!")}
-            if (value === 2) {alert("Команда уже набрана.")}
-            if (value === 3) {alert("Пользователь не найден")}
-            location.reload()
-        })
-    }
+function enrollEvent(uid) {
+    let tgId = get_id()
+    let array = []
+    array.unshift(tgId, uid)
+    let data = JSON.stringify(array);
+    ajaxRequest(data, "/enroll_event").then((value) => {
+        window.Telegram.WebApp.HapticFeedback.notificationOccurred("success")
+        if (value === 0) {alert("Вы записаны")}
+        if (value === 1) {alert("Вы отменили запись!")}
+        if (value === 2) {alert("Команда уже набрана.")}
+        if (value === 3) {alert("Пользователь не найден")}
+        location.reload()
+    })
 }
 
 function getStatistics() {
@@ -328,7 +325,6 @@ Telegram.WebApp.MainButton.onClick(function () {
         }
     }
     let currentOverlay = getCurrentOverlay().id;
-    console.log(currentOverlay)
     switch (currentOverlay) {
         case "overlay_enroll":
             setup(get_id()).then((value) => {
@@ -346,7 +342,8 @@ Telegram.WebApp.MainButton.onClick(function () {
             eventCreation()
             break;
         case "overlay_event":
-            console.log(document.getElementById("info_uid").innerHTML)
+            get_id()
+            enrollEvent(document.getElementById("info_uid").innerHTML)
             break;
     }
 })
