@@ -96,7 +96,16 @@ def teamParse():
     for index, x in enumerate(event[6:]):
         if x is not None:
             user = db_access.Users(x)
-            users.insert(index, user.Name)
+            name = ""
+            space = 0
+            for n in user.Name:
+                if space == 2:
+                    break
+                name += n
+                if n == " ":
+                    space += 1
+            print(name)
+            users.insert(index, name)
     return jsonify(users)
 
 
@@ -115,8 +124,15 @@ def enrollEvent():
 def getStat():
     tgId = request.json
     res = db_access.get_statistics(tgId)
-    print(res)
-    return jsonify("test")
+    uid_dict = []
+    date_dict = []
+    time_dict = []
+    for index, i in enumerate(res):
+        uid_dict.insert(index, str(i[0]))
+        date_dict.insert(index, str(i[1]))
+        time_dict.insert(index, str(i[2]))
+    result = uid_dict + date_dict + time_dict
+    return jsonify(result)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080, debug=True)
