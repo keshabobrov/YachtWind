@@ -21,15 +21,13 @@ class Users:
             self.UID = user_data[0]
             self.Role = user_data[1]
             self.Name = user_data[3]
-            self.StudyIn = user_data[4]
-            self.BD = user_data[5]
+            self.Access = user_data[4]
 
     def user_setup(self):
         write_new_user(
             TgId=self.TgId,
             Name=self.Name,
-            StudyIn=self.StudyIn,
-            BirthDay=self.BD,
+            Access=self.Access,
             Role=self.Role
         )
 
@@ -93,14 +91,14 @@ def parse_slots(slot):
 
 
 @access_db
-def write_new_user(TgId, Name, StudyIn, BirthDay, Role, cursor):
+def write_new_user(TgId, Name, Access, Role, cursor):
     try:
         RegDate = date.today()
         new_user = ("INSERT INTO users "
-                    "(Role, TgId, Name, StudyIn, BirthDay, RegDate) "
-                    "VALUES (%s, %s, %s, %s, %s, %s)")
+                    "(Role, TgId, Name, Access, RegDate) "
+                    "VALUES (%s, %s, %s, %s, %s)")
 
-        user_data = (Role, TgId, Name, StudyIn, BirthDay, RegDate)
+        user_data = (Role, TgId, Name, Access, RegDate)
         cursor.execute(new_user, user_data)
         logging.info('DB: User has been created!')
 
@@ -167,6 +165,7 @@ def teamParse(event_id, cursor):
     except:
         logging.error("DB: Exit code 1: error in read_db_training", exc_info=True)
 
+
 @access_db
 def enrollEvent(tgid, event_id, cursor):
     try:
@@ -176,13 +175,30 @@ def enrollEvent(tgid, event_id, cursor):
         request_result = cursor.fetchone()
         max = request_result[5] + 6
         for index, i in enumerate(request_result[6:max]):
-            if str(i) == tgid:
-                return ("User already enrolled!")
+            if str(i) == str(tgid):
+                enroll_event = ("UPDATE trainings SET U%s" % (index + 1) + " = NULL" + " WHERE UID = %s" % event_id)
+                cursor.execute(enroll_event)
+                return 1
             if i is None:
                 enroll_event = ("UPDATE trainings SET U%s" % (index + 1) + " = %s" % tgid + " WHERE UID = %s" % event_id)
                 cursor.execute(enroll_event)
-                return ("Enrolled successfully!")
-        return ("Team already combined")
+                return 0
+        return 2
 
+    except:
+        logging.error("DB: Exit code 1: error in read_db_training", exc_info=True)
+
+
+@access_db
+def get_statistics(tgId, cursor):
+    try:
+        today_date = date.today()
+        d1 = today_date.strftime("%Y.%m.%d")
+        request_events = ("SELECT UID, event_date, event_time FROM trainings" +
+                          " WHERE CONCAT_WS(\"\", U1, U2, U3, U4, U5, U6, U7, U8, U9, U10)" +
+                          " LIKE \"%s\"" %tgId + " AND event_date <= \"%s\"" %d1)
+        cursor.execute(request_events)
+        request_result = cursor.fetchall()
+        return request_result
     except:
         logging.error("DB: Exit code 1: error in read_db_training", exc_info=True)

@@ -1,5 +1,6 @@
+import time
+
 from flask import Flask, render_template, request, redirect, url_for, jsonify
-import json
 import db_access
 
 app = Flask(__name__)
@@ -9,28 +10,30 @@ app = Flask(__name__)
 def home():
     return render_template("index.html")
 
+@app.route('/reg_form')
+def reg_form():
+    return render_template("registration.html")
+
 
 @app.route('/ident', methods=['POST'])
 def userIdent():
-    jsonData = request.json
-    tgid = jsonData[0]['value']
+    tgid = request.json
     userinfo = db_access.Users(tgid)
     if hasattr(userinfo, 'UID'):
         return jsonify(userinfo.Role), 200
-    return jsonify("User not found, please register"), 200
+    return jsonify(0), 200
 
 
 @app.route('/register', methods=['POST'])
 def userRegistration():
     jsonData = request.json
-    tgid = jsonData[0]['value']
+    tgid = jsonData[3]['value']
     userinfo = db_access.Users(tgid)
     if hasattr(userinfo, 'UID'):
         return jsonify("User already in system! UID: " + str(userinfo.UID)), 409
     userinfo.Role = 'regular'
-    userinfo.Name = jsonData[1]['value']
-    userinfo.StudyIn = jsonData[2]['value']
-    userinfo.BD = jsonData[3]['value']
+    userinfo.Name = jsonData[0]['value'] + " " + jsonData[1]['value'] + " " + jsonData[2]['value']
+    userinfo.Access = True
     userinfo.user_setup()
     return jsonify("User has been created!"), 200
 
@@ -38,12 +41,14 @@ def userRegistration():
 @app.route('/create_event', methods=['POST'])
 def eventCreation():
     jsonData = request.json
-    tgid = jsonData[0]['value']
+    tgid = jsonData[3]['value']
     event = db_access.Trainings(tgid)
-    event.event_date = jsonData[1]['value']
-    event.event_time = jsonData[2]['value']
-    event.user_slots = jsonData[3]['value']
+    event.event_date = jsonData[0]['value']
+    event.event_time = jsonData[1]['value']
+    event.user_slots = jsonData[2]['value']
     res = event.create()
+    if res == "User not permitted!":
+        return jsonify(res), 401
     return jsonify(res), 200
 
 
@@ -91,7 +96,16 @@ def teamParse():
     for index, x in enumerate(event[6:]):
         if x is not None:
             user = db_access.Users(x)
-            users.insert(index, user.Name)
+            name = ""
+            space = 0
+            for n in user.Name:
+                if space == 2:
+                    break
+                name += n
+                if n == " ":
+                    space += 1
+            print(name)
+            users.insert(index, name)
     return jsonify(users)
 
 
@@ -102,9 +116,23 @@ def enrollEvent():
     event_id = enroll_data[1]
     user = db_access.Users(tgid)
     if not hasattr(user, 'UID'):
-        return jsonify("User not registred")
+        return jsonify(3)
     res = db_access.enrollEvent(tgid, event_id)
     return jsonify(res)
 
+@app.route('/stat_request', methods=['POST'])
+def getStat():
+    tgId = request.json
+    res = db_access.get_statistics(tgId)
+    uid_dict = []
+    date_dict = []
+    time_dict = []
+    for index, i in enumerate(res):
+        uid_dict.insert(index, str(i[0]))
+        date_dict.insert(index, str(i[1]))
+        time_dict.insert(index, str(i[2]))
+    result = uid_dict + date_dict + time_dict
+    return jsonify(result)
+
 if __name__ == "__main__":
-    app.run(host="localhost", port=8080, debug=True)
+    app.run(host="0.0.0.0", port=8080, debug=True)
