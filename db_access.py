@@ -1,16 +1,16 @@
 import mysql.connector
 import logging
 from datetime import date
+import os
 
 host = "localhost"
 user = "main_connector"
-password = "fkl5nsa"
+password = os.getenv("PASSWD")
 database = "yacht_db"
 logging.basicConfig(filename='db_access.log',
                     filemode='a+',
                     format='%(asctime)s - %(levelname)s - %(message)s',
                     level=logging.DEBUG)
-
 
 class Users:
     """Класс работы с пользовательскими данными: инициализация, создание, чтение и т.д."""
