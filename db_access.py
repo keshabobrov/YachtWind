@@ -3,7 +3,7 @@ import logging
 from datetime import date
 import os
 
-host = "localhost"
+host = "172.17.0.4"
 user = "main_connector"
 password = os.getenv("PASSWD")
 database = "yacht_db"
