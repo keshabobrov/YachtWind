@@ -1,6 +1,4 @@
-import time
-
-from flask import Flask, render_template, request, redirect, url_for, jsonify
+from flask import Flask, render_template, request, jsonify
 import db_access
 
 app = Flask(__name__)
@@ -9,6 +7,7 @@ app = Flask(__name__)
 @app.route('/')
 def home():
     return render_template("index.html")
+
 
 @app.route('/reg_form')
 def reg_form():
@@ -120,6 +119,7 @@ def enrollEvent():
     res = db_access.enrollEvent(tgid, event_id)
     return jsonify(res)
 
+
 @app.route('/stat_request', methods=['POST'])
 def getStat():
     tgId = request.json
@@ -134,5 +134,6 @@ def getStat():
     result = uid_dict + date_dict + time_dict
     return jsonify(result)
 
+
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8080, debug=True)
+    app.run(host="localhost", port=8080, debug=True)
