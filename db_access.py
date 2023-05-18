@@ -2,7 +2,7 @@ import mysql.connector
 import logging
 from datetime import date
 import os
-
+test
 host = "172.17.0.4"
 user = "main_connector"
 password = os.getenv("PASSWD")
