@@ -5,11 +5,19 @@ jobs:
     runs-on: self-hosted
     defaults:
       run:
-        working-directory: /home/deploy-user
+        working-directory: /usr/share/docker/webapp/PR-bot
     steps:
-      - name: Choosing folder
-        run: ls
-      - name: finding
-        run: find /*.*
-      - name: Adding file
-        run: echo "The PR was merged" > test.txt
+      - name: Updating repo
+        run: git pull
+      - name: Stopping existing container
+        run: docker container stop webappcont
+      - name: Removing existing container
+        run: docker container rm webappcont
+      - name: Removing existing image
+        run: docker image rm webapp
+      - name: Building image
+        run: docker build -t webapp .
+      - name: Starting container
+        run: docker run --name webappcont -d -p 443:443 -it webapp:latest /usr/share/nginx/html/application/start.sh
+      - name: Executing nginx
+        run: docker exec -it webappcont nginx
