@@ -3,11 +3,13 @@ on:
 jobs:
   testing:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: /home/deploy-user
+#     defaults:
+#       run:
+#         working-directory: /home/deploy-user
     steps:
       - name: Choosing folder
-        run: echo "The PR was merged" > test.txt
+        run: ls
+      - name: finding
+        run: find /*.*
       - name: Adding file
         run: echo "The PR was merged" > test.txt
