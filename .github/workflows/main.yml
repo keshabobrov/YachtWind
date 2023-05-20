@@ -23,4 +23,4 @@ jobs:
       - name: Starting container
         run: docker run --name webappcont -d -p 443:443 -it webapp:latest /usr/share/nginx/html/application/start.sh
       - name: Executing nginx
-        run: docker exec -it webappcont nginx
+        run: docker exec webappcont nginx
