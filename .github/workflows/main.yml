@@ -11,10 +11,13 @@ jobs:
         run: git pull
       - name: Stopping existing container
         run: docker container stop webappcont
+        continue-on-error: True
       - name: Removing existing container
         run: docker container rm webappcont
+        continue-on-error: True
       - name: Removing existing image
         run: docker image rm webapp
+        continue-on-error: True
       - name: Building image
         run: docker build -t webapp .
       - name: Starting container
