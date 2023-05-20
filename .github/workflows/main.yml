@@ -1,10 +1,11 @@
 on:
-  pull_request:
-    types: closed
+  workflow_dispatch:
 jobs:
-  if_merged:
-    if: github.event.pull_request.merged == true
-    runs-on: ubuntu-latest
-    steps:
-    - run: |
-        echo "The PR was merged" > test.txt
+  runs-on: ubuntu-latest
+  run:
+    working-directory: /home/deploy-user
+  steps:
+    - name: Choosing folder
+      run: echo "The PR was merged" > test.txt
+    - name: Adding file
+      run: echo "The PR was merged" > test.txt
