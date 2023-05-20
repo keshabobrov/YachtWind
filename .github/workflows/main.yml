@@ -1,7 +1,9 @@
 on:
   workflow_dispatch:
+  pull_request:
+    types: closed
 jobs:
-  testing:
+  Deploying:
     runs-on: self-hosted
     defaults:
       run:
