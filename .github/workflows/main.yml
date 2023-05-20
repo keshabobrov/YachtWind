@@ -1,11 +1,13 @@
 on:
   workflow_dispatch:
 jobs:
-  runs-on: ubuntu-latest
-  run:
-    working-directory: /home/deploy-user
-  steps:
-    - name: Choosing folder
-      run: echo "The PR was merged" > test.txt
-    - name: Adding file
-      run: echo "The PR was merged" > test.txt
+  testing:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: /home/deploy-user
+    steps:
+      - name: Choosing folder
+        run: echo "The PR was merged" > test.txt
+      - name: Adding file
+        run: echo "The PR was merged" > test.txt
