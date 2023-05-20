@@ -3,9 +3,9 @@ on:
 jobs:
   testing:
     runs-on: ubuntu-latest
-#     defaults:
-#       run:
-#         working-directory: /home/deploy-user
+    defaults:
+      run:
+        working-directory: /home/deploy-user
     steps:
       - name: Choosing folder
         run: ls
