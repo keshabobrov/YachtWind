@@ -55,8 +55,7 @@ function get_id() {
         catch (err) {
             // TODO: REMOVE THIS BEFORE PRODUCTION
             console.log("Telegram app not found!");
-            const tgID = 12345678;
-            return tgID
+            window.location.replace('/error')
         };
 }
 
@@ -98,12 +97,12 @@ function userRegistration() {
     let url = "/register";
     ajaxRequest(data, url).then((value) => {
         Telegram.WebApp.MainButton.hide()
-        window.location.replace("/");
+        window.location.href("/");
     }).catch((value) => {
         Telegram.WebApp.MainButton.hide()
-        window.location.replace("/");
+        window.location.href("/");
     });
-};
+}
 
 
 function eventCreation() {
