@@ -53,10 +53,9 @@ function get_id() {
             return tgID
         }
         catch (err) {
-            // TODO: REMOVE THIS BEFORE PRODUCTION
             console.log("Telegram app not found!");
-            window.location.replace('/error')
-        };
+            // window.location.replace('/error')
+        }
 }
 
 function setup(tgID) {
@@ -69,7 +68,7 @@ function setup(tgID) {
             resolve (value)
         });
     });
-};
+}
 
 
 function userRegistration() {
@@ -97,10 +96,10 @@ function userRegistration() {
     let url = "/register";
     ajaxRequest(data, url).then((value) => {
         Telegram.WebApp.MainButton.hide()
-        window.location.href("/");
+        document.getElementById('overlay_registration').style.display = 'none'
     }).catch((value) => {
         Telegram.WebApp.MainButton.hide()
-        window.location.href("/");
+        document.getElementById('overlay_registration').style.display = 'none'
     });
 }
 
@@ -142,7 +141,7 @@ function appStart() {
     // Promise to wait until role will be received.
     setup(tgID).then((role) => {
         if (role === 0) {
-            window.location.replace("/reg_form")
+            document.getElementById('overlay_registration').style.display = 'flex'
             return
         }
         if (role === "admin") {
@@ -344,5 +343,11 @@ Telegram.WebApp.MainButton.onClick(function () {
             get_id()
             enrollEvent(document.getElementById("info_uid").innerHTML)
             break;
+        case "overlay_registration":
+            Telegram.WebApp.MainButton.setParams({
+                text: 'Зарегистрироваться',
+                is_visible: true
+            })
+            userRegistration()
     }
 })
