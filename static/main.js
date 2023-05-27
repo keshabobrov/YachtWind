@@ -96,9 +96,11 @@ function userRegistration() {
     ajaxRequest(data, url).then((value) => {
         Telegram.WebApp.MainButton.hide()
         document.getElementById('overlay_registration').style.display = 'none'
+        location.reload()
     }).catch((value) => {
         Telegram.WebApp.MainButton.hide()
         document.getElementById('overlay_registration').style.display = 'none'
+        location.reload()
     });
 }
 
