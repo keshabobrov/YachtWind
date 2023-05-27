@@ -54,7 +54,6 @@ function get_id() {
         }
         catch (err) {
             console.log("Telegram app not found!");
-            // window.location.replace('/error')
         }
 }
 
@@ -142,6 +141,10 @@ function appStart() {
     setup(tgID).then((role) => {
         if (role === 0) {
             document.getElementById('overlay_registration').style.display = 'flex'
+            Telegram.WebApp.MainButton.setParams({
+                text: 'Зарегистрироваться',
+                is_visible: true
+            })
             return
         }
         if (role === "admin") {
@@ -344,10 +347,6 @@ Telegram.WebApp.MainButton.onClick(function () {
             enrollEvent(document.getElementById("info_uid").innerHTML)
             break;
         case "overlay_registration":
-            Telegram.WebApp.MainButton.setParams({
-                text: 'Зарегистрироваться',
-                is_visible: true
-            })
             userRegistration()
     }
 })
