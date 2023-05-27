@@ -2,8 +2,9 @@ import mysql.connector
 import logging
 from datetime import date
 import os
+from dotenv import load_dotenv
 
-
+load_dotenv(dotenv_path='/usr/share/nginx/html/application/.env')
 host = "172.17.0.4"
 user = "main_connector"
 password = os.getenv("PASSWD")
