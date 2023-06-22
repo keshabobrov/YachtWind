@@ -50,10 +50,12 @@ function get_id() {
     let telegram = window.Telegram.WebApp;
         try {
             const tgID = telegram.initDataUnsafe.user.id;
-            return tgID
+            return tgID;
         }
         catch (err) {
             console.log("Telegram app not found!");
+            // TODO: REMOVE BEFORE PRODUCTION
+            return 12345;
         }
 }
 
