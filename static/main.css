@@ -1,6 +1,6 @@
 @font-face {
     font-family: 'Montserrat';
-    font-weight: 400 600;
+    font-weight: 400 700;
     src: url(src/Montserrat.ttf)
 }
 
@@ -9,16 +9,50 @@ body {
     margin: 0;
 }
 
-.container {
+.container, .registrationForm {
     display: flex;
     margin: 25px 35px;
     font-family: "Montserrat", serif;
     font-style: normal;
-    font-weight: 400;
+    font-weight: 600;
     font-size: 20px;
     line-height: 24px;
     color: #0D0D0D;
     position: relative;
+}
+
+.overlay {
+    display: none;
+    flex-direction: column;
+    position: absolute;
+    top: 0;
+    padding-bottom: 100px;
+    max-width: inherit;
+    width: 100%;
+    background-color: #F2EFEB;
+    z-index: 1;
+}
+
+.overlay_header {
+    width: 100vw;
+    position: relative;
+    left: calc(-50vw + 50%);
+    min-height: 39px;
+    border-bottom: 1px solid #676AAA;
+}
+
+.header_text {
+    margin-left: 58px;
+    font-weight: 700;
+    color: #676AAA;
+}
+
+.inputBlock {
+    margin-bottom: 27px;
+}
+
+.textInput {
+    margin-bottom: 10px;
 }
 
 .mainMenu {
@@ -91,8 +125,20 @@ button {
     font-weight: 600;
 }
 
-img{
-        max-width: 100%;
-        max-height: 100%;
-        display: block; /* remove extra space below image */
-    }
+img {
+    max-width: 100%;
+    max-height: 100%;
+    display: block; /* remove extra space below image */
+}
+
+input {
+    width: 265px;
+    height: 50px;
+    background: none;
+    border: 1px solid #676AAA;
+    border-radius: 10px;
+    color: #0D0D0D;
+    font-size: 15px;
+    font-style: italic;
+    font-family: inherit;
+}

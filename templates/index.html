@@ -32,31 +32,30 @@
             </div>
         </nav>
         <div class="overlay" id="overlay_registration">
-            <div class="enroll_menu">
-                <div class="overlay_header">Регистрация</div>
-                <div id="headerLine"></div>
-                <div class="registrationForm">
-                    <form action="" id="regForm" method="post">
-                        <div class="inputBlock">
-                            <div class="textInput"><label for="lastName">Фамилия:</label></div>
-                            <div class="inputBoxes"><input type="text" id="lastName" name="lastName"></div>
-                        </div>
-                        <div class="inputBlock">
-                            <div class="textInput"><label for="firstName">Имя:</label></div>
-                            <div class="inputBoxes"><input type="text" id="firstName" name="firstName"></div>
-                        </div>
-                        <div class="inputBlock">
-                            <div class="textInput"><label for="middleName">Отчество:</label></div>
-                            <div class="inputBoxes"><input type="text" id="middleName" name="middleName"></div>
-                        </div>
-                        <div class="buttons"><button type="button" onclick="userRegistration()">Registration</button></div>
-                    </form>
-                </div>
+            <div class="overlay_header">
+                <div class="header_text">Регистрация</div>
+            </div>
+            <div class="registrationForm">
+                <form action="" id="regForm" method="post">
+                    <div class="inputBlock">
+                        <div class="textInput"><label for="lastName">Фамилия:</label></div>
+                        <div class="inputBoxes"><input type="text" id="lastName" name="lastName" placeholder="Type.."></div>
+                    </div>
+                    <div class="inputBlock">
+                        <div class="textInput"><label for="firstName">Имя:</label></div>
+                        <div class="inputBoxes"><input type="text" id="firstName" name="firstName" placeholder="Type.."></div>
+                    </div>
+                    <div class="inputBlock">
+                        <div class="textInput"><label for="middleName">Отчество:</label></div>
+                        <div class="inputBoxes"><input type="text" id="middleName" name="middleName" placeholder="Type.."></div>
+                    </div>
+                    <div class="buttons"><button type="button" onclick="userRegistration()">Registration</button></div>
+                </form>
             </div>
         </div>
         <div class="overlay" id="overlay_enroll">
-            <div class="enroll_menu">
-                <div class="overlay_header">Запись на выход</div>
+            <div class="overlay_header">
+                <div class="header_text">Запись на выход</div>
                 <div class="arrow_div" onclick="overlayEvents(0)"><i class="arrow left"></i></div>
                 <table id="enroll_table">
                     <tr></tr>
@@ -70,11 +69,11 @@
             </div>
         </div>
         <div class="overlay" id="event_creation">
-            <div class="enroll_menu">
-                <div class="overlay_header">Создание события</div>
+            <div class="overlay_header">
+                <div class="header_text">Создание события</div>
                 <div class="arrow_div" onclick="overlayCreation(0)"><i class="arrow left"></i></div>
             </div>
-            <div class="enroll_menu" id="creation_form">
+            <div class="overlay_header" id="creation_form">
                 <form id="event_create_form">
                     <div class="create_row">
                         <div class="create_form_label"><label for="date_form">Дата события:</label></div>
@@ -92,11 +91,11 @@
             </div>
         </div>
         <div class="overlay" id="overlay_event">
-            <div class="enroll_menu">
-                <div class="overlay_header">Запись на тренировку</div>
+            <div class="overlay_header">
+                <div class="header_text">Запись на тренировку</div>
                 <div class="arrow_div" onclick="clearTable()"><i class="arrow left"></i></div>
             </div>
-            <div class="enroll_menu">
+            <div class="overlay_header">
                 <div class="block_info">
                     <div class="block_row" style="display: none">
                         <div id="info_uid"></div>
