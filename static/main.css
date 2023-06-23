@@ -11,7 +11,7 @@ body {
 
 .container, .registrationForm {
     display: flex;
-    margin: 25px 35px;
+    margin: 19px 35px;
     font-family: "Montserrat", serif;
     font-style: normal;
     font-weight: 600;
@@ -29,22 +29,31 @@ body {
     padding-bottom: 100px;
     max-width: inherit;
     width: 100%;
+    min-height: 340px;
     background-color: #F2EFEB;
     z-index: 1;
 }
 
-.overlay_header {
+.header {
+    padding-bottom: 11px;
+    display: flex;
+    flex-direction: row;
     width: 100vw;
     position: relative;
     left: calc(-50vw + 50%);
-    min-height: 39px;
+    min-height: 44px;
     border-bottom: 1px solid #676AAA;
 }
 
 .header_text {
-    margin-left: 58px;
+    margin: auto 29px;
     font-weight: 700;
     color: #676AAA;
+}
+
+.arrow_exit {
+    width: 15px;
+    margin: auto 0 auto 37px;
 }
 
 .inputBlock {
@@ -76,8 +85,13 @@ body {
     display: none;
 }
 
+#main_header {
+    font-size: 30px;
+    font-style: italic;
+}
+
 #notification_indicator {
-    margin: 0 10px 20px auto;
+    margin: 0 30px 0 auto;
     max-width: 40px;
 }
 
@@ -86,7 +100,14 @@ body {
 }
 
 #my_teams {
+    margin-top: 26px;
     background-image: url("/static/src/users.png"), url("/static/src/arrow.png");
+}
+
+#team_table {
+    margin: 36px 0;
+    display: flex;
+    flex-direction: column;
 }
 
 #enroll_training {

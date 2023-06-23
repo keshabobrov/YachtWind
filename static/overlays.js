@@ -26,3 +26,12 @@ function overlayCreation(param) {
         overlayEvents(1)
     }
 }
+
+function overlayTeams(param) {
+    if (param === 1) {
+        document.getElementById("overlay_teams").style.display = "flex";
+    }
+    if (param === 0) {
+        document.getElementById("overlay_teams").style.display = "none";
+    }
+}
