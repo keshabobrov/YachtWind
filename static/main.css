@@ -9,7 +9,7 @@ body {
     margin: 0;
 }
 
-.container, .registrationForm {
+.container {
     display: flex;
     margin: 19px 35px;
     font-family: "Montserrat", serif;
@@ -19,6 +19,10 @@ body {
     line-height: 24px;
     color: #0D0D0D;
     position: relative;
+}
+
+.registrationForm {
+    margin-left: 54px;
 }
 
 .overlay {
@@ -43,6 +47,7 @@ body {
     left: calc(-50vw + 50%);
     min-height: 44px;
     border-bottom: 1px solid #676AAA;
+    margin-bottom: 26px;
 }
 
 .header_text {
@@ -81,6 +86,15 @@ body {
     -webkit-tap-highlight-color: rgba(126, 126, 133, 0.3);
 }
 
+.rows.teams {
+    background-image: url("/static/src/users.png"), url("/static/src/arrow.png");
+}
+
+.cell_logo_team {
+    max-width: 10px;
+    background-image: url("/static/src/users.png");
+}
+
 #overlay_registration, #overlay_enroll, #overlay_event, #event_creation {
     display: none;
 }
@@ -100,14 +114,11 @@ body {
 }
 
 #my_teams {
-    margin-top: 26px;
     background-image: url("/static/src/users.png"), url("/static/src/arrow.png");
 }
 
-#team_table {
-    margin: 36px 0;
-    display: flex;
-    flex-direction: column;
+#new_team {
+    background-image: url("/static/src/newUser.png"), url("/static/src/arrow.png")
 }
 
 #enroll_training {
@@ -125,6 +136,11 @@ body {
 #administration {
     display: none;
     background-image: url("/static/src/settings.png"), url("/static/src/arrow.png");
+}
+
+#reg_logo {
+    margin: auto 0 auto 30px;
+    width: 30px;
 }
 
 button {

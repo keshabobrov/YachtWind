@@ -36,7 +36,7 @@
         </nav>
         <div class="overlay" id="overlay_registration">
             <div class="header">
-                <div class="arrow_exit"><button type="button" style="display: none"><img src="/static/src/arrow_exit.png"></button></div>
+                <div id="reg_logo"><img src="/static/src/user.png"></div>
                 <div class="header_text">Регистрация</div>
             </div>
             <div class="registrationForm">
@@ -62,12 +62,16 @@
                 <div class="arrow_exit"><button type="button" onclick="overlayTeams(0)"><img src="/static/src/arrow_exit.png"></button></div>
                 <div class="header_text">Мои команды</div>
             </div>
-            <table id="team_table">
-                    <tr><td>Команда Ивана</td></tr>
-                    <tr><td>Команда Валеры</td></tr>
-                    <tr><td>Команда Димы</td></tr>
-            </table>
-            <div id="create_team">
+            <div class="rows teams">
+                <button type="button" onclick="">Команда Ивана</button>
+            </div>
+            <div class="rows teams">
+                <button type="button" onclick="">Команда Валеры</button>
+            </div>
+            <div class="rows teams">
+                <button type="button" onclick="">Команда Даши</button>
+            </div>
+            <div class="rows" id="new_team">
                 <button type="button" onclick="">Создать команду</button>
             </div>
         </div>
