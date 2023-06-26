@@ -5,7 +5,7 @@
     <meta name="viewport"
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <link href="/static/main.css" rel="stylesheet" type="text/css">
+    <link href="../static/main.css" rel="stylesheet" type="text/css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
     <title>YachtingBot</title>
@@ -13,69 +13,90 @@
 <body>
     <div class="container">
         <nav class="mainMenu">
+            <div class="header" id="main_header">
+                <div class="arrow_exit"><button type="button" style="display: none"><img src="/static/src/arrow_exit.png"></button></div>
+                <div class="header_text">Sailing Bot</div>
+                <div id="notification_indicator"><button type="button" id="notification_button" onclick=""><img src="/static/src/notification.png"></button></div>
+            </div>
             <div class="rows" id="my_teams">
-                <div class="buttons"><button type="button" onclick="document.getElementById('overlay').style.display = 'flex'">Мои команды</button></div>
-                <div class="arrow_div"><i class="arrow right"></i></div>
+                <button type="button" onclick="overlayTeams(1)">Мои команды</button>
             </div>
             <div class="rows" id="enroll_training">
-                <div class="buttons"><button type="button" onclick="overlayEvents(1)">Запись на выход</button></div>
-                <div class="arrow_div"><i class="arrow right"></i></div>
+                <button type="button" onclick="overlayEvents(1)">Запись на выход</button>
             </div>
             <div class="rows" id="statistics">
-                <div class="buttons"><button type="button" onclick="getStatistics()">Мои выходы</button></div>
-                <div class="arrow_div"><i class="arrow right"></i></div>
+                <button type="button" onclick="getStatistics()">Мои выходы</button>
             </div>
             <div class="rows" id="feedback">
-                <div class="buttons"><button type="button" onclick="document.getElementById('overlay').style.display = 'flex'">Обратная связь</button></div>
-                <div class="arrow_div"><i class="arrow right"></i></div>
+                <button type="button" onclick="document.getElementById('overlay').style.display = 'flex'">Обратная связь</button>
             </div>
             <div class="rows" id="administration">
-                <div class="buttons"><button type="button" onclick="">Администрирование</button></div>
-                <div class="arrow_div"><i class="arrow right"></i></div>
+                <button type="button" onclick="">Администрирование</button>
             </div>
         </nav>
         <div class="overlay" id="overlay_registration">
-            <div class="enroll_menu">
-                <div class="overlay_header">Регистрация</div>
-                <div class="registrationForm">
-                    <form action="" id="regForm" method="post">
-                        <div class="inputBlock">
-                            <div class="textInput"><label for="lastName">Фамилия:</label></div>
-                            <div class="inputBoxes"><input type="text" id="lastName" name="lastName"></div>
-                        </div>
-                        <div class="inputBlock">
-                            <div class="textInput"><label for="firstName">Имя:</label></div>
-                            <div class="inputBoxes"><input type="text" id="firstName" name="firstName"></div>
-                        </div>
-                        <div class="inputBlock">
-                            <div class="textInput"><label for="middleName">Отчество:</label></div>
-                            <div class="inputBoxes"><input type="text" id="middleName" name="middleName"></div>
-                        </div>
-                    </form>
-                </div>
+            <div class="header">
+                <div id="reg_logo"><img src="/static/src/user.png"></div>
+                <div class="header_text" id="reg_header">Регистрация</div>
+            </div>
+            <div class="registrationForm">
+                <form action="" id="regForm" method="post">
+                    <div class="inputBlock">
+                        <div class="textInput"><label for="lastName">Фамилия:</label></div>
+                        <div class="inputBoxes"><input type="text" id="lastName" name="lastName" placeholder="Type.."></div>
+                    </div>
+                    <div class="inputBlock">
+                        <div class="textInput"><label for="firstName">Имя:</label></div>
+                        <div class="inputBoxes"><input type="text" id="firstName" name="firstName" placeholder="Type.."></div>
+                    </div>
+                    <div class="inputBlock">
+                        <div class="textInput"><label for="middleName">Отчество:</label></div>
+                        <div class="inputBoxes"><input type="text" id="middleName" name="middleName" placeholder="Type.."></div>
+                    </div>
+<!--                    <div class="buttons"><button type="button" onclick="userRegistration()">Registration</button></div>-->
+                </form>
+            </div>
+        </div>
+        <div class="overlay" id="overlay_teams">
+            <div class="header">
+                <div class="arrow_exit"><button type="button" onclick="overlayTeams(0)"><img src="/static/src/arrow_exit.png"></button></div>
+                <div class="header_text">Мои команды</div>
+            </div>
+            <div class="rows teams">
+                <button type="button" onclick="">Команда Ивана</button>
+            </div>
+            <div class="rows teams">
+                <button type="button" onclick="">Команда Валеры</button>
+            </div>
+            <div class="rows teams">
+                <button type="button" onclick="">Команда Даши</button>
+            </div>
+            <div class="rows" id="new_team">
+                <button type="button" onclick="">Создать команду</button>
             </div>
         </div>
         <div class="overlay" id="overlay_enroll">
-            <div class="enroll_menu">
-                <div class="overlay_header">Запись на выход</div>
-                <div class="arrow_div" onclick="overlayEvents(0)"><i class="arrow left"></i></div>
-                <table id="enroll_table">
-                    <tr></tr>
-                </table>
+            <div class="header">
+                <div class="arrow_exit"><button type="button" onclick="overlayEvents(0)"><img src="/static/src/arrow_exit.png"></button></div>
+                <div class="header_text">Запись на выход</div>
             </div>
-            <div class="date_picker" id="date_picker">
-                <div class="arrow_div" id="arrow_date_left" onclick="listHandler(0)"><i class="arrow left"></i></div>
+            <table id="enroll_table">
+                <tr style="display: none"></tr>
+            </table>
+            <div id="date_picker">
+                <button type="button" id="arrow_date_left" onclick="listHandler(0)"><img src="/static/src/arrow_left.png"></button>
                 <div id="date_picker_text">Нет записей</div>
                 <div id="time_stamp" style="display: none"></div>
-                <div class="arrow_div" id="arrow_date_right" onclick="listHandler(1)"><i class="arrow right"></i></div>
+                <button type="button" id="arrow_date_right" onclick="listHandler(1)"><img src="/static/src/arrow.png"></button>
             </div>
+<!--            <button type="button" onclick="overlayCreation(1)">Создать событие</button>-->
         </div>
         <div class="overlay" id="event_creation">
-            <div class="enroll_menu">
-                <div class="overlay_header">Создание события</div>
-                <div class="arrow_div" onclick="overlayCreation(0)"><i class="arrow left"></i></div>
+            <div class="header">
+                <div class="arrow_exit"><button type="button" onclick="overlayCreation(0)"><img src="/static/src/arrow_exit.png"></button></div>
+                <div class="header_text">Создание события</div>
             </div>
-            <div class="enroll_menu" id="creation_form">
+            <div class="header" id="creation_form">
                 <form id="event_create_form">
                     <div class="create_row">
                         <div class="create_form_label"><label for="date_form">Дата события:</label></div>
@@ -90,14 +111,15 @@
                         <div class="create_form_input"><input type="number" id="slots_form" name="slots_form" placeholder="(1-10)"></div>
                     </div>
                 </form>
+                <button type="button" onclick="eventCreation()">Создать событие</button>
             </div>
         </div>
         <div class="overlay" id="overlay_event">
-            <div class="enroll_menu">
-                <div class="overlay_header">Запись на тренировку</div>
+            <div class="header">
+                <div class="header_text">Запись на тренировку</div>
                 <div class="arrow_div" onclick="clearTable()"><i class="arrow left"></i></div>
             </div>
-            <div class="enroll_menu">
+            <div class="header">
                 <div class="block_info">
                     <div class="block_row" style="display: none">
                         <div id="info_uid"></div>
