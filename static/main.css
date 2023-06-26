@@ -23,6 +23,7 @@ body {
 
 .registrationForm {
     margin-left: 45px;
+    margin-right: 45px;
 }
 
 .overlay {
@@ -45,7 +46,7 @@ body {
     width: 100vw;
     position: relative;
     left: calc(-50vw + 50%);
-    min-height: 44px;
+    height: 44px;
     border-bottom: 1px solid #676AAA;
     margin-bottom: 25px;
 }
@@ -211,7 +212,8 @@ img {
 }
 
 input {
-    width: 265px;
+    width: 100%;
+    box-sizing: border-box;
     height: 50px;
     background: none;
     border: 1px solid #676AAA;
