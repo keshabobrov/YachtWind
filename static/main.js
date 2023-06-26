@@ -50,10 +50,12 @@ function get_id() {
     let telegram = window.Telegram.WebApp;
         try {
             const tgID = telegram.initDataUnsafe.user.id;
-            return tgID
+            return tgID;
         }
         catch (err) {
             console.log("Telegram app not found!");
+            // TODO: REMOVE BEFORE PRODUCTION
+            return 12345678;
         }
 }
 
@@ -162,20 +164,22 @@ function showEvents() {
         for (i=1; i <= (value.size / 6); i++) {
             let uid = value.get("uid_" + i);
             let user = value.get("user_" + i);
+            user = user.split(' ').slice(0, 2).join(' ');
             let date = value.get("date_" + i);
             let time = value.get("time_" + i);
             let free_sl = value.get("free_sl_" + i);
             let row = table.insertRow(i);
-            row.insertCell(0).innerHTML = time.slice(0, -3);
-            row.insertCell(1).innerHTML = user;
+            row.insertCell(0).innerHTML = user;
+            row.insertCell(1).innerHTML = time.slice(0, -3);
             row.insertCell(2).innerHTML = free_sl;
             row.insertCell(3).innerHTML = date;
             row.insertCell(4).innerHTML = uid;
             row.className = "rows_invisible";
+            row.cells[2].style.display = "none";
             row.cells[3].style.display = "none";
             row.cells[4].style.display = "none";
-            let cell_time = row.cells[0];
-            let cell_trainer = row.cells[1];
+            let cell_trainer = row.cells[0];
+            let cell_time = row.cells[1];
             cell_time.className = "time_td";
             cell_trainer.className = "trainer_td";
             if (date === value.get("date_1")) {
