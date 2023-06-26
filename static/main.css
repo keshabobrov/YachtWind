@@ -22,7 +22,7 @@ body {
 }
 
 .registrationForm {
-    margin-left: 54px;
+    margin-left: 45px;
 }
 
 .overlay {
@@ -47,7 +47,7 @@ body {
     left: calc(-50vw + 50%);
     min-height: 44px;
     border-bottom: 1px solid #676AAA;
-    margin-bottom: 26px;
+    margin-bottom: 25px;
 }
 
 .header_text {
@@ -70,10 +70,7 @@ body {
 }
 
 .mainMenu {
-    display: flex;
     width: 100%;
-    flex-direction: column;
-    text-align: center;
 }
 
 .rows, .rows_invisible {
@@ -84,10 +81,29 @@ body {
     background-size: 30px, 14px;
     background-position: 0 50%, 100% 50%;
     -webkit-tap-highlight-color: rgba(126, 126, 133, 0.3);
+    width: 100%;
+}
+
+.rows_invisible {
+    display: none;
 }
 
 .rows.teams {
     background-image: url("/static/src/users.png"), url("/static/src/arrow.png");
+}
+
+.time_td {
+    padding: 3px 0 3px 0;
+    margin: 0 0 0 auto;
+    width: 66px;
+    background-color: #676AAA;
+    border-radius: 10px;
+    text-align: center;
+    color: #F2EFEB;
+}
+
+.trainer_td {
+    margin: auto 0;
 }
 
 .cell_logo_team {
@@ -95,6 +111,7 @@ body {
     background-image: url("/static/src/users.png");
 }
 
+/*TODO: REMOVE BEFORE PRODUCTION*/
 #overlay_registration, #overlay_enroll, #overlay_event, #event_creation {
     display: none;
 }
@@ -125,6 +142,22 @@ body {
     background-image: url("/static/src/edit.png"), url("/static/src/arrow.png");
 }
 
+#date_picker {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+}
+
+#date_picker_text {
+    width: 100%;
+    text-align: center;
+}
+
+#arrow_date_left, #arrow_date_right {
+    max-width: 14px;
+    margin: auto 0 auto 0;
+}
+
 #statistics {
     background-image: url("/static/src/calendar.png"), url("/static/src/arrow.png");
 }
@@ -141,6 +174,15 @@ body {
 #reg_logo {
     margin: auto 0 auto 30px;
     width: 30px;
+}
+
+#reg_header {
+    margin: auto 20px;
+}
+
+table {
+    width: 100%;
+    min-height: 350px;
 }
 
 button {
@@ -178,4 +220,5 @@ input {
     font-size: 15px;
     font-style: italic;
     font-family: inherit;
+    padding-left: 15px;
 }
