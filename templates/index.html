@@ -83,13 +83,13 @@
             <table id="enroll_table">
                 <tr style="display: none"></tr>
             </table>
+<!--            <button type="button" onclick="overlayCreation(1)">Создать событие</button>-->
             <div id="date_picker">
                 <button type="button" id="arrow_date_left" onclick="listHandler(0)"><img src="/static/src/arrow_left.png"></button>
                 <div id="date_picker_text">Нет записей</div>
                 <div id="time_stamp" style="display: none"></div>
                 <button type="button" id="arrow_date_right" onclick="listHandler(1)"><img src="/static/src/arrow.png"></button>
             </div>
-<!--            <button type="button" onclick="overlayCreation(1)">Создать событие</button>-->
         </div>
         <div class="overlay" id="event_creation">
             <div class="header">
@@ -116,33 +116,32 @@
         </div>
         <div class="overlay" id="overlay_event">
             <div class="header">
-                <div class="header_text">Запись на тренировку</div>
-                <div class="arrow_div" onclick="clearTable()"><i class="arrow left"></i></div>
+                <div class="arrow_exit"><button type="button" onclick="clearTable()"><img src="/static/src/arrow_exit.png"></button></div>
+                <div class="header_text">Запись на выход</div>
             </div>
-            <div class="header">
-                <div class="block_info">
-                    <div class="block_row" style="display: none">
-                        <div id="info_uid"></div>
-                    </div>
-                    <div class="block_row">
-                        <div id="info_trainer">Тренер</div>
-                    </div>
-                    <div class="block_row">
-                        <div id="info_date">Дата</div>
-                    </div>
-                    <div class="block_row">
-                        <div id="info_time">Время</div>
-                    </div>
-                    <div class="block_row">
-                        <div id="info_available">Мест для записи</div>
-                    </div>
-                    <div class="block_row">
-                        <table id="team_list">
-                            <tr>
-                                <td>Команда</td>
-                            </tr>
-                        </table>
-                    </div>
+            <div class="block_info">
+                <div class="rows" style="display: none">
+                    <div id="info_uid"></div>
+                </div>
+                <div class="rows">
+                    <div class="icon"><img src="/static/src/user.png"></div>
+                    <div id="info_trainer">Тренер</div>
+                </div>
+                <div class="rows">
+                    <div class="icon"><img src="/static/src/calendar.png"></div>
+                    <div id="info_date">Дата</div>
+                    <div id="info_time">Время</div>
+                </div>
+                <div class="block_row">
+                    <div id="info_available">Мест для записи</div>
+                </div>
+                <div class="block_row">
+                    <div class="icon"><img src="/static/src/users.png"></div>
+                    <table id="team_list">
+                        <tr>
+                            <td>Команда</td>
+                        </tr>
+                    </table>
                 </div>
             </div>
         </div>
