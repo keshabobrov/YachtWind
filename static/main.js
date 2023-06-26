@@ -268,9 +268,9 @@ function addRowHandlers() {
 function eventViewer(row) {
     let uid = row.cells[4].innerHTML
     let table = document.getElementById("team_list")
-    document.getElementById("info_trainer").innerHTML = row.cells[1].innerHTML
+    document.getElementById("info_trainer").innerHTML = row.cells[0].innerHTML
     document.getElementById("info_date").innerHTML = row.cells[3].innerHTML
-    document.getElementById("info_time").innerHTML = row.cells[0].innerHTML
+    document.getElementById("info_time").innerHTML = row.cells[1].innerHTML
     document.getElementById("info_available").innerHTML = row.cells[2].innerHTML
     document.getElementById("info_uid").innerHTML = uid
     ajaxRequest(uid, "/team_parse").then((value) => {
