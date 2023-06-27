@@ -55,7 +55,7 @@ function get_id() {
         catch (err) {
             console.log("Telegram app not found!");
             // TODO: REMOVE BEFORE PRODUCTION
-            return 12345678;
+            return 1234567;
         }
 }
 
@@ -266,17 +266,23 @@ function addRowHandlers() {
 
 
 function eventViewer(row) {
-    let uid = row.cells[4].innerHTML
-    let table = document.getElementById("team_list")
-    document.getElementById("info_trainer").innerHTML = row.cells[0].innerHTML
-    document.getElementById("info_date").innerHTML = row.cells[3].innerHTML
-    document.getElementById("info_time").innerHTML = row.cells[1].innerHTML
-    document.getElementById("info_available").innerHTML = row.cells[2].innerHTML
-    document.getElementById("info_uid").innerHTML = uid
+    let uid = row.cells[4].innerHTML;
+    let table = document.getElementById("team_list");
+    document.getElementById("info_trainer").innerHTML = row.cells[0].innerHTML;
+    let date = new Date(row.cells[3].innerHTML);
+    document.getElementById("info_date").innerHTML = date.toLocaleString("ru", {
+        month: "long",
+        day: "numeric",
+        year: "numeric"
+    })
+    document.getElementById("info_time").innerHTML = row.cells[1].innerHTML;
+    document.getElementById("info_available").innerHTML = row.cells[2].innerHTML;
+    document.getElementById("info_uid").innerHTML = uid;
     ajaxRequest(uid, "/team_parse").then((value) => {
         for (let i = 0; i < value.length; i++) {
-            let row = table.insertRow(i + 1)
-            row.insertCell(0).innerHTML = value[i]
+            let row = table.insertRow(i + 1);
+            row.insertCell(0).innerHTML = value[i];
+            row.cells[0].className = "table_team";
         }
         Telegram.WebApp.MainButton.setParams({
             text: 'Записаться',
@@ -286,9 +292,9 @@ function eventViewer(row) {
 }
 
 function enrollEvent(uid) {
-    let tgId = get_id()
+    let tgId = get_id();
     let array = []
-    array.unshift(tgId, uid)
+    array.unshift(tgId, uid);
     let data = JSON.stringify(array);
     ajaxRequest(data, "/enroll_event").then((value) => {
         window.Telegram.WebApp.HapticFeedback.notificationOccurred("success")
@@ -296,7 +302,7 @@ function enrollEvent(uid) {
         if (value === 1) {alert("Вы отменили запись!")}
         if (value === 2) {alert("Команда уже набрана.")}
         if (value === 3) {alert("Пользователь не найден")}
-        location.reload()
+        location.reload();
     })
 }
 
