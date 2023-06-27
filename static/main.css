@@ -197,12 +197,16 @@ body {
 
 #info_available {
     padding: 3px 0 3px 0;
-    margin-left: 16px;
+    margin: auto 0 auto auto;
     background-color: #676AAA;
     border-radius: 10px;
-    min-width: 30px;
+    width: 30px;
     text-align: center;
     color: #F2EFEB;
+}
+
+#team_list {
+    width: calc(100% - 30px);
 }
 
 #statistics {
