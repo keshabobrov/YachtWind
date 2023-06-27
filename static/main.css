@@ -97,6 +97,10 @@ body {
     background-image: url("/static/src/users.png"), url("/static/src/arrow.png");
 }
 
+.rows.event {
+    column-gap: 20px;
+}
+
 .time_td {
     padding: 3px 0 3px 0;
     margin: 0 0 0 auto;
@@ -114,6 +118,10 @@ body {
 .cell_logo_team {
     max-width: 10px;
     background-image: url("/static/src/users.png");
+}
+
+.table_team {
+    padding-top: 10px;
 }
 
 /*TODO: REMOVE BEFORE PRODUCTION*/
@@ -165,6 +173,38 @@ body {
     margin: auto 0 auto 0;
 }
 
+#date_section {
+    margin-bottom: 10px;
+}
+
+#info_date {
+    margin: auto 0 auto 0;
+}
+
+#info_time {
+    margin-left: 52px;
+    margin-bottom: 36px;
+}
+
+#enroll_access_lock {
+    width: 30px;
+    margin: auto 0 auto auto;
+}
+
+#info_trainer {
+    margin: auto 0 auto 0;
+}
+
+#info_available {
+    padding: 3px 0 3px 0;
+    margin-left: 16px;
+    background-color: #676AAA;
+    border-radius: 10px;
+    min-width: 30px;
+    text-align: center;
+    color: #F2EFEB;
+}
+
 #statistics {
     background-image: url("/static/src/calendar.png"), url("/static/src/arrow.png");
 }
@@ -187,9 +227,6 @@ body {
     margin: auto 20px;
 }
 
-table {
-    width: 100%;
-}
 
 button {
     display: flex;
