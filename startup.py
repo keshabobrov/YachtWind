@@ -103,7 +103,6 @@ def teamParse():
                 name += n
                 if n == " ":
                     space += 1
-            print(name)
             users.insert(index, name)
     return jsonify(users)
 
