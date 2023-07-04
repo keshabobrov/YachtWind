@@ -33,6 +33,7 @@ body {
     top: 0;
     max-width: inherit;
     width: 100%;
+    height: calc(100vh - 50px);
     min-height: 370px;
     background-color: #F2EFEB;
     z-index: 1;
@@ -100,26 +101,6 @@ body {
     column-gap: 20px;
 }
 
-.create_event_row {
-    display: flex;
-    flex-direction: row;
-    column-gap: 16px;
-    margin-bottom: 17px;
-}
-
-.create_form_logo {
-    margin: auto 0 auto 0;
-    width: 30px;
-}
-
-.create_form_label {
-    margin: auto 0 auto 0;
-}
-
-.create_form_input {
-    margin: 0 0 0 auto;
-}
-
 .time_td {
     padding: 3px 0 3px 0;
     margin: 0 0 0 auto;
@@ -143,6 +124,10 @@ body {
     padding-top: 10px;
 }
 
+/*TODO: REMOVE BEFORE PRODUCTION*/
+#overlay_registration, #overlay_enroll, #overlay_event, #event_creation {
+    display: none;
+}
 
 #main_header {
     font-size: 30px;
@@ -212,16 +197,12 @@ body {
 
 #info_available {
     padding: 3px 0 3px 0;
-    margin: auto 0 auto auto;
+    margin-left: 16px;
     background-color: #676AAA;
     border-radius: 10px;
-    width: 30px;
+    min-width: 30px;
     text-align: center;
     color: #F2EFEB;
-}
-
-#team_list {
-    width: calc(100% - 30px);
 }
 
 #statistics {
@@ -246,25 +227,6 @@ body {
     margin: auto 20px;
 }
 
-#overlay_enroll {
-    height: calc(100vh - 50px);
-}
-
-#date_form, #time_form {
-    width: 160px;
-}
-
-#duration_form, #slots_form {
-    width: 50px;
-    padding-left: 0;
-    text-align: center;
-}
-
-#type_form {
-    width: 110px;
-    padding-left: 0;
-    text-align: center;
-}
 
 button {
     display: flex;
@@ -291,7 +253,7 @@ img {
     display: block; /* remove extra space below image */
 }
 
-input, select {
+input {
     width: 100%;
     box-sizing: border-box;
     height: 50px;
