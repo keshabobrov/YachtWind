@@ -55,7 +55,7 @@ function get_id() {
         catch (err) {
             console.log("Telegram app not found!");
             // TODO: REMOVE BEFORE PRODUCTION
-            return 12345678;
+            return 1234567;
         }
 }
 
