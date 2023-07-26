@@ -5,7 +5,7 @@ import os
 from dotenv import load_dotenv
 
 load_dotenv(dotenv_path='/usr/share/nginx/html/application/.env')
-host = "172.17.0.4"
+host = "10.5.0.3"
 # host = 'localhost'
 user = "main_connector"
 password = os.getenv("PASSWD")
