@@ -23,6 +23,6 @@ jobs:
       - name: Building image
         run: docker build -t webapp .
       - name: Starting container
-        run: docker run --name webappcont -d -p 443:443 -it webapp:latest /usr/share/nginx/html/application/start.sh
+        run: docker run --name webappcont -d --net srvnet --ip 10.5.0.2 -p 443:443 -it webapp:latest /usr/share/nginx/html/application/start.sh
       - name: Executing nginx
         run: docker exec webappcont nginx
