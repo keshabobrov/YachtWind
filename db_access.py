@@ -5,11 +5,11 @@ import os
 from dotenv import load_dotenv
 
 load_dotenv(dotenv_path='/usr/share/nginx/html/application/.env')
-host = "10.5.0.3"
-# host = 'localhost'
+# host = "10.5.0.3"
+host = 'localhost'
 user = "main_connector"
-password = os.getenv("PASSWD")
-# password = '***REMOVED***'
+# password = os.getenv("PASSWD")
+password = '***REMOVED***'
 database = "yacht_db"
 logging.basicConfig(filename='db_access.log',
                     filemode='a+',
