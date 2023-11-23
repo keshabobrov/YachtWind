@@ -35,3 +35,13 @@ function overlayTeams(param) {
         document.getElementById("overlay_teams").style.display = "none";
     }
 }
+
+function overlayStats(param) {
+    if (param === 1) {
+        document.getElementById("overlay_stats").style.display = "flex";
+        getStatistics()
+    }
+    if (param === 0) {
+        document.getElementById("overlay_stats").style.display = "none";
+    }
+}

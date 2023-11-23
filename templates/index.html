@@ -8,14 +8,14 @@
     <link href="../static/main.css" rel="stylesheet" type="text/css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
-    <title>YachtingBot</title>
+    <title>YachtWind</title>
 </head>
 <body>
     <div class="container">
         <nav class="mainMenu">
             <div class="header" id="main_header">
                 <div class="arrow_exit"><button type="button" style="display: none"><img src="/static/src/arrow_exit.png"></button></div>
-                <div class="header_text">Sailing Bot</div>
+                <div class="header_text">YachtWind</div>
                 <div id="notification_indicator"><button type="button" id="notification_button" onclick=""><img src="/static/src/notification.png"></button></div>
             </div>
             <div class="rows" id="my_teams">
@@ -25,7 +25,7 @@
                 <button type="button" onclick="overlayEvents(1)">Запись на выход</button>
             </div>
             <div class="rows" id="statistics">
-                <button type="button" onclick="getStatistics()">Мои выходы</button>
+                <button type="button" onclick="overlayStats(1)">Мои тренировки</button>
             </div>
             <div class="rows" id="feedback">
                 <button type="button" onclick="document.getElementById('overlay').style.display = 'flex'">Обратная связь</button>
@@ -78,7 +78,7 @@
         <div class="overlay" id="overlay_enroll">
             <div class="header">
                 <div class="arrow_exit"><button type="button" onclick="overlayEvents(0)"><img src="/static/src/arrow_exit.png"></button></div>
-                <div class="header_text">Запись на выход</div>
+                <div class="header_text">Тренировки</div>
             </div>
             <table id="enroll_table">
                 <tr style="display: none"></tr>
@@ -117,9 +117,9 @@
         <div class="overlay" id="overlay_event">
             <div class="header">
                 <div class="arrow_exit"><button type="button" onclick="clearTable()"><img src="/static/src/arrow_exit.png"></button></div>
-                <div class="header_text">Запись на выход</div>
+                <div class="header_text">Тренировки</div>
             </div>
-            <div class="block_info">
+            <div id="block_info">
                 <div class="rows event" style="display: none">
                     <div id="info_uid"></div>
                 </div>
@@ -143,6 +143,39 @@
                     </table>
                 </div>
             </div>
+        </div>
+        <div class="overlay" id="overlay_stats">
+            <div class="header">
+                <div class="arrow_exit"><button type="button" onclick="overlayStats(0)"><img src="/static/src/arrow_exit.png"></button></div>
+                <div class="header_text">Мои тренировки</div>
+            </div>
+            <table id="statistics_table">
+                <tr onclick="console.log('button pressed 1')">
+                    <td>
+                        <img src="/static/src/fire.png" class="icon">
+                    </td>
+                    <td>
+                        <span>Рейтинг</span>
+                    </td>
+                    <td>
+                        <span class="number_blue_box stats_number" id="rating_num">0</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="spacer"></td>
+                </tr>
+                <tr onclick="console.log('button pressed 2')">
+                    <td>
+                        <img src="/static/src/histogram.png" class="icon">
+                    </td>
+                    <td>
+                        <span>Тренировки</span>
+                    </td>
+                    <td>
+                        <span class="number_blue_box stats_number" id="total_num">0</span>
+                    </td>
+                </tr>
+            </table>
         </div>
     </div>
     <script src="/static/main.js"></script>

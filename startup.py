@@ -119,19 +119,28 @@ def enrollEvent():
     return jsonify(res)
 
 
+# @app.route('/stat_request', methods=['POST'])
+# def getStat():
+#     tgId = request.json
+#     res = db_access.get_statistics(tgId)
+#     uid_dict = []
+#     date_dict = []
+#     time_dict = []
+#     for index, i in enumerate(res):
+#         uid_dict.insert(index, str(i[0]))
+#         date_dict.insert(index, str(i[1]))
+#         time_dict.insert(index, str(i[2]))
+#     result = uid_dict + date_dict + time_dict
+#     return jsonify(result)
+
 @app.route('/stat_request', methods=['POST'])
 def getStat():
     tgId = request.json
     res = db_access.get_statistics(tgId)
-    uid_dict = []
-    date_dict = []
-    time_dict = []
-    for index, i in enumerate(res):
-        uid_dict.insert(index, str(i[0]))
-        date_dict.insert(index, str(i[1]))
-        time_dict.insert(index, str(i[2]))
-    result = uid_dict + date_dict + time_dict
-    return jsonify(result)
+    total = res[0]
+    rating = res[1]
+    result = str(total) + "/" + str(rating)
+    return jsonify(result), 200
 
 
 if __name__ == "__main__":

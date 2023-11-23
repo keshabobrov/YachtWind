@@ -89,19 +89,15 @@ body {
     width: 100%;
 }
 
-.rows_invisible {
-    display: none;
-}
-
 .rows.teams {
-    background-image: url("/static/src/users.png"), url("/static/src/arrow.png");
+    background-image: url("/static/src/users.png");
 }
 
 .rows.event {
     column-gap: 20px;
 }
 
-.time_td {
+.number_blue_box {
     padding: 3px 0 3px 0;
     margin: 0 0 0 auto;
     width: 66px;
@@ -109,6 +105,10 @@ body {
     border-radius: 10px;
     text-align: center;
     color: #F2EFEB;
+}
+
+.number_blue_box.stats_number {
+    display: block;
 }
 
 .trainer_td {
@@ -124,9 +124,8 @@ body {
     padding-top: 10px;
 }
 
-/*TODO: REMOVE BEFORE PRODUCTION*/
-#overlay_registration, #overlay_enroll, #overlay_event, #event_creation {
-    display: none;
+.spacer {
+    padding-bottom: 36px;
 }
 
 #main_header {
