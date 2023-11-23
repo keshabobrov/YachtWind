@@ -5,16 +5,17 @@ import os
 from dotenv import load_dotenv
 
 load_dotenv(dotenv_path='/usr/share/nginx/html/application/.env')
-# host = "10.5.0.3"
-host = 'localhost'
+host = "10.5.0.3"
+# host = 'localhost'
 user = "main_connector"
-# password = os.getenv("PASSWD")
-password = 'fkl5nsa'
+password = os.getenv("PASSWD")
+# password = 'fkl5nsa'
 database = "yacht_db"
 logging.basicConfig(filename='db_access.log',
                     filemode='a+',
                     format='%(asctime)s - %(levelname)s - %(message)s',
                     level=logging.DEBUG)
+
 
 class Users:
     """Класс работы с пользовательскими данными: инициализация, создание, чтение и т.д."""
@@ -93,7 +94,6 @@ def parse_slots(slot):
         logging.error("DB: Exit code 4: error in parse slots", exc_info=True)
 
 
-
 @access_db
 def write_new_user(TgId, Name, Access, Role, cursor):
     try:
@@ -108,6 +108,7 @@ def write_new_user(TgId, Name, Access, Role, cursor):
 
     except:
         logging.error("DB: Exit code 1: error in write_db", exc_info=True)
+
 
 @access_db
 def get_user_raw(TgId, cursor):
@@ -182,10 +183,18 @@ def enrollEvent(tgid, event_id, cursor):
             if str(i) == str(tgid):
                 enroll_event = ("UPDATE trainings SET U%s" % (index + 1) + " = NULL" + " WHERE UID = %s" % event_id)
                 cursor.execute(enroll_event)
+                # try:
+                #     # update_rating(tgid)
+                # except:
+                #     logging.error("Error in update_rating call", exc_info=True)
                 return 1
             if i is None:
                 enroll_event = ("UPDATE trainings SET U%s" % (index + 1) + " = %s" % tgid + " WHERE UID = %s" % event_id)
                 cursor.execute(enroll_event)
+                # try:
+                #     update_rating(tgid)
+                # except:
+                #     logging.error("Error in update_rating call", exc_info=True)
                 return 0
         return 2
 
@@ -193,16 +202,39 @@ def enrollEvent(tgid, event_id, cursor):
         logging.error("DB: Exit code 1: error in read_db_training", exc_info=True)
 
 
+# @access_db
+# def get_statistics(tgId, cursor):
+#     try:
+#         today_date = date.today()
+#         d1 = today_date.strftime("%Y.%m.%d")
+#         request_events = ("SELECT UID, event_date, event_time FROM trainings" +
+#                           " WHERE CONCAT_WS(\"\", U1, U2, U3, U4, U5, U6, U7, U8, U9, U10)" +
+#                           " LIKE \"%s\"" %tgId + " AND event_date <= \"%s\"" %d1)
+#         cursor.execute(request_events)
+#         request_result = cursor.fetchall()
+#         return request_result
+#     except:
+#         logging.error("DB: Exit code 1: error in read_db_training", exc_info=True)
+
+
 @access_db
 def get_statistics(tgId, cursor):
     try:
         today_date = date.today()
+        result = []
         d1 = today_date.strftime("%Y.%m.%d")
-        request_events = ("SELECT UID, event_date, event_time FROM trainings" +
-                          " WHERE CONCAT_WS(\"\", U1, U2, U3, U4, U5, U6, U7, U8, U9, U10)" +
-                          " LIKE \"%s\"" %tgId + " AND event_date <= \"%s\"" %d1)
-        cursor.execute(request_events)
-        request_result = cursor.fetchall()
-        return request_result
+        rating_request = ("SELECT SumTrainings FROM users" +
+                          " WHERE TgID = \"%s\"" %tgId)
+        count_events = (
+                "SELECT COUNT(*) FROM trainings" +
+                " WHERE CONCAT_WS(\"\", U1, U2, U3, U4, U5, U6, U7, U8, U9, U10)" +
+                " LIKE \"%s\"" %tgId + " OR creator_id = \"%s\"" %tgId +
+                " AND event_date <= \"%s\"" %d1
+        )
+        cursor.execute(count_events)
+        result.insert(0, cursor.fetchone()[0])
+        cursor.execute(rating_request)
+        result.insert(1, cursor.fetchone()[0])
+        return result
     except:
-        logging.error("DB: Exit code 1: error in read_db_training", exc_info=True)
+        logging.error("DB: Exit code 1: error in DB_get_statistics", exc_info=True)

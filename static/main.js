@@ -180,7 +180,7 @@ function showEvents() {
             row.cells[4].style.display = "none";
             let cell_trainer = row.cells[0];
             let cell_time = row.cells[1];
-            cell_time.className = "time_td";
+            cell_time.className = "number_blue_box";
             cell_trainer.className = "trainer_td";
             if (date === value.get("date_1")) {
                 row.className = "rows";
@@ -311,9 +311,11 @@ function getStatistics() {
     const formData = JSON.stringify(tgId);
     const url = "/stat_request"
     ajaxRequest(formData, url).then((value) => {
-        console.log(value)
+        document.getElementById("total_num").innerHTML = value.slice(0, value.indexOf("/"));
+        document.getElementById("rating_num").innerHTML = value.slice(value.indexOf("/") + 1);
     })
 }
+
 
 function clearTable() {
     let table = document.getElementById("team_list")
