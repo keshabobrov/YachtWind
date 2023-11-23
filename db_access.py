@@ -228,8 +228,7 @@ def get_statistics(tgId, cursor):
         count_events = (
                 "SELECT COUNT(*) FROM trainings" +
                 " WHERE CONCAT_WS(\"\", U1, U2, U3, U4, U5, U6, U7, U8, U9, U10)" +
-                " LIKE \"%s\"" %tgId + " OR creator_id = \"%s\"" %tgId +
-                " AND event_date <= \"%s\"" %d1
+                " LIKE \"%s\"" %tgId + " OR creator_id = \"%s\"" %tgId
         )
         cursor.execute(count_events)
         result.insert(0, cursor.fetchone()[0])
