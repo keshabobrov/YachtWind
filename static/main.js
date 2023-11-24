@@ -55,7 +55,7 @@ function get_id() {
         catch (err) {
             console.log("Telegram app not found!");
             // TODO: REMOVE BEFORE PRODUCTION
-            return 1234567;
+            return 12345678;
         }
 }
 
@@ -174,7 +174,7 @@ function showEvents() {
             row.insertCell(2).innerHTML = free_sl;
             row.insertCell(3).innerHTML = date;
             row.insertCell(4).innerHTML = uid;
-            row.className = "rows_invisible";
+            row.className = "rows invisible";
             row.cells[2].style.display = "none";
             row.cells[3].style.display = "none";
             row.cells[4].style.display = "none";
@@ -207,7 +207,7 @@ function updateVisiblity(table, date_vis, dates, newIndex) {
         document.getElementById("time_stamp").innerHTML = dates[newIndex];
         for (let i = 1; i < table.rows.length; i++) {
             if (table.rows[i].cells[3].innerHTML !== dates[newIndex]) {
-                table.rows[i].className = "rows_invisible"
+                table.rows[i].className = "rows invisible"
             }
             if (table.rows[i].cells[3].innerHTML === dates[newIndex]) {
                 table.rows[i].className = "rows"
