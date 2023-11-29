@@ -4,17 +4,16 @@ from datetime import date
 import os
 from dotenv import load_dotenv
 
-load_dotenv(dotenv_path='/usr/share/nginx/html/application/.env')
-host = "10.5.0.3"
-# host = 'localhost'
-user = "main_connector"
-password = os.getenv("PASSWD")
-# password = '***REMOVED***'
-database = "yacht_db"
-logging.basicConfig(filename='db_access.log',
+load_dotenv(dotenv_path='.env')
+host = os.getenv('DB_HOST')
+user = os.getenv('DB_USERNAME')
+password = os.getenv('DB_PASSWD')
+database = os.getenv('DB_NAME')
+logging.basicConfig(filename='srv.log',
                     filemode='a+',
                     format='%(asctime)s - %(levelname)s - %(message)s',
-                    level=logging.DEBUG)
+                    level=getattr(logging, os.getenv('PROFILE'))
+                    )
 
 
 class Users:
