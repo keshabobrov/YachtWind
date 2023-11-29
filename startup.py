@@ -9,11 +9,6 @@ def home():
     return render_template("index.html")
 
 
-@app.route('/reg_form')
-def reg_form():
-    return render_template("registration.html")
-
-
 @app.route('/ident', methods=['POST'])
 def userIdent():
     tgid = request.json
@@ -144,4 +139,4 @@ def getStat():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8080, debug=True)
+    app.run(host="0.0.0.0", port=8080, debug=False)
