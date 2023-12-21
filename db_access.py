@@ -154,7 +154,6 @@ def event_request(cursor):
         request_events = ("SELECT * FROM trainings "
                           f"WHERE event_date >= {formatted_date} "
                           "ORDER BY event_date, event_time")
-        print(request_events)
         cursor.execute(request_events)
         request_result = cursor.fetchall()
         return request_result
