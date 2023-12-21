@@ -12,9 +12,11 @@ def home():
 @app.route('/init', methods=['POST'])
 def user_initialization():
     user_telegram_id = request.json
-    user_info = db_access.Users(user_telegram_id)
-    if hasattr(user_info, 'user_id'):
-        return jsonify(user_info.user_role), 200
+    user = db_access.Users(user_telegram_id)
+    if hasattr(user, 'user_id'):
+        response = app.make_response(jsonify(user.user_role))
+        response.set_cookie('user_id', str(user.user_id))
+        return response, 200
     return jsonify(0), 200
 
 
@@ -22,13 +24,13 @@ def user_initialization():
 def user_creation():
     json_input = request.json
     user_telegram_id = json_input[3]['value']
-    user_info = db_access.Users(user_telegram_id)
-    if hasattr(user_info, 'user_id'):
-        return jsonify("User already in system! user_id: " + str(user_info.user_id)), 409
-    user_info.user_role = 'regular'
-    user_info.user_name = json_input[0]['value'] + " " + json_input[1]['value'] + " " + json_input[2]['value']
-    user_info.user_profile_type = True
-    user_info.setup()
+    user = db_access.Users(user_telegram_id)
+    if hasattr(user, 'user_id'):
+        return jsonify("User already in system! user_id: " + str(user.user_id)), 409
+    user.user_role = 'regular'
+    user.user_name = json_input[0]['value'] + " " + json_input[1]['value'] + " " + json_input[2]['value']
+    user.user_profile_type = True
+    user.setup()
     return jsonify("User has been created!"), 200
 
 
