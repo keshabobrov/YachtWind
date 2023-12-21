@@ -63,7 +63,7 @@ function setup(tgID) {
     /** Функция идентифицирования пользователя. Отправляет на сервер id пользователя и возвращает
      * роль пользователя в системе или сообщение об отсутствии пользователя в системе.*/
     return new Promise((resolve, reject) => {
-        let url = "/ident";
+        let url = "/init";
         let data = JSON.stringify(tgID);
         ajaxRequest(data, url).then((value) => {
             resolve (value)
