@@ -40,12 +40,13 @@ class Users:
 class Events:
     """Класс для тренировок: создание, чтение"""
 
-    def __init__(self, user_telegram_id):
-        self.event_author = Users(user_telegram_id)
+    def __init__(self):
+        self.event_author = None
         self.event_id = None
         self.event_date = None
         self.event_time = None
         self.event_slot_num = None
+        self.event_slot_available = None
 
     def create(self):
         if not hasattr(self.event_author, 'user_id'):
@@ -59,10 +60,6 @@ class Events:
             event_slot_num=self.event_slot_num
         )
         return 'Event has been created!'
-
-    def request(self):
-        result = event_request()
-        return result
 
 
 def access_db(func):
@@ -151,8 +148,8 @@ def event_request(cursor):
     try:
         today_date = date.today()
         formatted_date = today_date.strftime("%Y.%m.%d")
-        request_events = ("SELECT * FROM trainings "
-                          f"WHERE event_date >= {formatted_date} "
+        request_events = ("SELECT * FROM events "
+                          f"WHERE event_date >= \"{formatted_date}\" "
                           "ORDER BY event_date, event_time")
         cursor.execute(request_events)
         request_result = cursor.fetchall()
