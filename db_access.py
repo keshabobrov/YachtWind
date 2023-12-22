@@ -148,14 +148,14 @@ def event_request(cursor):
     try:
         today_date = date.today()
         formatted_date = today_date.strftime("%Y.%m.%d")
-        request_events = ("SELECT * FROM events "
+        request_events = ("SELECT event_id, event_datetime, event_slot_num, user_name AS event_author_name FROM events "
+                          "JOIN users ON events.event_author_id=users.user_id "
                           f"WHERE event_datetime >= \"{formatted_date}\" "
                           "ORDER BY event_datetime")
         cursor.execute(request_events)
         result = cursor.fetchall()
         for event in result:
             event['event_datetime'] = event['event_datetime'].isoformat()
-            event['event_creation_date'] = event['event_creation_date'].isoformat()
         return result
 
     except:

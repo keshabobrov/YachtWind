@@ -52,7 +52,6 @@ def user_initialization():
 def event_request():
     event_list = db_access.event_request()
     res = json.dumps(event_list, indent=1)
-    print(res)
     return jsonify(res), 200
 
 

@@ -20,30 +20,30 @@ function ajaxRequest(formData, url) {
 }
 
 
-function request_events() {
-    return new Promise((resolve, reject) => {
-        let formData = '';
-        let url = "/event_request";
-        const array = new Map()
-        ajaxRequest(formData, url).then((value) => {
-            for (let i = 1; i <= value[0]; i++) {
-                let uid_name = "uid_" + i;
-                let user_name = "user_" + i;
-                let date_name = "date_" + i;
-                let time_name = "time_" + i;
-                let all_sl_name = "all_sl_" + i;
-                let free_sl_name = "free_sl_" + i;
-                array.set(uid_name, value[i]);
-                array.set(user_name, value[i + value[0]]);
-                array.set(date_name, value[i + value[0] * 2]);
-                array.set(time_name, value[i + value[0] * 3]);
-                array.set(all_sl_name, value[i + value[0] * 4]);
-                array.set(free_sl_name, value[i + value[0] * 5]);
-            }
-            resolve(array)
-        });
-    });
-}
+// function event_request() {
+//     return new Promise((resolve, reject) => {
+//         let formData = null;
+//         let url = "/event_request";
+//         const array = new Map()
+//         ajaxRequest(formData, url).then((value) => {
+//             for (let i = 1; i <= value[0]; i++) {
+//                 let uid_name = "uid_" + i;
+//                 let user_name = "user_" + i;
+//                 let date_name = "date_" + i;
+//                 let time_name = "time_" + i;
+//                 let all_sl_name = "all_sl_" + i;
+//                 let free_sl_name = "free_sl_" + i;
+//                 array.set(uid_name, value[i]);
+//                 array.set(user_name, value[i + value[0]]);
+//                 array.set(date_name, value[i + value[0] * 2]);
+//                 array.set(time_name, value[i + value[0] * 3]);
+//                 array.set(all_sl_name, value[i + value[0] * 4]);
+//                 array.set(free_sl_name, value[i + value[0] * 5]);
+//             }
+//             resolve(array)
+//         });
+//     });
+// }
 
 
 function get_id() {
@@ -159,43 +159,67 @@ function appStart() {
 }
 
 function showEvents() {
-    request_events().then((value) => {
-        let table = document.getElementById('enroll_table');
-        for (i=1; i <= (value.size / 6); i++) {
-            let uid = value.get("uid_" + i);
-            let user = value.get("user_" + i);
-            user = user.split(' ').slice(0, 2).join(' ');
-            let date = value.get("date_" + i);
-            let time = value.get("time_" + i);
-            let free_sl = value.get("free_sl_" + i);
-            let row = table.insertRow(i);
-            row.insertCell(0).innerHTML = user;
-            row.insertCell(1).innerHTML = time.slice(0, -3);
-            row.insertCell(2).innerHTML = free_sl;
-            row.insertCell(3).innerHTML = date;
-            row.insertCell(4).innerHTML = uid;
-            row.className = "rows invisible";
+    const formData = null
+    const url = '/event_request'
+    const table = document.getElementById('events_table');
+    ajaxRequest(formData, url).then((value) => {
+        const events_results = JSON.parse(value)
+        for (let i = 0; i < events_results.length; i++) {
+            const row = table.insertRow(i + 1);
+            const event = events_results[i];
+            const date = new Date(event.event_datetime);
+            document.getElementById("date_picker_text").innerHTML = date.toLocaleString("ru", {
+                month: "long",
+                day: "numeric"
+            })
+            row.insertCell(0).innerHTML = event.event_author_name.split(' ').slice(0, 2).join(' ');
+            row.insertCell(1).innerHTML = date.toLocaleTimeString("ru", {hour: "2-digit", minute: "2-digit"});
+            row.insertCell(2).innerHTML = event.event_slot_num;
+            row.insertCell(3).innerHTML = event.event_id;
+            row.cells[0].className = "trainer_td";
+            row.cells[1].className = "number_blue_box";
             row.cells[2].style.display = "none";
             row.cells[3].style.display = "none";
-            row.cells[4].style.display = "none";
-            let cell_trainer = row.cells[0];
-            let cell_time = row.cells[1];
-            cell_time.className = "number_blue_box";
-            cell_trainer.className = "trainer_td";
-            if (date === value.get("date_1")) {
-                row.className = "rows";
-                let date = new Date(value.get("date_1"))
-                document.getElementById("time_stamp").innerHTML = value.get("date_1")
-                document.getElementById("date_picker_text").innerHTML = date.toLocaleString("ru", {
-                    month: "long",
-                    day: "numeric"
-                })
-            }
         }
-        /** добавление обработчика нажатий на строки таблицы*/
-        addRowHandlers()
     })
 }
+    // event_request().then((value) => {
+    //     let table = document.getElementById('enroll_table');
+    //     for (i=1; i <= (value.size / 6); i++) {
+    //         let uid = value.get("uid_" + i);
+    //         let user = value.get("user_" + i);
+    //         user = user.split(' ').slice(0, 2).join(' ');
+    //         let date = value.get("date_" + i);
+    //         let time = value.get("time_" + i);
+    //         let free_sl = value.get("free_sl_" + i);
+    //         let row = table.insertRow(i);
+    //         row.insertCell(0).innerHTML = user;
+    //         row.insertCell(1).innerHTML = time.slice(0, -3);
+    //         row.insertCell(2).innerHTML = free_sl;
+    //         row.insertCell(3).innerHTML = date;
+    //         row.insertCell(4).innerHTML = uid;
+    //         row.className = "rows invisible";
+    //         row.cells[2].style.display = "none";
+    //         row.cells[3].style.display = "none";
+    //         row.cells[4].style.display = "none";
+    //         let cell_trainer = row.cells[0];
+    //         let cell_time = row.cells[1];
+    //         cell_time.className = "number_blue_box";
+    //         cell_trainer.className = "trainer_td";
+    //         if (date === value.get("date_1")) {
+    //             row.className = "rows";
+    //             let date = new Date(value.get("date_1"))
+    //             document.getElementById("time_stamp").innerHTML = value.get("date_1")
+    //             document.getElementById("date_picker_text").innerHTML = date.toLocaleString("ru", {
+    //                 month: "long",
+    //                 day: "numeric"
+    //             })
+    //         }
+    //     }
+    //     /** добавление обработчика нажатий на строки таблицы*/
+    //     addRowHandlers()
+    // })
+// }
 
 function updateVisiblity(table, date_vis, dates, newIndex) {
     if (dates[newIndex] !== date_vis) {
