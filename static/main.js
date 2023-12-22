@@ -138,22 +138,29 @@ function showEvents() {
     const table = document.getElementById('events_table');
     ajaxRequest(formData, url).then((value) => {
         const events_results = JSON.parse(value)
+        const page_date = new Date(events_results[0].event_datetime);
+        document.getElementById("date_picker_text").innerHTML = page_date.toLocaleString("ru", {
+            month: "long",
+            day: "numeric"
+        })
+        sessionStorage.setItem('page_date', page_date.toISOString())
         for (let i = 0; i < events_results.length; i++) {
             const row = table.insertRow(i + 1);
             const event = events_results[i];
-            const date = new Date(event.event_datetime);
-            document.getElementById("date_picker_text").innerHTML = date.toLocaleString("ru", {
-                month: "long",
-                day: "numeric"
-            })
+            const date = new Date(event.event_datetime)
             row.insertCell(0).innerHTML = event.event_author_name.split(' ').slice(0, 2).join(' ');
-            row.insertCell(1).innerHTML = date.toLocaleTimeString("ru", {hour: "2-digit", minute: "2-digit"});
+            row.insertCell(1).innerHTML = date.toLocaleTimeString("ru", {hour: "2-digit", minute: "2-digit"})
             row.insertCell(2).innerHTML = event.event_slot_num;
             row.insertCell(3).innerHTML = event.event_id;
+            row.insertCell(4).innerHTML = date.toDateString();
             row.cells[0].className = "trainer_td";
             row.cells[1].className = "number_blue_box";
             row.cells[2].style.display = "none";
             row.cells[3].style.display = "none";
+            row.cells[4].style.display = "none";
+            if (date > page_date) {
+                row.className = "rows invisible"
+            }
         }
         addRowHandlers()
     })
@@ -161,27 +168,28 @@ function showEvents() {
 
 
 function listHandler(direction) {
-    const table = document.getElementById("enroll_table");
-    const date_vis = document.getElementById("time_stamp").innerHTML;
-    let dates = []
+    const table = document.getElementById("events_table");
+    const page_date = (new Date (sessionStorage.getItem('page_date'))).toDateString();
+    let dates_array = []
     for (let i = 1; i < table.rows.length; i++) {
-        dates.push(table.rows[i].cells[3].innerHTML);
+        const date = new Date (table.rows[i].cells[4].innerHTML)
+        dates_array.push(date.toDateString());
     }
-    const currentIndex = dates.indexOf(date_vis);
-    if (direction === 0) {
+    const currentIndex = dates_array.indexOf(page_date);
+    if (direction === "-") {
         let newIndex = currentIndex - 1;
         while (newIndex >= 0) {
-            let res = updateVisibility(table, date_vis, dates, newIndex)
+            let res = updateVisibility(table, page_date, dates_array, newIndex)
             if (res === 0) {
                 return;
             }
             newIndex += 1;
         }
     }
-    if (direction === 1) {
+    if (direction === "+") {
         let newIndex = currentIndex + 1;
-        while (newIndex < dates.length) {
-            let res = updateVisibility(table, date_vis, dates, newIndex)
+        while (newIndex < dates_array.length) {
+            let res = updateVisibility(table, page_date, dates_array, newIndex)
             if (res === 0) {return;}
             newIndex += 1;
         }
@@ -189,20 +197,22 @@ function listHandler(direction) {
 }
 
 
-function updateVisibility(table, date_vis, dates, newIndex) {
-    if (dates[newIndex] !== date_vis) {
-        const date = new Date(dates[newIndex])
-        document.getElementById("date_picker_text").innerHTML = date.toLocaleString("ru", {
+function updateVisibility(table, page_date, dates_array, newIndex) {
+    if (dates_array[newIndex] !== page_date) {
+        const new_date = new Date(dates_array[newIndex]);
+        document.getElementById("date_picker_text").innerHTML = new_date.toLocaleString("ru", {
             month: "long",
             day: "numeric"
         })
-        document.getElementById("time_stamp").innerHTML = dates[newIndex];
+        sessionStorage.setItem('page_date', new_date.toDateString());
         for (let i = 1; i < table.rows.length; i++) {
-            if (table.rows[i].cells[3].innerHTML !== dates[newIndex]) {
+            if (table.rows[i].cells[4].innerHTML !== dates_array[newIndex]) {
                 table.rows[i].className = "rows invisible"
+                console.log(i + "none")
             }
-            if (table.rows[i].cells[3].innerHTML === dates[newIndex]) {
+            if (table.rows[i].cells[4].innerHTML === dates_array[newIndex]) {
                 table.rows[i].className = "rows"
+                console.log(i + "flex")
             }
         }
         return 0;
@@ -213,10 +223,10 @@ function updateVisibility(table, date_vis, dates, newIndex) {
 function addRowHandlers() {
     /** Функция обработчика нажатий на строки в таблице.
      * При нажатии вызывается функция eventViewer, которой передается строка.*/
-    let table = document.getElementById("enroll_table");
-    let rows = table.getElementsByTagName("tr");
+    const table = document.getElementById("events_table");
+    const rows = table.getElementsByTagName("tr");
     for (let i=1; i < rows.length; i++) {
-        let current_row = rows[i];
+        const current_row = rows[i];
         let create_click_handler = (row) => {
             return function () {
                 document.getElementById("overlay_event").style.display = "flex";

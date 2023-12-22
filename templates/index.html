@@ -85,10 +85,9 @@
             </table>
 <!--            <button type="button" onclick="overlayCreation(1)">Создать событие</button>-->
             <div id="date_picker">
-                <button type="button" id="arrow_date_left" onclick="listHandler(0)"><img src="/static/src/arrow_left.png"></button>
+                <button type="button" id="arrow_date_left" onclick="listHandler('-')"><img src="/static/src/arrow_left.png"></button>
                 <div id="date_picker_text">Нет записей</div>
-                <div id="time_stamp" style="display: none"></div>
-                <button type="button" id="arrow_date_right" onclick="listHandler(1)"><img src="/static/src/arrow.png"></button>
+                <button type="button" id="arrow_date_right" onclick="listHandler('+')"><img src="/static/src/arrow.png"></button>
             </div>
         </div>
         <div class="overlay" id="event_creation">
