@@ -20,18 +20,18 @@ def user_initialization():
     return jsonify(0), 200
 
 
-@app.route('/register', methods=['POST'])
-def user_creation():
-    json_input = request.json
-    user_telegram_id = json_input[3]['value']
-    user = db_access.Users(user_telegram_id)
-    if hasattr(user, 'user_id'):
-        return jsonify("User already in system! user_id: " + str(user.user_id)), 409
-    user.user_role = 'regular'
-    user.user_name = json_input[0]['value'] + " " + json_input[1]['value'] + " " + json_input[2]['value']
-    user.user_profile_type = True
-    user.setup()
-    return jsonify("User has been created!"), 200
+# @app.route('/register', methods=['POST'])
+# def user_creation():
+#     json_input = request.json
+#     user_telegram_id = json_input[3]['value']
+#     user = db_access.Users(user_telegram_id)
+#     if hasattr(user, 'user_id'):
+#         return jsonify("User already in system! user_id: " + str(user.user_id)), 409
+#     user.user_role = 'regular'
+#     user.user_name = json_input[0]['value'] + " " + json_input[1]['value'] + " " + json_input[2]['value']
+#     user.user_profile_type = True
+#     user.setup()
+#     return jsonify("User has been created!"), 200
 
 
 # @app.route('/create_event', methods=['POST'])
@@ -51,59 +51,29 @@ def user_creation():
 @app.route('/event_request', methods=['POST'])
 def event_request():
     event_list = db_access.event_request()
-    return jsonify(event_list), 200
+    res = json.dumps(event_list, indent=1)
+    print(res)
+    return jsonify(res), 200
 
 
-# def event_request():
-#     user_id_dict = []
-#     event_id_dict = []
-#     user_name_dict = []
-#     event_data_dict = []
-#     event_time_dict = []
-#     event_slot_num_dict = []
-#     available_slots_dict = []
-#     quantity = []
-#     event_class_object = db_access.Events(0)
-#     event_list = event_class_object.request()
-#     for index, event in enumerate(event_list):
-#         parse_slots = []
-#         event_id_dict.insert(index, str(event[0]))
-#         user_id_dict.insert(index, str(event[1]))
-#         event_data_dict.insert(index, str(event[3]))
-#         event_time_dict.insert(index, str(event[4]))
-#         event_slot_num_dict.insert(index, str(event[5]))
-#         # for n in event[6:]:
-#         #     if n is not None:
-#         #         parse_slots.insert(index, index)
-#         # slots_quantity = event[5] - len(parse_slots)
-#         # available_slots_dict.insert(k, slots_quantity)
-#         # k += 1
-#     for index, i in enumerate(user_id_dict):
-#         event_author_id = db_access.Users(i)
-#         user_name_dict.insert(index, trainer.user_name)
-#     result = event_id_dict + user_name_dict + event_data_dict + event_time_dict + event_slot_num_dict + available_slots_dict
-#     quantity.insert(0, len(user_id_dict))
-#     return jsonify(quantity + result), 200
-
-
-@app.route('/team_parse', methods=['POST'])
-def teamParse():
-    users = []
-    event_id = request.json
-    event = db_access.teamParse(event_id)[0]
-    for index, x in enumerate(event[6:]):
-        if x is not None:
-            user = db_access.Users(x)
-            name = ""
-            space = 0
-            for n in user.Name:
-                if space == 2:
-                    break
-                name += n
-                if n == " ":
-                    space += 1
-            users.insert(index, name)
-    return jsonify(users)
+# @app.route('/team_parse', methods=['POST'])
+# def teamParse():
+#     users = []
+#     event_id = request.json
+#     event = db_access.teamParse(event_id)[0]
+#     for index, x in enumerate(event[6:]):
+#         if x is not None:
+#             user = db_access.Users(x)
+#             name = ""
+#             space = 0
+#             for n in user.Name:
+#                 if space == 2:
+#                     break
+#                 name += n
+#                 if n == " ":
+#                     space += 1
+#             users.insert(index, name)
+#     return jsonify(users)
 
 
 # @app.route('/enroll_event', methods=['POST'])

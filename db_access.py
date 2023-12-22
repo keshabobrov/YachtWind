@@ -1,6 +1,6 @@
 import mysql.connector
 import logging
-from datetime import date
+from datetime import date, datetime
 import os
 from dotenv import load_dotenv
 
@@ -23,10 +23,10 @@ class Users:
         self.user_telegram_id = user_telegram_id
         user_data = user_initialization(self.user_telegram_id)
         if user_data != 0:
-            self.user_id = user_data[0]
-            self.user_role = user_data[1]
-            self.user_name = user_data[3]
-            self.user_profile_type = user_data[4]
+            self.user_id = user_data['user_id']
+            self.user_role = user_data['user_role']
+            self.user_name = user_data['user_name']
+            self.user_profile_type = user_data['user_profile_type']
 
     def setup(self):
         create_user(
@@ -70,7 +70,7 @@ def access_db(func):
 
     def connector(*args, **kwargs):
         db = mysql.connector.connect(host=host, user=user, password=password, database=database)
-        cursor = db.cursor()
+        cursor = db.cursor(dictionary=True)
         kwargs['cursor'] = cursor
         existence_code = func(*args, **kwargs)
         db.commit()
@@ -127,20 +127,20 @@ def user_initialization(user_telegram_id, cursor):
         logging.error("DB: Exit code 2: error in user_initialization", exc_info=True)
 
 
-@access_db
-def event_creation(event_date, event_time, event_author_id, event_slot_num, cursor):
-    try:
-        event_creation_date = date.today()
-        new_event = ("INSERT INTO trainings "
-                     "(event_date, event_time, event_author_id, event_creation_date, event_slot_num) "
-                     "VALUES (%s, %s, %s, %s, %s)")
-
-        event_data = (event_date, event_time, event_author_id, event_creation_date, event_slot_num)
-        cursor.execute(new_event, event_data)
-        logging.info('DB: Event has been created!')
-
-    except:
-        logging.error("DB: Exit code 1: error in event_creation", exc_info=True)
+# @access_db
+# def event_creation(event_date, event_time, event_author_id, event_slot_num, cursor):
+#     try:
+#         event_creation_date = date.today()
+#         new_event = ("INSERT INTO trainings "
+#                      "(event_date, event_time, event_author_id, event_creation_date, event_slot_num) "
+#                      "VALUES (%s, %s, %s, %s, %s)")
+#
+#         event_data = (event_date, event_time, event_author_id, event_creation_date, event_slot_num)
+#         cursor.execute(new_event, event_data)
+#         logging.info('DB: Event has been created!')
+#
+#     except:
+#         logging.error("DB: Exit code 1: error in event_creation", exc_info=True)
 
 
 @access_db
@@ -149,11 +149,14 @@ def event_request(cursor):
         today_date = date.today()
         formatted_date = today_date.strftime("%Y.%m.%d")
         request_events = ("SELECT * FROM events "
-                          f"WHERE event_date >= \"{formatted_date}\" "
-                          "ORDER BY event_date, event_time")
+                          f"WHERE event_datetime >= \"{formatted_date}\" "
+                          "ORDER BY event_datetime")
         cursor.execute(request_events)
-        request_result = cursor.fetchall()
-        return request_result
+        result = cursor.fetchall()
+        for event in result:
+            event['event_datetime'] = event['event_datetime'].isoformat()
+            event['event_creation_date'] = event['event_creation_date'].isoformat()
+        return result
 
     except:
         logging.error("DB: Exit code 1: error in event_request", exc_info=True)
