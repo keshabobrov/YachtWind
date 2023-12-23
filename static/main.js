@@ -23,8 +23,7 @@ function ajaxRequest(formData, url) {
 function get_id() {
     let telegram = window.Telegram.WebApp;
         try {
-            const tgID = telegram.initDataUnsafe.user.id;
-            return tgID;
+            return  telegram.initDataUnsafe.user.id;
         }
         catch (err) {
             console.log("Telegram app not found!");

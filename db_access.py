@@ -26,15 +26,14 @@ class Users:
             self.user_id = user_data['user_id']
             self.user_role = user_data['user_role']
             self.user_name = user_data['user_name']
-            self.user_profile_type = user_data['user_profile_type']
+            self.user_access_flag = user_data['user_access_flag']
 
     def setup(self):
-        create_user(
+        if create_user(
             user_telegram_id=self.user_telegram_id,
-            user_name=self.user_name,
-            user_profile_type=self.user_profile_type,
-            user_role=self.user_role
-        )
+            user_name=self.user_name
+        ):
+            return True
 
 
 class Events:
@@ -95,16 +94,17 @@ def access_db(func):
 
 
 @access_db
-def create_user(user_role, user_telegram_id, user_name, user_profile_type, cursor):
+def create_user(user_telegram_id, user_name, cursor):
     try:
         user_registration_date = date.today()
         new_user = ("INSERT INTO users "
-                    "(user_role, user_telegram_id, user_name, user_profile_type, user_registration_date) "
-                    "VALUES (%s, %s, %s, %s, %s)")
+                    "(user_telegram_id, user_name, user_registration_date) "
+                    "VALUES (%s, %s, %s)")
 
-        user_data = (user_role, user_telegram_id, user_name, user_profile_type, user_registration_date)
+        user_data = (user_telegram_id, user_name, user_registration_date)
         cursor.execute(new_user, user_data)
         logging.info('DB: User has been created!')
+        return True
 
     except:
         logging.error("DB: Exit code 1: error in create_user", exc_info=True)
