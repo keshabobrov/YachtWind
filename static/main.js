@@ -82,29 +82,22 @@ function userRegistration() {
 
 function eventCreation() {
     /** Функция создания события. Отправляет данные формы и возвращает:
-     * 1. Юзер не в системе
-     * 2. Юзер не обладает полномочиями
-     * 3. Событие создано
-     * Обновление страницы после выполнения кода.*/
-    if (document.getElementById("slots_form").value <= 1 || document.getElementById("slots_form").value >= 10) {
-        alert("Неверное число слотов для записи. (1-10)");
+     * 1. Юзер не в системе 409
+     * 2. Юзер не обладает полномочиями 401
+     * 3. Событие создано 200
+     * TODO: CHANGE RELOADING LOGIC*/
+    const event_data = new FormData(document.querySelector('#event_create_form'))
+    const jsonObject = Object.fromEntries(event_data)
+    if (document.getElementById("slot_form").value <= 1) {
+        alert("Неверное число слотов для записи");
         return;
     }
-    if (document.getElementById("date_form").value === "") {
-        alert("Введите дату");
+    if (document.getElementById("datetime_form").value === "") {
+        alert("Введите дату и время");
         return;
     }
-    if (document.getElementById("time_form").value === "") {
-        alert("Введите время");
-        return;
-    }
-    let dict = $("#event_create_form").serializeArray();
-    dict.push({
-        name: "id",
-        value: get_id()
-    })
-    let data = JSON.stringify(dict);
-    let url = "/create_event";
+    const data = JSON.stringify(jsonObject)
+    const url = "/create_event";
     ajaxRequest(data, url).then((value) => {
         window.Telegram.WebApp.HapticFeedback.notificationOccurred("success")
         alert("Событие создано!")
