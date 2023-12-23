@@ -15,7 +15,7 @@ def user_initialization():
     user = db_access.Users(user_telegram_id)
     if hasattr(user, 'user_id'):
         response = app.make_response(jsonify(user.user_role))
-        response.set_cookie('user_id', str(user.user_id))
+        response.set_cookie('user_telegram_id', str(user.user_telegram_id))
         return response, 200
     return jsonify(0), 200
 
@@ -34,18 +34,22 @@ def user_registration():
         return jsonify("Some error writing user"), 500
 
 
-# @app.route('/create_event', methods=['POST'])
-# def event_create():
-#     json_input = request.json
-#     user_telegram_id = json_input[3]['value']
-#     event = db_access.Events(user_telegram_id)
-#     event.event_date = json_input[0]['value']
-#     event.event_time = json_input[1]['value']
-#     event.event_slot_num = json_input[2]['value']
-#     res = event.create()
-#     if res == "User not permitted!":
-#         return jsonify(res), 401
-#     return jsonify(res), 200
+@app.route('/create_event', methods=['POST'])
+def event_create():
+    json_input = request.json
+    user_telegram_id = request.cookies.get('user_telegram_id')
+    event = db_access.Events()
+    event.event_datetime = json_input['datetime_form']
+    event.event_slot_num = json_input['slot_form']
+    event.event_author = db_access.Users(user_telegram_id)
+    res = event.create()
+    if res == "User not permitted":
+        return jsonify(res), 401
+    if res == "User not logged in":
+        return jsonify(res), 409
+    if res == "Some error":
+        return jsonify(res), 500
+    return jsonify(res), 200
 
 
 @app.route('/event_request', methods=['POST'])
