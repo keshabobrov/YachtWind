@@ -20,18 +20,18 @@ def user_initialization():
     return jsonify(0), 200
 
 
-# @app.route('/register', methods=['POST'])
-# def user_creation():
-#     json_input = request.json
-#     user_telegram_id = json_input[3]['value']
-#     user = db_access.Users(user_telegram_id)
-#     if hasattr(user, 'user_id'):
-#         return jsonify("User already in system! user_id: " + str(user.user_id)), 409
-#     user.user_role = 'regular'
-#     user.user_name = json_input[0]['value'] + " " + json_input[1]['value'] + " " + json_input[2]['value']
-#     user.user_profile_type = True
-#     user.setup()
-#     return jsonify("User has been created!"), 200
+@app.route('/register', methods=['POST'])
+def user_registration():
+    json_input = request.json
+    user_telegram_id = json_input[3]['value']
+    user = db_access.Users(user_telegram_id)
+    if hasattr(user, 'user_id'):
+        return jsonify("User already in system! user_id: " + str(user.user_id)), 409
+    user.user_name = json_input[0]['value'] + " " + json_input[1]['value'] + " " + json_input[2]['value']
+    if user.setup():
+        return jsonify("User has been created!"), 200
+    else:
+        return jsonify("Some error writing user"), 500
 
 
 # @app.route('/create_event', methods=['POST'])
