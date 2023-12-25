@@ -59,24 +59,12 @@ def event_request():
     return jsonify(res), 200
 
 
-# @app.route('/team_parse', methods=['POST'])
-# def teamParse():
-#     users = []
-#     event_id = request.json
-#     event = db_access.teamParse(event_id)[0]
-#     for index, x in enumerate(event[6:]):
-#         if x is not None:
-#             user = db_access.Users(x)
-#             name = ""
-#             space = 0
-#             for n in user.Name:
-#                 if space == 2:
-#                     break
-#                 name += n
-#                 if n == " ":
-#                     space += 1
-#             users.insert(index, name)
-#     return jsonify(users)
+@app.route('/get_enrollment', methods=['POST'])
+def team_request():
+    event_id = request.json
+    event_users = db_access.team_request(event_id)
+    res = json.dumps(event_users, indent=1)
+    return jsonify(res), 200
 
 
 # @app.route('/enroll_event', methods=['POST'])
