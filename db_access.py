@@ -1,6 +1,6 @@
 import mysql.connector
 import logging
-from datetime import date, datetime
+from datetime import date
 import os
 from dotenv import load_dotenv
 
@@ -72,19 +72,6 @@ def access_db(func):
     return connector
 
 
-# def parse_slots(slot):
-#     try:
-#         k = 0
-#         appointments = []
-#         for i in slot[6:]:
-#             if i is not None:
-#                 appointments.insert(k, i)
-#                 k += 1
-#         return appointments
-#     except:
-#         logging.error("DB: Exit code 4: error in parse slots", exc_info=True)
-
-
 @access_db
 def create_user(user_data, cursor):
     try:
@@ -142,10 +129,14 @@ def event_request(cursor):
     try:
         today_date = date.today()
         formatted_date = today_date.strftime("%Y.%m.%d")
-        request_events = ("SELECT event_id, event_datetime, event_slot_num, user_name AS event_author_name FROM events "
-                          "JOIN users ON events.event_author_id=users.user_id "
-                          f"WHERE event_datetime >= \"{formatted_date}\" "
-                          "ORDER BY event_datetime")
+        request_events = ("SELECT events.event_id, events.event_datetime, users.user_name AS event_author_name, "
+                          "(events.event_slot_num - COUNT(enrollments.enrollment_id)) AS event_remaining_slots "
+                          "FROM events JOIN users ON events.event_author_id = users.user_id "
+                          "LEFT JOIN enrollments ON events.event_id = enrollments.event_id "
+                          f"WHERE events.event_datetime >= \"{formatted_date}\" "
+                          "GROUP BY events.event_id, users.user_name "
+                          "ORDER BY events.event_datetime;"
+                          )
         cursor.execute(request_events)
         result = cursor.fetchall()
         for event in result:
@@ -156,17 +147,17 @@ def event_request(cursor):
         logging.error("DB: Exit code 1: error in event_request", exc_info=True)
 
 
-# @access_db
-# def teamParse(event_id, cursor):
-#     try:
-#         request_events = ("SELECT * FROM trainings"
-#                           " WHERE UID = %s" % event_id)
-#         cursor.execute(request_events)
-#         request_result = cursor.fetchall()
-#         return request_result
-#
-#     except:
-#         logging.error("DB: Exit code 1: error in read_db_training", exc_info=True)
+@access_db
+def team_request(event_id, cursor):
+    try:
+        request_teams = ("SELECT user_name FROM enrollments JOIN users ON enrollments.user_id=users.user_id "
+                         f"WHERE event_id = {event_id}")
+        cursor.execute(request_teams)
+        request_result = cursor.fetchall()
+        return request_result
+
+    except:
+        logging.error("DB: Exit code 1: error in read_db_training", exc_info=True)
 
 # TODO: REWRITE THIS BLOCK OF CODE
 # @access_db

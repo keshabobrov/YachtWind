@@ -130,27 +130,31 @@ function showEvents() {
     const table = document.getElementById('events_table');
     ajaxRequest(formData, url).then((value) => {
         const events_results = JSON.parse(value)
-        const page_date = new Date(events_results[0].event_datetime);
-        document.getElementById("date_picker_text").innerHTML = page_date.toLocaleString("ru", {
+        const first_event_date = new Date(events_results[0].event_datetime);
+        const page_date = first_event_date.toDateString()
+        document.getElementById("date_picker_text").innerHTML = first_event_date.toLocaleString("ru", {
             month: "long",
             day: "numeric"
         })
-        sessionStorage.setItem('page_date', page_date.toISOString())
+        sessionStorage.setItem('page_date', page_date)
         for (let i = 0; i < events_results.length; i++) {
             const row = table.insertRow(i + 1);
             const event = events_results[i];
             const date = new Date(event.event_datetime)
             row.insertCell(0).innerHTML = event.event_author_name.split(' ').slice(0, 2).join(' ');
             row.insertCell(1).innerHTML = date.toLocaleTimeString("ru", {hour: "2-digit", minute: "2-digit"})
-            row.insertCell(2).innerHTML = event.event_slot_num;
-            row.insertCell(3).innerHTML = event.event_id;
-            row.insertCell(4).innerHTML = date.toDateString();
+            row.insertCell(2).innerHTML = event.event_id;
+            row.insertCell(3).innerHTML = date.toDateString();
+            row.insertCell(4).innerHTML = event.event_remaining_slots;
             row.cells[0].className = "trainer_td";
             row.cells[1].className = "number_blue_box";
             row.cells[2].style.display = "none";
             row.cells[3].style.display = "none";
             row.cells[4].style.display = "none";
-            if (date > page_date) {
+            if (date.toDateString() === page_date) {
+                row.className = "rows"
+            }
+            else {
                 row.className = "rows invisible"
             }
         }
@@ -164,7 +168,7 @@ function listHandler(direction) {
     const page_date = (new Date (sessionStorage.getItem('page_date'))).toDateString();
     let dates_array = []
     for (let i = 1; i < table.rows.length; i++) {
-        const date = new Date (table.rows[i].cells[4].innerHTML)
+        const date = new Date (table.rows[i].cells[3].innerHTML);
         dates_array.push(date.toDateString());
     }
     const currentIndex = dates_array.indexOf(page_date);
@@ -198,13 +202,11 @@ function updateVisibility(table, page_date, dates_array, newIndex) {
         })
         sessionStorage.setItem('page_date', new_date.toDateString());
         for (let i = 1; i < table.rows.length; i++) {
-            if (table.rows[i].cells[4].innerHTML !== dates_array[newIndex]) {
-                table.rows[i].className = "rows invisible"
-                console.log(i + "none")
-            }
-            if (table.rows[i].cells[4].innerHTML === dates_array[newIndex]) {
+            if (table.rows[i].cells[3].innerHTML === dates_array[newIndex]) {
                 table.rows[i].className = "rows"
-                console.log(i + "flex")
+            }
+            else {
+                table.rows[i].className = "rows invisible"
             }
         }
         return 0;
@@ -223,7 +225,12 @@ function addRowHandlers() {
             return function () {
                 document.getElementById("overlay_event").style.display = "flex";
                 document.getElementById("overlay_enroll").style.display = "none";
-                eventViewer(row);
+                sessionStorage.setItem('open_event_author', current_row.cells[0].innerHTML);
+                sessionStorage.setItem('open_event_time', current_row.cells[1].innerHTML);
+                sessionStorage.setItem('open_event_id', current_row.cells[2].innerHTML);
+                sessionStorage.setItem('open_event_date', current_row.cells[3].innerHTML);
+                sessionStorage.setItem('open_event_remaining_slots', current_row.cells[4].innerHTML);
+                eventViewer();
             }
         }
         current_row.onclick = create_click_handler(current_row);
@@ -231,23 +238,24 @@ function addRowHandlers() {
 }
 
 
-function eventViewer(row) {
-    let uid = row.cells[4].innerHTML;
-    let table = document.getElementById("team_list");
-    document.getElementById("info_trainer").innerHTML = row.cells[0].innerHTML;
-    let date = new Date(row.cells[3].innerHTML);
+function eventViewer() {
+    const table = document.getElementById("event_team_list");
+    const event_id = sessionStorage.getItem('open_event_id');
+    const date = new Date(sessionStorage.getItem('open_event_date'));
+    document.getElementById("event_author_name").innerHTML = sessionStorage.getItem('open_event_author');
+    document.getElementById("info_time").innerHTML = sessionStorage.getItem('open_event_time');
+    document.getElementById("info_available").innerHTML = sessionStorage.getItem('open_event_remaining_slots');
     document.getElementById("info_date").innerHTML = date.toLocaleString("ru", {
         month: "long",
         day: "numeric",
         year: "numeric"
     })
-    document.getElementById("info_time").innerHTML = row.cells[1].innerHTML;
-    document.getElementById("info_available").innerHTML = row.cells[2].innerHTML;
-    document.getElementById("info_uid").innerHTML = uid;
-    ajaxRequest(uid, "/team_parse").then((value) => {
-        for (let i = 0; i < value.length; i++) {
-            let row = table.insertRow(i + 1);
-            row.insertCell(0).innerHTML = value[i];
+    ajaxRequest(event_id, "/get_enrollment").then((value) => {
+        const events_results = JSON.parse(value)
+        for (let i = 0; i < events_results.length; i++) {
+            const user_name = events_results[i].user_name
+            const row = table.insertRow(i +1);
+            row.insertCell(0).innerHTML = user_name;
             row.cells[0].className = "table_team";
         }
         Telegram.WebApp.MainButton.setParams({
@@ -283,13 +291,13 @@ function getStatistics() {
 }
 
 
-function clearTable() {
-    let table = document.getElementById("team_list")
-    for (let  i = 1; i < table.rows.length; i++) {
-            table.deleteRow(i)
-        }
-    document.getElementById('overlay_event').style.display = 'none'
-}
+// function clearTable() {
+//     let table = document.getElementById("event_team_list")
+//     for (let  i = 1; i < table.rows.length; i++) {
+//             table.deleteRow(i)
+//         }
+//     document.getElementById('overlay_event').style.display = 'none'
+// }
 
 if (window.location.pathname === "/") {
     appStart()
