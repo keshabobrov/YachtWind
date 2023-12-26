@@ -88,7 +88,7 @@ function eventCreation() {
      * TODO: CHANGE RELOADING LOGIC*/
     const event_data = new FormData(document.querySelector('#event_create_form'))
     const jsonObject = Object.fromEntries(event_data)
-    if (document.getElementById("slot_form").value <= 1) {
+    if (document.getElementById("slot_form").value < 1) {
         alert("Неверное число слотов для записи");
         return;
     }
@@ -223,8 +223,7 @@ function addRowHandlers() {
         const current_row = rows[i];
         let create_click_handler = (row) => {
             return function () {
-                document.getElementById("overlay_event").style.display = "flex";
-                document.getElementById("overlay_enroll").style.display = "none";
+                overlayEvent(1)
                 sessionStorage.setItem('open_event_author', current_row.cells[0].innerHTML);
                 sessionStorage.setItem('open_event_time', current_row.cells[1].innerHTML);
                 sessionStorage.setItem('open_event_id', current_row.cells[2].innerHTML);
@@ -265,39 +264,40 @@ function eventViewer() {
     });
 }
 
-function enrollEvent(uid) {
-    let tgId = get_id();
-    let array = []
-    array.unshift(tgId, uid);
-    let data = JSON.stringify(array);
-    ajaxRequest(data, "/enroll_event").then((value) => {
-        window.Telegram.WebApp.HapticFeedback.notificationOccurred("success")
-        if (value === 0) {alert("Вы записаны")}
-        if (value === 1) {alert("Вы отменили запись!")}
-        if (value === 2) {alert("Команда уже набрана.")}
-        if (value === 3) {alert("Пользователь не найден")}
+function enrollEvent() {
+    const event_id = sessionStorage.getItem('open_event_id');
+    ajaxRequest(event_id, "/event_enroll").then((value) => {
+        switch(value) {
+            case "success":
+                window.Telegram.WebApp.HapticFeedback.notificationOccurred("success");
+                alert("Вы записаны");
+                break;
+            case "removed":
+                alert("Вы отменили запись");
+                break;
+            case "no more slots":
+                alert("Команда уже набрана. Мест для записи нет");
+                break;
+            case "User not found":
+                alert("Пользователь не найден");
+                break;
+            default:
+                alert('Something went wrong');
+        }
         location.reload();
     })
 }
 
-function getStatistics() {
-    const tgId = get_id()
-    const formData = JSON.stringify(tgId);
-    const url = "/stat_request"
-    ajaxRequest(formData, url).then((value) => {
-        document.getElementById("total_num").innerHTML = value.slice(0, value.indexOf("/"));
-        document.getElementById("rating_num").innerHTML = value.slice(value.indexOf("/") + 1);
-    })
-}
-
-
-// function clearTable() {
-//     let table = document.getElementById("event_team_list")
-//     for (let  i = 1; i < table.rows.length; i++) {
-//             table.deleteRow(i)
-//         }
-//     document.getElementById('overlay_event').style.display = 'none'
+// function getStatistics() {
+//     const tgId = get_id()
+//     const formData = JSON.stringify(tgId);
+//     const url = "/stat_request"
+//     ajaxRequest(formData, url).then((value) => {
+//         document.getElementById("total_num").innerHTML = value.slice(0, value.indexOf("/"));
+//         document.getElementById("rating_num").innerHTML = value.slice(value.indexOf("/") + 1);
+//     })
 // }
+
 
 if (window.location.pathname === "/") {
     appStart()
@@ -323,7 +323,7 @@ Telegram.WebApp.MainButton.onClick(function () {
                         is_visible: true
                     })
                     overlayCreation(1);
-                    overlayEvents(0);
+                    overlayList(0);
                 }
             })
             break;

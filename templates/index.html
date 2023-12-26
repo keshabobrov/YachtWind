@@ -22,7 +22,7 @@
                 <button type="button" onclick="overlayTeams(1)">Мои команды</button>
             </div>
             <div class="rows" id="enroll_training">
-                <button type="button" onclick="overlayEvents(1)">Запись на выход</button>
+                <button type="button" onclick="overlayList(1)">Запись на выход</button>
             </div>
             <div class="rows" id="statistics">
                 <button type="button" onclick="overlayStats(1)">Мои тренировки</button>
@@ -77,7 +77,7 @@
         </div>
         <div class="overlay" id="overlay_enroll">
             <div class="header">
-                <div class="arrow_exit"><button type="button" onclick="overlayEvents(0)"><img src="/static/src/arrow_exit.png"></button></div>
+                <div class="arrow_exit"><button type="button" onclick="overlayList(0)"><img src="/static/src/arrow_exit.png"></button></div>
                 <div class="header_text">Тренировки</div>
             </div>
             <table id="events_table">
@@ -111,7 +111,7 @@
         </div>
         <div class="overlay" id="overlay_event">
             <div class="header">
-                <div class="arrow_exit"><button type="button" onclick="clearTable()"><img src="/static/src/arrow_exit.png"></button></div>
+                <div class="arrow_exit"><button type="button" onclick="overlayEvent(0)"><img src="/static/src/arrow_exit.png"></button></div>
                 <div class="header_text">Тренировки</div>
             </div>
             <div id="block_info">

@@ -45,7 +45,7 @@ def event_create():
     res = event.create()
     if res == "User not permitted":
         return jsonify(res), 401
-    if res == "User not logged in":
+    if res == "User not found":
         return jsonify(res), 409
     if res == "Some error":
         return jsonify(res), 500
@@ -67,16 +67,21 @@ def team_request():
     return jsonify(res), 200
 
 
-# @app.route('/enroll_event', methods=['POST'])
-# def enrollEvent():
-#     enroll_data = request.json
-#     tgid = enroll_data[0]
-#     event_id = enroll_data[1]
-#     user = db_access.Users(tgid)
-#     if not hasattr(user, 'UID'):
-#         return jsonify(3)
-#     res = db_access.enrollEvent(tgid, event_id)
-#     return jsonify(res)
+@app.route('/event_enroll', methods=['POST'])
+def event_enroll():
+    event_id = request.json
+    user_telegram_id = request.cookies.get('user_telegram_id')
+    user = db_access.Users(user_telegram_id)
+    if not hasattr(user, 'user_id'):
+        return jsonify('User not found'), 409
+    res = db_access.event_enrollment(user, event_id)
+    if res == 'no more slots':
+        return jsonify(res), 200
+    if res == 'success':
+        return jsonify(res), 200
+    if res == 'removed':
+        return jsonify(res), 200
+    return jsonify(res), 500
 
 
 # @app.route('/stat_request', methods=['POST'])

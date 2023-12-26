@@ -159,56 +159,29 @@ def team_request(event_id, cursor):
     except:
         logging.error("DB: Exit code 1: error in read_db_training", exc_info=True)
 
-# TODO: REWRITE THIS BLOCK OF CODE
-# @access_db
-# def event_enrollment(user_telegram_id, event_id, cursor):
-#     try:
-#         request_events = ("SELECT * FROM trainings"
-#                           " WHERE UID = %s" % event_id)
-#         cursor.execute(request_events)
-#         request_result = cursor.fetchone()
-#         max = request_result[5] + 6
-#         for index, i in enumerate(request_result[6:max]):
-#             if str(i) == str(tgid):
-#                 enroll_event = ("UPDATE trainings SET U%s" % (index + 1) + " = NULL" + " WHERE UID = %s" % event_id)
-#                 cursor.execute(enroll_event)
-#                 # try:
-#                 #     # update_rating(tgid)
-#                 # except:
-#                 #     logging.error("Error in update_rating call", exc_info=True)
-#                 return 1
-#             if i is None:
-#                 enroll_event = (
-#                             "UPDATE trainings SET U%s" % (index + 1) + " = %s" % tgid + " WHERE UID = %s" % event_id)
-#                 cursor.execute(enroll_event)
-#                 # try:
-#                 #     update_rating(tgid)
-#                 # except:
-#                 #     logging.error("Error in update_rating call", exc_info=True)
-#                 return 0
-#         return 2
-#
-#     except:
-#         logging.error("DB: Exit code 1: error in read_db_training", exc_info=True)
 
+@access_db
+def event_enrollment(user, event_id, cursor):
+    try:
+        request_available = ("SELECT (events.event_slot_num - COUNT(enrollments.enrollment_id)) AS remaining_slots, "
+                             f"MAX(CASE WHEN enrollments.user_id = {user.user_id} THEN 1 ELSE 0 END) AS user_already_enrolled "
+                             "FROM events LEFT JOIN enrollments ON events.event_id = enrollments.event_id "
+                             f"WHERE events.event_id = {event_id} GROUP BY events.event_id;")
+        cursor.execute(request_available)
+        request_result = cursor.fetchone()
+        if request_result['user_already_enrolled'] == 1:
+            request_remove = f"DELETE FROM enrollments WHERE user_id={user.user_id} AND event_id={event_id}"
+            cursor.execute(request_remove)
+            return "removed"
+        elif request_result['remaining_slots'] == 0:
+            return "no more slots"
+        elif request_result['user_already_enrolled'] == 0:
+            request_enroll = ("INSERT INTO enrollments (user_id, event_id) "
+                              f"VALUES ({user.user_id}, {event_id})")
+            cursor.execute(request_enroll)
+            return "success"
+        else:
+            return "error"
 
-# @access_db
-# def get_statistics(tgId, cursor):
-#     try:
-#         today_date = date.today()
-#         result = []
-#         d1 = today_date.strftime("%Y.%m.%d")
-#         rating_request = ("SELECT SumTrainings FROM users" +
-#                           " WHERE TgID = \"%s\"" % tgId)
-#         count_events = (
-#                 "SELECT COUNT(*) FROM trainings" +
-#                 " WHERE CONCAT_WS(\"\", U1, U2, U3, U4, U5, U6, U7, U8, U9, U10)" +
-#                 " LIKE \"%s\"" % tgId + " OR creator_id = \"%s\"" % tgId
-#         )
-#         cursor.execute(count_events)
-#         result.insert(0, cursor.fetchone()[0])
-#         cursor.execute(rating_request)
-#         result.insert(1, cursor.fetchone()[0])
-#         return result
-#     except:
-#         logging.error("DB: Exit code 1: error in DB_get_statistics", exc_info=True)
+    except:
+        logging.error("DB: Exit code 1: error in database read/write enrollment", exc_info=True)
