@@ -14,7 +14,14 @@ def user_initialization():
     user_telegram_id = request.json
     user = db_access.Users(user_telegram_id)
     if hasattr(user, 'user_id'):
-        response = app.make_response(jsonify(user.user_role))
+        dictionary = {
+            'user_role' : user.user_role,
+            'user_rank' : user.user_rank,
+            'user_total_events' : user.user_total_events,
+            'user_access_flag' : user.user_access_flag
+        }
+        results = json.dumps(dictionary, indent=1)
+        response = app.make_response(results)
         response.set_cookie('user_telegram_id', str(user.user_telegram_id))
         return response, 200
     return jsonify(0), 200
@@ -42,29 +49,29 @@ def event_create():
     event.event_datetime = json_input['datetime_form']
     event.event_slot_num = json_input['slot_form']
     event.event_author = db_access.Users(user_telegram_id)
-    res = event.create()
-    if res == "User not permitted":
-        return jsonify(res), 401
-    if res == "User not found":
-        return jsonify(res), 409
-    if res == "Some error":
-        return jsonify(res), 500
-    return jsonify(res), 200
+    results = event.create()
+    if results == "User not permitted":
+        return jsonify(results), 401
+    if results == "User not found":
+        return jsonify(results), 409
+    if results == "Some error":
+        return jsonify(results), 500
+    return jsonify(results), 200
 
 
 @app.route('/event_request', methods=['POST'])
 def event_request():
     event_list = db_access.event_request()
-    res = json.dumps(event_list, indent=1)
-    return jsonify(res), 200
+    results = json.dumps(event_list, indent=1)
+    return jsonify(results), 200
 
 
 @app.route('/get_enrollment', methods=['POST'])
 def team_request():
     event_id = request.json
     event_users = db_access.team_request(event_id)
-    res = json.dumps(event_users, indent=1)
-    return jsonify(res), 200
+    results = json.dumps(event_users, indent=1)
+    return jsonify(results), 200
 
 
 @app.route('/event_enroll', methods=['POST'])
@@ -74,38 +81,14 @@ def event_enroll():
     user = db_access.Users(user_telegram_id)
     if not hasattr(user, 'user_id'):
         return jsonify('User not found'), 409
-    res = db_access.event_enrollment(user, event_id)
-    if res == 'no more slots':
-        return jsonify(res), 200
-    if res == 'success':
-        return jsonify(res), 200
-    if res == 'removed':
-        return jsonify(res), 200
-    return jsonify(res), 500
-
-
-# @app.route('/stat_request', methods=['POST'])
-# def getStat():
-#     tgId = request.json
-#     res = db_access.get_statistics(tgId)
-#     uid_dict = []
-#     date_dict = []
-#     time_dict = []
-#     for index, i in enumerate(res):
-#         uid_dict.insert(index, str(i[0]))
-#         date_dict.insert(index, str(i[1]))
-#         time_dict.insert(index, str(i[2]))
-#     result = uid_dict + date_dict + time_dict
-#     return jsonify(result)
-
-# @app.route('/stat_request', methods=['POST'])
-# def getStat():
-#     tgId = request.json
-#     res = db_access.get_statistics(tgId)
-#     total = res[0]
-#     rating = res[1]
-#     result = str(total) + "/" + str(rating)
-#     return jsonify(result), 200
+    results = db_access.event_enrollment(user, event_id)
+    if results == 'no more slots':
+        return jsonify(results), 200
+    if results == 'success':
+        return jsonify(results), 200
+    if results == 'removed':
+        return jsonify(results), 200
+    return jsonify(results), 500
 
 
 if __name__ == "__main__":
