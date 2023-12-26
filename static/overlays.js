@@ -1,4 +1,4 @@
-function overlayEvents(param) {
+function overlayList(param) {
     if (param === 1) {
         document.getElementById('overlay_enroll').style.display = "flex";
         Telegram.WebApp.expand();
@@ -43,5 +43,14 @@ function overlayStats(param) {
     }
     if (param === 0) {
         document.getElementById("overlay_stats").style.display = "none";
+    }
+}
+
+function overlayEvent(param) {
+    if (param === 1) {
+        document.getElementById('overlay_event').style.display = 'flex';
+    }
+    if (param === 0) {
+        document.getElementById('overlay_event').style.display = 'none';
     }
 }
