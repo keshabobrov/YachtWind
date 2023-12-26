@@ -12,8 +12,7 @@ database = os.getenv('DB_NAME')
 logging.basicConfig(filename='srv.log',
                     filemode='a+',
                     format='%(name)s :: %(asctime)s :: %(levelname)s :: %(message)s',
-                    level=getattr(logging, os.getenv('PROFILE'))
-                    )
+                    level=getattr(logging, os.getenv('PROFILE')))
 
 
 class Users:
@@ -26,6 +25,9 @@ class Users:
         self.user_role = user_data['user_role']
         self.user_name = user_data['user_name']
         self.user_access_flag = user_data['user_access_flag']
+        statistics = user_statistics(self)
+        self.user_rank = statistics['user_rank']
+        self.user_total_events = statistics['user_total_events']
 
     def setup(self):
         if create_user(self):
@@ -104,6 +106,24 @@ def user_initialization(user_telegram_id, cursor):
 
     except:
         logging.error("DB: Exit code 2: error in user_initialization", exc_info=True)
+
+
+@access_db
+def user_statistics(user, cursor):
+    try:
+        request_get_statistics = ("SELECT RANK() OVER (ORDER BY total DESC) AS user_rank, "
+                                  "count.total AS user_total_events, user_id FROM "
+                                  "(SELECT COUNT(enrollments.enrollment_id) AS total, users.user_id FROM users "
+                                  "LEFT JOIN enrollments ON users.user_id = enrollments.user_id "
+                                  "GROUP BY users.user_id ORDER BY total DESC ) AS count "
+                                  f"WHERE user_id = {user.user_id} "
+                                  "ORDER BY user_rank;")
+        cursor.execute(request_get_statistics)
+        request_result = cursor.fetchone()
+        return request_result
+
+    except:
+        logging.error("DB: Exit code 1: error in getting statistics", exc_info=True)
 
 
 @access_db
