@@ -49,8 +49,6 @@ function appStart() {
         if (value['user_role'] === "admin") {
             document.getElementById('administration').style.display = 'flex'
         }
-        // TODO: TEMPORARY WORKAROUND
-        sessionStorage.setItem('user_role', value['user_role'])
         document.getElementById("user_total_events").innerHTML = value['user_total_events'];
         document.getElementById("user_rank").innerHTML = value['user_rank'];
     });
@@ -301,21 +299,23 @@ Telegram.WebApp.MainButton.onClick(function () {
     let currentOverlay = getCurrentOverlay().id;
     switch (currentOverlay) {
         case "overlay_enroll":
-            const value = sessionStorage.getItem('user_role')
-            if (value === "captain" || value === "admin") {
-                Telegram.WebApp.MainButton.setParams({
-                    text: 'Создать событие',
-                    is_visible: true
-                })
-                overlayCreation(1);
-                overlayList(0);
-            }
+            setup(get_id()).then((value) => {
+                if (value === "captain" || value === "admin") {
+                    Telegram.WebApp.MainButton.setParams({
+                        text: 'Создать событие',
+                        is_visible: true
+                    })
+                    overlayCreation(1);
+                    overlayList(0);
+                }
+            })
             break;
         case "event_creation":
             eventCreation()
             break;
         case "overlay_event":
-            enrollEvent()
+            get_id()
+            enrollEvent(document.getElementById("info_uid").innerHTML)
             break;
         case "overlay_registration":
             userRegistration()
