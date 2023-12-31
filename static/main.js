@@ -30,6 +30,7 @@ function setup() {
         let url = "/init";
         let data = JSON.stringify(user_telegram_id);
         ajaxRequest(data, url).then((value) => {
+            sessionStorage.setItem('user_role', value['user_role'])
             resolve (value)
         });
     });
@@ -227,6 +228,7 @@ function addRowHandlers() {
 
 
 function eventViewer() {
+    overlayList(0);
     const table = document.getElementById("event_team_list");
     const event_id = sessionStorage.getItem('open_event_id');
     const date = new Date(sessionStorage.getItem('open_event_date'));
@@ -284,34 +286,31 @@ if (window.location.pathname === "/") {
 }
 
 Telegram.WebApp.MainButton.onClick(function () {
-    let overlays = document.querySelectorAll(".overlay");
-    let getCurrentOverlay = () => {
+    // Telegram callback function for main buttons. Web Api couldn't let you use button as a simple event trigger.
+    // It's a callback. That's why I'm using this workaround.
+    const overlays = document.querySelectorAll(".overlay");
+    const getCurrentOverlay = () => {
         for (let i = 0; i < overlays.length; i++) {
             if (overlays[i].style.display === "flex") {
                 return overlays[i];
             }
         }
     }
-    let currentOverlay = getCurrentOverlay().id;
+    const currentOverlay = getCurrentOverlay().id;
     switch (currentOverlay) {
-        case "overlay_enroll":
-            setup(get_id()).then((value) => {
-                if (value === "captain" || value === "admin") {
-                    Telegram.WebApp.MainButton.setParams({
-                        text: 'Создать событие',
-                        is_visible: true
-                    })
-                    overlayCreation(1);
-                    overlayList(0);
-                }
+        case "overlay_event_list":
+            Telegram.WebApp.MainButton.setParams({
+                text: 'Создать тренировку',
+                is_visible: true
             })
+            overlayCreation(1);
+            overlayList(0);
             break;
         case "event_creation":
             eventCreation()
             break;
         case "overlay_event":
-            get_id()
-            enrollEvent(document.getElementById("info_uid").innerHTML)
+            enrollEvent()
             break;
         case "overlay_registration":
             userRegistration()
