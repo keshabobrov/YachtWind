@@ -21,13 +21,14 @@ class Users:
     def __init__(self, user_telegram_id):
         self.user_telegram_id = user_telegram_id
         user_data = user_initialization(self.user_telegram_id)
-        self.user_id = user_data['user_id']
-        self.user_role = user_data['user_role']
-        self.user_name = user_data['user_name']
-        self.user_access_flag = user_data['user_access_flag']
-        statistics = user_statistics(self)
-        self.user_rank = statistics['user_rank']
-        self.user_total_events = statistics['user_total_events']
+        if user_data != 0:
+            self.user_id = user_data['user_id']
+            self.user_role = user_data['user_role']
+            self.user_name = user_data['user_name']
+            self.user_access_flag = user_data['user_access_flag']
+            statistics = user_statistics(self)
+            self.user_rank = statistics['user_rank']
+            self.user_total_events = statistics['user_total_events']
 
     def setup(self):
         if create_user(self):

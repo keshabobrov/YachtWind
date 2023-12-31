@@ -15,10 +15,10 @@ def user_initialization():
     user = db_access.Users(user_telegram_id)
     if hasattr(user, 'user_id'):
         dictionary = {
-            'user_role' : user.user_role,
-            'user_rank' : user.user_rank,
-            'user_total_events' : user.user_total_events,
-            'user_access_flag' : user.user_access_flag
+            'user_role': user.user_role,
+            'user_rank': user.user_rank,
+            'user_total_events': user.user_total_events,
+            'user_access_flag': user.user_access_flag
         }
         results = json.dumps(dictionary, indent=1)
         response = app.make_response(results)
@@ -27,14 +27,14 @@ def user_initialization():
     return jsonify(0), 200
 
 
-@app.route('/register', methods=['POST'])
+@app.route('/user_registration', methods=['POST'])
 def user_registration():
     json_input = request.json
-    user_telegram_id = json_input[3]['value']
+    user_telegram_id = json_input['user_telegram_id']
     user = db_access.Users(user_telegram_id)
     if hasattr(user, 'user_id'):
         return jsonify("User already in system! user_id: " + str(user.user_id)), 409
-    user.user_name = json_input[0]['value'] + " " + json_input[1]['value'] + " " + json_input[2]['value']
+    user.user_name = json_input['lastName'] + " " + json_input['firstName'] + " " + json_input['middleName']
     if user.setup():
         return jsonify("User has been created!"), 200
     else:

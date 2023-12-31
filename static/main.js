@@ -60,6 +60,10 @@ function userRegistration() {
     /** Функция регистрации пользователя.
      * Данные на входе: форма
      * Данные на выходе: Сообщение: Пользователь уже зарегистрирован, успешная регистрация*/
+    const user_data = new FormData(document.querySelector('#user_register_form'));
+    const jsonObject = Object.fromEntries(user_data);
+    const telegram = window.Telegram.WebApp;
+    const user_telegram_id = telegram.initDataUnsafe.user.id;
     if (document.getElementById("lastName").value === "") {
         alert("Введите фамилию!")
         return
@@ -72,22 +76,14 @@ function userRegistration() {
         alert("Введите отчество!")
         return
     }
-    let dict = $("#regForm").serializeArray()
-    dict.push({
-        name: "id",
-        value: get_id()
+    jsonObject['user_telegram_id'] = user_telegram_id
+    const request = JSON.stringify(jsonObject)
+    const url = "/user_registration";
+    ajaxRequest(request, url).then((value) => {
+        Telegram.WebApp.MainButton.hide()
+        document.getElementById('overlay_registration').style.display = 'none'
+        location.reload()
     })
-    let data = JSON.stringify(dict);
-    let url = "/register";
-    ajaxRequest(data, url).then((value) => {
-        Telegram.WebApp.MainButton.hide()
-        document.getElementById('overlay_registration').style.display = 'none'
-        location.reload()
-    }).catch((value) => {
-        Telegram.WebApp.MainButton.hide()
-        document.getElementById('overlay_registration').style.display = 'none'
-        location.reload()
-    });
 }
 
 
