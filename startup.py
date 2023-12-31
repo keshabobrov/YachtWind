@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, json, jsonify
 import db_access
 
 app = Flask(__name__)
@@ -9,130 +9,87 @@ def home():
     return render_template("index.html")
 
 
-@app.route('/reg_form')
-def reg_form():
-    return render_template("registration.html")
-
-
-@app.route('/ident', methods=['POST'])
-def userIdent():
-    tgid = request.json
-    userinfo = db_access.Users(tgid)
-    if hasattr(userinfo, 'UID'):
-        return jsonify(userinfo.Role), 200
+@app.route('/init', methods=['POST'])
+def user_initialization():
+    user_telegram_id = request.json
+    user = db_access.Users(user_telegram_id)
+    if hasattr(user, 'user_id'):
+        dictionary = {
+            'user_role': user.user_role,
+            'user_rank': user.user_rank,
+            'user_total_events': user.user_total_events,
+            'user_access_flag': user.user_access_flag
+        }
+        results = json.dumps(dictionary, indent=1)
+        response = app.make_response(results)
+        response.set_cookie('user_telegram_id', str(user.user_telegram_id))
+        return response, 200
     return jsonify(0), 200
 
 
-@app.route('/register', methods=['POST'])
-def userRegistration():
-    jsonData = request.json
-    tgid = jsonData[3]['value']
-    userinfo = db_access.Users(tgid)
-    if hasattr(userinfo, 'UID'):
-        return jsonify("User already in system! UID: " + str(userinfo.UID)), 409
-    userinfo.Role = 'regular'
-    userinfo.Name = jsonData[0]['value'] + " " + jsonData[1]['value'] + " " + jsonData[2]['value']
-    userinfo.Access = True
-    userinfo.user_setup()
-    return jsonify("User has been created!"), 200
+@app.route('/user_registration', methods=['POST'])
+def user_registration():
+    json_input = request.json
+    user_telegram_id = json_input['user_telegram_id']
+    user = db_access.Users(user_telegram_id)
+    if hasattr(user, 'user_id'):
+        return jsonify("User already in system! user_id: " + str(user.user_id)), 409
+    user.user_name = json_input['lastName'] + " " + json_input['firstName'] + " " + json_input['middleName']
+    if user.setup():
+        return jsonify("User has been created!"), 200
+    else:
+        return jsonify("Some error writing user"), 500
 
 
 @app.route('/create_event', methods=['POST'])
-def eventCreation():
-    jsonData = request.json
-    tgid = jsonData[3]['value']
-    event = db_access.Trainings(tgid)
-    event.event_date = jsonData[0]['value']
-    event.event_time = jsonData[1]['value']
-    event.user_slots = jsonData[2]['value']
-    res = event.create()
-    if res == "User not permitted!":
-        return jsonify(res), 401
-    return jsonify(res), 200
+def event_create():
+    json_input = request.json
+    user_telegram_id = request.cookies.get('user_telegram_id')
+    event = db_access.Events()
+    event.event_datetime = json_input['datetime_form']
+    event.event_slot_num = json_input['slot_form']
+    event.event_author = db_access.Users(user_telegram_id)
+    results = event.create()
+    if results == "User not permitted":
+        return jsonify(results), 401
+    if results == "User not found":
+        return jsonify(results), 409
+    if results == "Some error":
+        return jsonify(results), 500
+    return jsonify(results), 200
 
 
 @app.route('/event_request', methods=['POST'])
-def eventRequest():
-    user_id_dict = []
-    event_UID_dict = []
-    user_name_dict = []
-    event_data_dict = []
-    event_time_dict = []
-    all_slots_dict = []
-    available_slots_dict = []
-    quantity = []
-    k = 0
-    event_class_object = db_access.Trainings(0)
-    event_list = event_class_object.request()
-    for i in event_list:
-        parse_slots = []
-        event_UID_dict.insert(k, str(i[0]))
-        user_id_dict.insert(k, str(i[1]))
-        event_data_dict.insert(k, str(i[3]))
-        event_time_dict.insert(k, str(i[4]))
-        all_slots_dict.insert(k, str(i[5]))
-        iter = 0
-        for n in i[6:]:
-            if n is not None:
-                parse_slots.insert(iter, k)
-                iter += 1
-        slots_quantity = i[5] - len(parse_slots)
-        available_slots_dict.insert(k, slots_quantity)
-        k += 1
-    for index, i in enumerate(user_id_dict):
-        trainer = db_access.Users(i)
-        user_name_dict.insert(index, trainer.Name)
-    result = event_UID_dict + user_name_dict + event_data_dict + event_time_dict + all_slots_dict + available_slots_dict
-    quantity.insert(0, len(user_id_dict))
-    return jsonify(quantity + result), 200
+def event_request():
+    event_list = db_access.event_request()
+    results = json.dumps(event_list, indent=1)
+    return jsonify(results), 200
 
 
-@app.route('/team_parse', methods=['POST'])
-def teamParse():
-    users = []
+@app.route('/get_enrollment', methods=['POST'])
+def team_request():
     event_id = request.json
-    event = db_access.teamParse(event_id)[0]
-    for index, x in enumerate(event[6:]):
-        if x is not None:
-            user = db_access.Users(x)
-            name = ""
-            space = 0
-            for n in user.Name:
-                if space == 2:
-                    break
-                name += n
-                if n == " ":
-                    space += 1
-            users.insert(index, name)
-    return jsonify(users)
+    event_users = db_access.team_request(event_id)
+    results = json.dumps(event_users, indent=1)
+    return jsonify(results), 200
 
 
-@app.route('/enroll_event', methods=['POST'])
-def enrollEvent():
-    enroll_data = request.json
-    tgid = enroll_data[0]
-    event_id = enroll_data[1]
-    user = db_access.Users(tgid)
-    if not hasattr(user, 'UID'):
-        return jsonify(3)
-    res = db_access.enrollEvent(tgid, event_id)
-    return jsonify(res)
-
-
-@app.route('/stat_request', methods=['POST'])
-def getStat():
-    tgId = request.json
-    res = db_access.get_statistics(tgId)
-    uid_dict = []
-    date_dict = []
-    time_dict = []
-    for index, i in enumerate(res):
-        uid_dict.insert(index, str(i[0]))
-        date_dict.insert(index, str(i[1]))
-        time_dict.insert(index, str(i[2]))
-    result = uid_dict + date_dict + time_dict
-    return jsonify(result)
+@app.route('/event_enroll', methods=['POST'])
+def event_enroll():
+    event_id = request.json
+    user_telegram_id = request.cookies.get('user_telegram_id')
+    user = db_access.Users(user_telegram_id)
+    if not hasattr(user, 'user_id'):
+        return jsonify('User not found'), 409
+    results = db_access.event_enrollment(user, event_id)
+    if results == 'no more slots':
+        return jsonify(results), 200
+    if results == 'success':
+        return jsonify(results), 200
+    if results == 'removed':
+        return jsonify(results), 200
+    return jsonify(results), 500
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8080, debug=True)
+    app.run(host="0.0.0.0", port=8080, debug=False)
