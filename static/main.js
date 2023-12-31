@@ -20,55 +20,40 @@ function ajaxRequest(formData, url) {
 }
 
 
-function request_events() {
-    return new Promise((resolve, reject) => {
-        let formData = '';
-        let url = "/event_request";
-        const array = new Map()
-        ajaxRequest(formData, url).then((value) => {
-            for (let i = 1; i <= value[0]; i++) {
-                let uid_name = "uid_" + i;
-                let user_name = "user_" + i;
-                let date_name = "date_" + i;
-                let time_name = "time_" + i;
-                let all_sl_name = "all_sl_" + i;
-                let free_sl_name = "free_sl_" + i;
-                array.set(uid_name, value[i]);
-                array.set(user_name, value[i + value[0]]);
-                array.set(date_name, value[i + value[0] * 2]);
-                array.set(time_name, value[i + value[0] * 3]);
-                array.set(all_sl_name, value[i + value[0] * 4]);
-                array.set(free_sl_name, value[i + value[0] * 5]);
-            }
-            resolve(array)
-        });
-    });
-}
-
-
-function get_id() {
-    let telegram = window.Telegram.WebApp;
-        try {
-            const tgID = telegram.initDataUnsafe.user.id;
-            return tgID;
-        }
-        catch (err) {
-            console.log("Telegram app not found!");
-            // TODO: REMOVE BEFORE PRODUCTION
-            return 1234567;
-        }
-}
-
-function setup(tgID) {
+function setup() {
+    // TODO: REWRITE THIS LOGIC. TOO HEAVY.
     /** Функция идентифицирования пользователя. Отправляет на сервер id пользователя и возвращает
      * роль пользователя в системе или сообщение об отсутствии пользователя в системе.*/
+    const telegram = window.Telegram.WebApp;
+    const user_telegram_id = telegram.initDataUnsafe.user.id;
     return new Promise((resolve, reject) => {
-        let url = "/ident";
-        let data = JSON.stringify(tgID);
+        let url = "/init";
+        let data = JSON.stringify(user_telegram_id);
         ajaxRequest(data, url).then((value) => {
+            sessionStorage.setItem('user_role', value['user_role'])
             resolve (value)
         });
     });
+}
+
+
+function appStart() {
+    setup().then((value) => {
+        if (value === 0) {
+            document.getElementById('overlay_registration').style.display = 'flex'
+            Telegram.WebApp.MainButton.setParams({
+                text: 'Зарегистрироваться',
+                is_visible: true
+            })
+            return
+        }
+        if (value['user_role'] === "admin") {
+            document.getElementById('administration').style.display = 'flex'
+        }
+        document.getElementById("user_total_events").innerHTML = value['user_total_events'];
+        document.getElementById("user_rank").innerHTML = value['user_rank'];
+    });
+    showEvents();
 }
 
 
@@ -76,6 +61,10 @@ function userRegistration() {
     /** Функция регистрации пользователя.
      * Данные на входе: форма
      * Данные на выходе: Сообщение: Пользователь уже зарегистрирован, успешная регистрация*/
+    const user_data = new FormData(document.querySelector('#user_register_form'));
+    const jsonObject = Object.fromEntries(user_data);
+    const telegram = window.Telegram.WebApp;
+    const user_telegram_id = telegram.initDataUnsafe.user.id;
     if (document.getElementById("lastName").value === "") {
         alert("Введите фамилию!")
         return
@@ -88,50 +77,35 @@ function userRegistration() {
         alert("Введите отчество!")
         return
     }
-    let dict = $("#regForm").serializeArray()
-    dict.push({
-        name: "id",
-        value: get_id()
+    jsonObject['user_telegram_id'] = user_telegram_id
+    const request = JSON.stringify(jsonObject)
+    const url = "/user_registration";
+    ajaxRequest(request, url).then((value) => {
+        Telegram.WebApp.MainButton.hide()
+        document.getElementById('overlay_registration').style.display = 'none'
+        location.reload()
     })
-    let data = JSON.stringify(dict);
-    let url = "/register";
-    ajaxRequest(data, url).then((value) => {
-        Telegram.WebApp.MainButton.hide()
-        document.getElementById('overlay_registration').style.display = 'none'
-        location.reload()
-    }).catch((value) => {
-        Telegram.WebApp.MainButton.hide()
-        document.getElementById('overlay_registration').style.display = 'none'
-        location.reload()
-    });
 }
 
 
 function eventCreation() {
     /** Функция создания события. Отправляет данные формы и возвращает:
-     * 1. Юзер не в системе
-     * 2. Юзер не обладает полномочиями
-     * 3. Событие создано
-     * Обновление страницы после выполнения кода.*/
-    if (document.getElementById("slots_form").value <= 1 || document.getElementById("slots_form").value >= 10) {
-        alert("Неверное число слотов для записи. (1-10)");
+     * 1. Юзер не в системе 409
+     * 2. Юзер не обладает полномочиями 401
+     * 3. Событие создано 200
+     * TODO: CHANGE RELOADING LOGIC*/
+    const event_data = new FormData(document.querySelector('#event_create_form'))
+    const jsonObject = Object.fromEntries(event_data)
+    if (document.getElementById("slot_form").value < 1) {
+        alert("Неверное число слотов для записи");
         return;
     }
-    if (document.getElementById("date_form").value === "") {
-        alert("Введите дату");
+    if (document.getElementById("datetime_form").value === "") {
+        alert("Введите дату и время");
         return;
     }
-    if (document.getElementById("time_form").value === "") {
-        alert("Введите время");
-        return;
-    }
-    let dict = $("#event_create_form").serializeArray();
-    dict.push({
-        name: "id",
-        value: get_id()
-    })
-    let data = JSON.stringify(dict);
-    let url = "/create_event";
+    const data = JSON.stringify(jsonObject)
+    const url = "/create_event";
     ajaxRequest(data, url).then((value) => {
         window.Telegram.WebApp.HapticFeedback.notificationOccurred("success")
         alert("Событие создано!")
@@ -139,106 +113,69 @@ function eventCreation() {
     });
 }
 
-function appStart() {
-    const tgID = get_id()
-    // Promise to wait until role will be received.
-    setup(tgID).then((role) => {
-        if (role === 0) {
-            document.getElementById('overlay_registration').style.display = 'flex'
-            Telegram.WebApp.MainButton.setParams({
-                text: 'Зарегистрироваться',
-                is_visible: true
-            })
-            return
-        }
-        if (role === "admin") {
-            document.getElementById('administration').style.display = 'flex'
-        }
-    });
-    showEvents();
-}
 
 function showEvents() {
-    request_events().then((value) => {
-        let table = document.getElementById('enroll_table');
-        for (i=1; i <= (value.size / 6); i++) {
-            let uid = value.get("uid_" + i);
-            let user = value.get("user_" + i);
-            user = user.split(' ').slice(0, 2).join(' ');
-            let date = value.get("date_" + i);
-            let time = value.get("time_" + i);
-            let free_sl = value.get("free_sl_" + i);
-            let row = table.insertRow(i);
-            row.insertCell(0).innerHTML = user;
-            row.insertCell(1).innerHTML = time.slice(0, -3);
-            row.insertCell(2).innerHTML = free_sl;
-            row.insertCell(3).innerHTML = date;
-            row.insertCell(4).innerHTML = uid;
-            row.className = "rows_invisible";
+    const formData = null
+    const url = '/event_request'
+    const table = document.getElementById('events_table');
+    ajaxRequest(formData, url).then((value) => {
+        const events_results = JSON.parse(value)
+        const first_event_date = new Date(events_results[0].event_datetime);
+        const page_date = first_event_date.toDateString()
+        document.getElementById("date_picker_text").innerHTML = first_event_date.toLocaleString("ru", {
+            month: "long",
+            day: "numeric"
+        })
+        sessionStorage.setItem('page_date', page_date)
+        for (let i = 0; i < events_results.length; i++) {
+            const row = table.insertRow(i + 1);
+            const event = events_results[i];
+            const date = new Date(event.event_datetime)
+            row.insertCell(0).innerHTML = event.event_author_name.split(' ').slice(0, 2).join(' ');
+            row.insertCell(1).innerHTML = date.toLocaleTimeString("ru", {hour: "2-digit", minute: "2-digit"})
+            row.insertCell(2).innerHTML = event.event_id;
+            row.insertCell(3).innerHTML = date.toDateString();
+            row.insertCell(4).innerHTML = event.event_remaining_slots;
+            row.cells[0].className = "trainer_td";
+            row.cells[1].className = "number_blue_box";
             row.cells[2].style.display = "none";
             row.cells[3].style.display = "none";
             row.cells[4].style.display = "none";
-            let cell_trainer = row.cells[0];
-            let cell_time = row.cells[1];
-            cell_time.className = "time_td";
-            cell_trainer.className = "trainer_td";
-            if (date === value.get("date_1")) {
-                row.className = "rows";
-                let date = new Date(value.get("date_1"))
-                document.getElementById("time_stamp").innerHTML = value.get("date_1")
-                document.getElementById("date_picker_text").innerHTML = date.toLocaleString("ru", {
-                    month: "long",
-                    day: "numeric"
-                })
+            if (date.toDateString() === page_date) {
+                row.className = "rows"
+            }
+            else {
+                row.className = "rows invisible"
             }
         }
-        /** добавление обработчика нажатий на строки таблицы*/
         addRowHandlers()
     })
 }
 
-function updateVisiblity(table, date_vis, dates, newIndex) {
-    if (dates[newIndex] !== date_vis) {
-        const date = new Date(dates[newIndex])
-        document.getElementById("date_picker_text").innerHTML = date.toLocaleString("ru", {
-            month: "long",
-            day: "numeric"
-        })
-        document.getElementById("time_stamp").innerHTML = dates[newIndex];
-        for (let i = 1; i < table.rows.length; i++) {
-            if (table.rows[i].cells[3].innerHTML !== dates[newIndex]) {
-                table.rows[i].className = "rows_invisible"
-            }
-            if (table.rows[i].cells[3].innerHTML === dates[newIndex]) {
-                table.rows[i].className = "rows"
-            }
-        }
-        return 0;
-    }
-}
 
 function listHandler(direction) {
-    const table = document.getElementById("enroll_table");
-    const date_vis = document.getElementById("time_stamp").innerHTML;
-    let dates = []
+    const table = document.getElementById("events_table");
+    const page_date = (new Date (sessionStorage.getItem('page_date'))).toDateString();
+    let dates_array = []
     for (let i = 1; i < table.rows.length; i++) {
-        dates.push(table.rows[i].cells[3].innerHTML);
+        const date = new Date (table.rows[i].cells[3].innerHTML);
+        dates_array.push(date.toDateString());
     }
-    const currentIndex = dates.indexOf(date_vis);
-    if (direction === 0) {
+    const currentIndex = dates_array.indexOf(page_date);
+    if (direction === "-") {
         let newIndex = currentIndex - 1;
         while (newIndex >= 0) {
-            let res = updateVisiblity(table, date_vis, dates, newIndex)
+            let res = updateVisibility(table, page_date, dates_array, newIndex)
             if (res === 0) {
                 return;
             }
             newIndex += 1;
         }
     }
-    if (direction === 1) {
+    if (direction === "+") {
         let newIndex = currentIndex + 1;
-        while (newIndex < dates.length) {
-            let res = updateVisiblity(table, date_vis, dates, newIndex)
+        while (newIndex < dates_array.length) {
+            let res = updateVisibility(table, page_date, dates_array, newIndex)
             if (res === 0) {return;}
             newIndex += 1;
         }
@@ -246,18 +183,43 @@ function listHandler(direction) {
 }
 
 
+function updateVisibility(table, page_date, dates_array, newIndex) {
+    if (dates_array[newIndex] !== page_date) {
+        const new_date = new Date(dates_array[newIndex]);
+        document.getElementById("date_picker_text").innerHTML = new_date.toLocaleString("ru", {
+            month: "long",
+            day: "numeric"
+        })
+        sessionStorage.setItem('page_date', new_date.toDateString());
+        for (let i = 1; i < table.rows.length; i++) {
+            if (table.rows[i].cells[3].innerHTML === dates_array[newIndex]) {
+                table.rows[i].className = "rows"
+            }
+            else {
+                table.rows[i].className = "rows invisible"
+            }
+        }
+        return 0;
+    }
+}
+
+
 function addRowHandlers() {
     /** Функция обработчика нажатий на строки в таблице.
      * При нажатии вызывается функция eventViewer, которой передается строка.*/
-    let table = document.getElementById("enroll_table");
-    let rows = table.getElementsByTagName("tr");
+    const table = document.getElementById("events_table");
+    const rows = table.getElementsByTagName("tr");
     for (let i=1; i < rows.length; i++) {
-        let current_row = rows[i];
+        const current_row = rows[i];
         let create_click_handler = (row) => {
             return function () {
-                document.getElementById("overlay_event").style.display = "flex";
-                document.getElementById("overlay_enroll").style.display = "none";
-                eventViewer(row);
+                overlayEvent(1)
+                sessionStorage.setItem('open_event_author', current_row.cells[0].innerHTML);
+                sessionStorage.setItem('open_event_time', current_row.cells[1].innerHTML);
+                sessionStorage.setItem('open_event_id', current_row.cells[2].innerHTML);
+                sessionStorage.setItem('open_event_date', current_row.cells[3].innerHTML);
+                sessionStorage.setItem('open_event_remaining_slots', current_row.cells[4].innerHTML);
+                eventViewer();
             }
         }
         current_row.onclick = create_click_handler(current_row);
@@ -265,23 +227,25 @@ function addRowHandlers() {
 }
 
 
-function eventViewer(row) {
-    let uid = row.cells[4].innerHTML;
-    let table = document.getElementById("team_list");
-    document.getElementById("info_trainer").innerHTML = row.cells[0].innerHTML;
-    let date = new Date(row.cells[3].innerHTML);
+function eventViewer() {
+    overlayList(0);
+    const table = document.getElementById("event_team_list");
+    const event_id = sessionStorage.getItem('open_event_id');
+    const date = new Date(sessionStorage.getItem('open_event_date'));
+    document.getElementById("event_author_name").innerHTML = sessionStorage.getItem('open_event_author');
+    document.getElementById("info_time").innerHTML = sessionStorage.getItem('open_event_time');
+    document.getElementById("info_available").innerHTML = sessionStorage.getItem('open_event_remaining_slots');
     document.getElementById("info_date").innerHTML = date.toLocaleString("ru", {
         month: "long",
         day: "numeric",
         year: "numeric"
     })
-    document.getElementById("info_time").innerHTML = row.cells[1].innerHTML;
-    document.getElementById("info_available").innerHTML = row.cells[2].innerHTML;
-    document.getElementById("info_uid").innerHTML = uid;
-    ajaxRequest(uid, "/team_parse").then((value) => {
-        for (let i = 0; i < value.length; i++) {
-            let row = table.insertRow(i + 1);
-            row.insertCell(0).innerHTML = value[i];
+    ajaxRequest(event_id, "/get_enrollment").then((value) => {
+        const events_results = JSON.parse(value)
+        for (let i = 0; i < events_results.length; i++) {
+            const user_name = events_results[i].user_name
+            const row = table.insertRow(i +1);
+            row.insertCell(0).innerHTML = user_name;
             row.cells[0].className = "table_team";
         }
         Telegram.WebApp.MainButton.setParams({
@@ -291,37 +255,30 @@ function eventViewer(row) {
     });
 }
 
-function enrollEvent(uid) {
-    let tgId = get_id();
-    let array = []
-    array.unshift(tgId, uid);
-    let data = JSON.stringify(array);
-    ajaxRequest(data, "/enroll_event").then((value) => {
-        window.Telegram.WebApp.HapticFeedback.notificationOccurred("success")
-        if (value === 0) {alert("Вы записаны")}
-        if (value === 1) {alert("Вы отменили запись!")}
-        if (value === 2) {alert("Команда уже набрана.")}
-        if (value === 3) {alert("Пользователь не найден")}
+function enrollEvent() {
+    const event_id = sessionStorage.getItem('open_event_id');
+    ajaxRequest(event_id, "/event_enroll").then((value) => {
+        switch(value) {
+            case "success":
+                window.Telegram.WebApp.HapticFeedback.notificationOccurred("success");
+                alert("Вы записаны");
+                break;
+            case "removed":
+                alert("Вы отменили запись");
+                break;
+            case "no more slots":
+                alert("Команда уже набрана. Мест для записи нет");
+                break;
+            case "User not found":
+                alert("Пользователь не найден");
+                break;
+            default:
+                alert('Something went wrong');
+        }
         location.reload();
     })
 }
 
-function getStatistics() {
-    const tgId = get_id()
-    const formData = JSON.stringify(tgId);
-    const url = "/stat_request"
-    ajaxRequest(formData, url).then((value) => {
-        console.log(value)
-    })
-}
-
-function clearTable() {
-    let table = document.getElementById("team_list")
-    for (let  i = 1; i < table.rows.length; i++) {
-            table.deleteRow(i)
-        }
-    document.getElementById('overlay_event').style.display = 'none'
-}
 
 if (window.location.pathname === "/") {
     appStart()
@@ -329,34 +286,31 @@ if (window.location.pathname === "/") {
 }
 
 Telegram.WebApp.MainButton.onClick(function () {
-    let overlays = document.querySelectorAll(".overlay");
-    let getCurrentOverlay = () => {
+    // Telegram callback function for main buttons. Web Api couldn't let you use button as a simple event trigger.
+    // It's a callback. That's why I'm using this workaround.
+    const overlays = document.querySelectorAll(".overlay");
+    const getCurrentOverlay = () => {
         for (let i = 0; i < overlays.length; i++) {
             if (overlays[i].style.display === "flex") {
                 return overlays[i];
             }
         }
     }
-    let currentOverlay = getCurrentOverlay().id;
+    const currentOverlay = getCurrentOverlay().id;
     switch (currentOverlay) {
-        case "overlay_enroll":
-            setup(get_id()).then((value) => {
-                if (value === "captain" || value === "admin") {
-                    Telegram.WebApp.MainButton.setParams({
-                        text: 'Создать событие',
-                        is_visible: true
-                    })
-                    overlayCreation(1);
-                    overlayEvents(0);
-                }
+        case "overlay_event_list":
+            Telegram.WebApp.MainButton.setParams({
+                text: 'Создать тренировку',
+                is_visible: true
             })
+            overlayCreation(1);
+            overlayList(0);
             break;
         case "event_creation":
             eventCreation()
             break;
         case "overlay_event":
-            get_id()
-            enrollEvent(document.getElementById("info_uid").innerHTML)
+            enrollEvent()
             break;
         case "overlay_registration":
             userRegistration()

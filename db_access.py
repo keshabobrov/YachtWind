@@ -4,63 +4,56 @@ from datetime import date
 import os
 from dotenv import load_dotenv
 
-load_dotenv(dotenv_path='/usr/share/nginx/html/application/.env')
-host = "10.5.0.3"
-# host = 'localhost'
-user = "main_connector"
-password = os.getenv("PASSWD")
-# password = '***REMOVED***'
-database = "yacht_db"
-logging.basicConfig(filename='db_access.log',
+load_dotenv(dotenv_path='.env')
+host = os.getenv('DB_HOST')
+user = os.getenv('DB_USERNAME')
+password = os.getenv('DB_PASSWD')
+database = os.getenv('DB_NAME')
+logging.basicConfig(filename='srv.log',
                     filemode='a+',
-                    format='%(asctime)s - %(levelname)s - %(message)s',
-                    level=logging.DEBUG)
+                    format='%(name)s :: %(asctime)s :: %(levelname)s :: %(message)s',
+                    level=getattr(logging, os.getenv('PROFILE')))
+
 
 class Users:
-    """Класс работы с пользовательскими данными: инициализация, создание, чтение и т.д."""
-    def __init__(self, TgId):
-        self.TgId = TgId
-        user_data = get_user_raw(self.TgId)
+    """Обработка пользовательских данных: инициализация, создание, чтение и т.д."""
+
+    def __init__(self, user_telegram_id):
+        self.user_telegram_id = user_telegram_id
+        user_data = user_initialization(self.user_telegram_id)
         if user_data != 0:
-            self.UID = user_data[0]
-            self.Role = user_data[1]
-            self.Name = user_data[3]
-            self.Access = user_data[4]
+            self.user_id = user_data['user_id']
+            self.user_role = user_data['user_role']
+            self.user_name = user_data['user_name']
+            self.user_access_flag = user_data['user_access_flag']
+            statistics = user_statistics(self)
+            self.user_rank = statistics['user_rank']
+            self.user_total_events = statistics['user_total_events']
 
-    def user_setup(self):
-        write_new_user(
-            TgId=self.TgId,
-            Name=self.Name,
-            Access=self.Access,
-            Role=self.Role
-        )
+    def setup(self):
+        if create_user(self):
+            return True
 
 
-class Trainings:
+class Events:
     """Класс для тренировок: создание, чтение"""
-    def __init__(self, TgId):
-        self.user = Users(TgId)
-        self.event_date = None
-        self.event_time = None
-        self.user_slots = None
-        self.slot = None
+
+    def __init__(self):
+        self.event_author = None
+        self.event_id = None
+        self.event_datetime = None
+        self.event_slot_num = None
+        self.event_slot_available = None
 
     def create(self):
-        if not hasattr(self.user, 'UID'):
-            return 'User not in system!'
-        if self.user.Role != 'admin' and self.user.Role != 'captain':
-            return 'User not permitted!'
-        training_creation(
-            creator_id=self.user.TgId,
-            event_date=self.event_date,
-            event_time=self.event_time,
-            user_slots=self.user_slots
-        )
+        if not hasattr(self.event_author, 'user_id'):
+            return 'User not logged in'
+        if self.event_author.user_role != 'admin' and self.event_author.user_role != 'captain':
+            return 'User not permitted'
+        result = event_creation(self)
+        if not result:
+            return 'Some error'
         return 'Event has been created!'
-
-    def request(self):
-        result = training_request()
-        return result
 
 
 def access_db(func):
@@ -68,141 +61,148 @@ def access_db(func):
     Decorator for connection to mysql DB.
     It's setting up the connection and forwarding cursor to func
     """
+
     def connector(*args, **kwargs):
         db = mysql.connector.connect(host=host, user=user, password=password, database=database)
-        cursor = db.cursor()
+        cursor = db.cursor(dictionary=True)
         kwargs['cursor'] = cursor
         existence_code = func(*args, **kwargs)
         db.commit()
         cursor.close()
         db.close()
         return existence_code
+
     return connector
 
 
-def parse_slots(slot):
-    try:
-        k = 0
-        appointments = []
-        for i in slot[6:]:
-            if i is not None:
-                appointments.insert(k, i)
-                k += 1
-        return appointments
-    except:
-        logging.error("DB: Exit code 4: error in parse slots", exc_info=True)
-
-
-
 @access_db
-def write_new_user(TgId, Name, Access, Role, cursor):
+def create_user(user_data, cursor):
     try:
-        RegDate = date.today()
+        user_registration_date = date.today()
         new_user = ("INSERT INTO users "
-                    "(Role, TgId, Name, Access, RegDate) "
-                    "VALUES (%s, %s, %s, %s, %s)")
+                    "(user_telegram_id, user_name, user_registration_date) "
+                    "VALUES (%s, %s, %s)")
 
-        user_data = (Role, TgId, Name, Access, RegDate)
+        user_data = (user_data.user_telegram_id, user_data.user_name, user_registration_date)
         cursor.execute(new_user, user_data)
         logging.info('DB: User has been created!')
+        return True
 
     except:
-        logging.error("DB: Exit code 1: error in write_db", exc_info=True)
+        logging.error("DB: Exit code 1: error in create_user", exc_info=True)
+
 
 @access_db
-def get_user_raw(TgId, cursor):
+def user_initialization(user_telegram_id, cursor):
     """Первичная инициализация пользователя"""
     try:
-        request_find_user = ("SELECT * FROM users "
-                             "WHERE TgId = %s" % TgId)
+        request_find_user = f"SELECT * FROM users WHERE user_telegram_id = {user_telegram_id}"
         cursor.execute(request_find_user)
         request_result = cursor.fetchall()
-        if not request_result: return 0
+        if not request_result:
+            return 0
         if len(request_result) >= 2:
-            logging.warning('DB: Exit code 3: Multiple users found! ---  TgID: ' + str(TgId))
+            logging.warning('DB: Exit code 3: Multiple users found! ---  TgID: ' + str(user_telegram_id))
         return request_result[0]
 
     except:
-        logging.error("DB: Exit code 2: error in read_db", exc_info=True)
+        logging.error("DB: Exit code 2: error in user_initialization", exc_info=True)
 
 
 @access_db
-def training_creation(creator_id, event_date, event_time, user_slots, cursor):
+def user_statistics(user, cursor):
     try:
-        RegDate = date.today()
-        new_training = ("INSERT INTO trainings "
-                    "(creator_id, creation_date, event_date, event_time, user_slots) "
-                    "VALUES (%s, %s, %s, %s, %s)")
-
-        training_data = (creator_id, RegDate, event_date, event_time, user_slots)
-        cursor.execute(new_training, training_data)
-        logging.info('DB: Training has been created!')
-
-    except:
-        logging.error("DB: Exit code 1: error in write_db", exc_info=True)
-
-
-@access_db
-def training_request(cursor):
-    try:
-        today_date = date.today()
-        d1 = today_date.strftime("%Y.%m.%d")
-        request_events = ("SELECT * FROM trainings"
-                             " WHERE event_date >= \"%s\"" % d1 + " ORDER BY event_date, event_time")
-        cursor.execute(request_events)
-        request_result = cursor.fetchall()
-        return request_result
-
-    except:
-        logging.error("DB: Exit code 1: error in read_db_training", exc_info=True)
-
-
-@access_db
-def teamParse(event_id, cursor):
-    try:
-        request_events = ("SELECT * FROM trainings"
-                             " WHERE UID = %s" % event_id)
-        cursor.execute(request_events)
-        request_result = cursor.fetchall()
-        return request_result
-
-    except:
-        logging.error("DB: Exit code 1: error in read_db_training", exc_info=True)
-
-
-@access_db
-def enrollEvent(tgid, event_id, cursor):
-    try:
-        request_events = ("SELECT * FROM trainings"
-                             " WHERE UID = %s" % event_id)
-        cursor.execute(request_events)
+        request_get_statistics = ("SELECT RANK() OVER (ORDER BY total DESC) AS user_rank, "
+                                  "count.total AS user_total_events, user_id FROM "
+                                  "(SELECT COUNT(enrollments.enrollment_id) AS total, users.user_id FROM users "
+                                  "LEFT JOIN enrollments ON users.user_id = enrollments.user_id "
+                                  "GROUP BY users.user_id ORDER BY total DESC ) AS count "
+                                  f"WHERE user_id = {user.user_id} "
+                                  "ORDER BY user_rank;")
+        cursor.execute(request_get_statistics)
         request_result = cursor.fetchone()
-        max = request_result[5] + 6
-        for index, i in enumerate(request_result[6:max]):
-            if str(i) == str(tgid):
-                enroll_event = ("UPDATE trainings SET U%s" % (index + 1) + " = NULL" + " WHERE UID = %s" % event_id)
-                cursor.execute(enroll_event)
-                return 1
-            if i is None:
-                enroll_event = ("UPDATE trainings SET U%s" % (index + 1) + " = %s" % tgid + " WHERE UID = %s" % event_id)
-                cursor.execute(enroll_event)
-                return 0
-        return 2
+        return request_result
+
+    except:
+        logging.error("DB: Exit code 1: error in getting statistics", exc_info=True)
+
+
+@access_db
+def event_creation(event, cursor):
+    try:
+        event_creation_date = date.today()
+        new_event = ("INSERT INTO events "
+                     "(event_datetime, event_author_id, event_creation_date, event_slot_num) "
+                     "VALUES (%s, %s, %s, %s)")
+
+        event_data = (event.event_datetime, event.event_author.user_id, event_creation_date, event.event_slot_num)
+        cursor.execute(new_event, event_data)
+        logging.info('DB: Event has been created!')
+        return True
+
+    except:
+        logging.error("DB: Exit code 1: error in event_creation", exc_info=True)
+        return False
+
+
+@access_db
+def event_request(cursor):
+    try:
+        today_date = date.today()
+        formatted_date = today_date.strftime("%Y.%m.%d")
+        request_events = ("SELECT events.event_id, events.event_datetime, users.user_name AS event_author_name, "
+                          "(events.event_slot_num - COUNT(enrollments.enrollment_id)) AS event_remaining_slots "
+                          "FROM events JOIN users ON events.event_author_id = users.user_id "
+                          "LEFT JOIN enrollments ON events.event_id = enrollments.event_id "
+                          f"WHERE events.event_datetime >= \"{formatted_date}\" "
+                          "GROUP BY events.event_id, users.user_name "
+                          "ORDER BY events.event_datetime;"
+                          )
+        cursor.execute(request_events)
+        result = cursor.fetchall()
+        for event in result:
+            event['event_datetime'] = event['event_datetime'].isoformat()
+        return result
+
+    except:
+        logging.error("DB: Exit code 1: error in event_request", exc_info=True)
+
+
+@access_db
+def team_request(event_id, cursor):
+    try:
+        request_teams = ("SELECT user_name FROM enrollments JOIN users ON enrollments.user_id=users.user_id "
+                         f"WHERE event_id = {event_id}")
+        cursor.execute(request_teams)
+        request_result = cursor.fetchall()
+        return request_result
 
     except:
         logging.error("DB: Exit code 1: error in read_db_training", exc_info=True)
 
 
 @access_db
-def get_statistics(tgId, cursor):
+def event_enrollment(user, event_id, cursor):
     try:
-        today_date = date.today()
-        d1 = today_date.strftime("%Y.%m.%d")
-        request_events = ("SELECT UID, event_date, event_time FROM trainings" +
-                          " WHERE CONCAT_WS(\"\", U1, U2, U3, U4, U5, U6, U7, U8, U9, U10)" +
-                          " LIKE \"%s\"" %tgId + " AND event_date <= \"%s\"" %d1)
-        cursor.execute(request_events)
-        request_result = cursor.fetchall()
-        return request_result
+        request_available = ("SELECT (events.event_slot_num - COUNT(enrollments.enrollment_id)) AS remaining_slots, "
+                             f"MAX(CASE WHEN enrollments.user_id = {user.user_id} THEN 1 ELSE 0 END) AS user_already_enrolled "
+                             "FROM events LEFT JOIN enrollments ON events.event_id = enrollments.event_id "
+                             f"WHERE events.event_id = {event_id} GROUP BY events.event_id;")
+        cursor.execute(request_available)
+        request_result = cursor.fetchone()
+        if request_result['user_already_enrolled'] == 1:
+            request_remove = f"DELETE FROM enrollments WHERE user_id={user.user_id} AND event_id={event_id}"
+            cursor.execute(request_remove)
+            return "removed"
+        elif request_result['remaining_slots'] == 0:
+            return "no more slots"
+        elif request_result['user_already_enrolled'] == 0:
+            request_enroll = ("INSERT INTO enrollments (user_id, event_id) "
+                              f"VALUES ({user.user_id}, {event_id})")
+            cursor.execute(request_enroll)
+            return "success"
+        else:
+            return "error"
+
     except:
-        logging.error("DB: Exit code 1: error in read_db_training", exc_info=True)
+        logging.error("DB: Exit code 1: error in database read/write enrollment", exc_info=True)
