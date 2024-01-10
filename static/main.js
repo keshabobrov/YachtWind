@@ -276,18 +276,11 @@ if (window.location.pathname === "/") {
 }
 
 Telegram.WebApp.MainButton.onClick(function () {
-    // Telegram callback function for main buttons. Web Api couldn't let you use button as a simple event trigger.
-    // It's a callback. That's why I'm using this workaround.
-    const overlays = document.querySelectorAll(".overlay");
-    const getCurrentOverlay = () => {
-        for (let i = 0; i < overlays.length; i++) {
-            if (overlays[i].style.display === "flex") {
-                return overlays[i];
-            }
-        }
-    }
-    const currentOverlay = getCurrentOverlay().id;
-    switch (currentOverlay) {
+    const button_overlay = sessionStorage.getItem('button_overlay')
+    switch (button_overlay) {
+        case "overlay_registration":
+            userRegistration();
+            break;
         case "overlay_event_list":
             eventCreateOverlay.changeState();
             eventListOverlay.changeState();
@@ -298,7 +291,5 @@ Telegram.WebApp.MainButton.onClick(function () {
         case "overlay_event":
             enrollEvent()
             break;
-        case "overlay_registration":
-            userRegistration()
     }
 })
