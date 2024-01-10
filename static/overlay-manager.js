@@ -1,10 +1,11 @@
 class overlayManager {
-    constructor(id, onLoadFunc, buttonName) {
+    constructor(id, onLoadFunc, buttonName, permissionLevel) {
         this.id = id;
         this.state = false;
         this.onLoadFunc = onLoadFunc;
         this.buttonName = buttonName;
         this.buttonVisibility = this.buttonName !== null;
+        this.permissionLevel = permissionLevel;
     }
     changeState() {
         if (this.state === false) {
@@ -18,52 +19,75 @@ class overlayManager {
     }
     setupButton() {
         if (this.buttonVisibility !== false) {
+            if (this.checkPermissions() < this.permissionLevel) {
+                return;
+            }
             Telegram.WebApp.MainButton.setParams({
                 text: this.buttonName,
                 is_visible: this.buttonVisibility
-            })
+            });
+            sessionStorage.setItem("button_overlay", this.id);
         }
-    }
+    };
+    checkPermissions() {
+        const user_role = sessionStorage.getItem("user_role");
+        let user_level = 0;
+        switch (user_role) {
+            case "captain":
+                user_level = 1;
+                break;
+            case "admin":
+                user_level = 2;
+                break;
+        }
+        return user_level
+    };
 }
 
 
 const registrationOverlay = new overlayManager(
-    id = 'overlay_registration',
-    onLoadFunc = null,
-    buttonName = "Зарегистрироваться"
+    "overlay_registration",
+    null,
+    "Зарегистрироваться",
+    0
 );
 
 
 const eventListOverlay = new overlayManager(
-    id = 'overlay_event_list',
-    onLoadFunc = null,
-    buttonName = "Новая тренировка"
+    "overlay_event_list",
+    null,
+    "Новая тренировка",
+    1
 );
 
 
 const eventCreateOverlay = new overlayManager(
-    id = 'event_creation',
-    onLoadFunc = null,
-    buttonName = "Создать"
+    "event_creation",
+    null,
+    "Создать",
+    1
 );
 
 
 const teamListOverlay = new overlayManager(
-    id = "overlay_teams",
-    onLoadFunc = null,
-    buttonName = null
+    "overlay_teams",
+    null,
+    null,
+    0
 );
 
 
 const statisticsOverlay = new overlayManager(
-    id = "overlay_stats",
-    onLoadFunc = null,
-    buttonName = null
+    "overlay_stats",
+    null,
+    null,
+    0
 );
 
 
 const viewEventOverlay = new overlayManager(
-    id = "overlay_event",
-    onLoadFunc = null,
-    buttonName = "Записаться"
+    "overlay_event",
+    null,
+    "Записаться",
+    0
 );
