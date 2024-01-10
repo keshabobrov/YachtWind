@@ -40,11 +40,7 @@ function setup() {
 function appStart() {
     setup().then((value) => {
         if (value === 0) {
-            document.getElementById('overlay_registration').style.display = 'flex'
-            Telegram.WebApp.MainButton.setParams({
-                text: 'Зарегистрироваться',
-                is_visible: true
-            })
+            registrationOverlay.changeState();
             return
         }
         if (value['user_role'] === "admin") {
@@ -81,8 +77,7 @@ function userRegistration() {
     const request = JSON.stringify(jsonObject)
     const url = "/user_registration";
     ajaxRequest(request, url).then((value) => {
-        Telegram.WebApp.MainButton.hide()
-        document.getElementById('overlay_registration').style.display = 'none'
+        registrationOverlay.changeState();
         location.reload()
     })
 }
@@ -213,7 +208,7 @@ function addRowHandlers() {
         const current_row = rows[i];
         let create_click_handler = (row) => {
             return function () {
-                overlayEvent(1)
+                viewEventOverlay.changeState();
                 sessionStorage.setItem('open_event_author', current_row.cells[0].innerHTML);
                 sessionStorage.setItem('open_event_time', current_row.cells[1].innerHTML);
                 sessionStorage.setItem('open_event_id', current_row.cells[2].innerHTML);
@@ -228,7 +223,7 @@ function addRowHandlers() {
 
 
 function eventViewer() {
-    overlayList(0);
+    eventListOverlay.changeState();
     const table = document.getElementById("event_team_list");
     const event_id = sessionStorage.getItem('open_event_id');
     const date = new Date(sessionStorage.getItem('open_event_date'));
@@ -248,10 +243,6 @@ function eventViewer() {
             row.insertCell(0).innerHTML = user_name;
             row.cells[0].className = "table_team";
         }
-        Telegram.WebApp.MainButton.setParams({
-            text: 'Записаться',
-            is_visible: true
-        })
     });
 }
 
@@ -282,7 +273,6 @@ function enrollEvent() {
 
 if (window.location.pathname === "/") {
     appStart()
-    Telegram.WebApp.MainButton.hide()
 }
 
 Telegram.WebApp.MainButton.onClick(function () {
@@ -299,12 +289,8 @@ Telegram.WebApp.MainButton.onClick(function () {
     const currentOverlay = getCurrentOverlay().id;
     switch (currentOverlay) {
         case "overlay_event_list":
-            Telegram.WebApp.MainButton.setParams({
-                text: 'Создать тренировку',
-                is_visible: true
-            })
-            overlayCreation(1);
-            overlayList(0);
+            eventCreateOverlay.changeState();
+            eventListOverlay.changeState();
             break;
         case "event_creation":
             eventCreation()
