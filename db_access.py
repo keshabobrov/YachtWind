@@ -112,13 +112,14 @@ def user_initialization(user_telegram_id, cursor):
 @access_db
 def user_statistics(user, cursor):
     try:
-        request_get_statistics = ("SELECT RANK() OVER (ORDER BY total DESC) AS user_rank, "
+        request_get_statistics = ("SELECT user_rank, user_total_events FROM "
+                                  "(SELECT RANK() OVER (ORDER BY total DESC) AS user_rank, "
                                   "count.total AS user_total_events, user_id FROM "
                                   "(SELECT COUNT(enrollments.enrollment_id) AS total, users.user_id FROM users "
                                   "LEFT JOIN enrollments ON users.user_id = enrollments.user_id "
                                   "GROUP BY users.user_id ORDER BY total DESC ) AS count "
-                                  f"WHERE user_id = {user.user_id} "
-                                  "ORDER BY user_rank;")
+                                  "ORDER BY user_rank) AS rank_table "
+                                  f"WHERE user_id = {user.user_id};")
         cursor.execute(request_get_statistics)
         request_result = cursor.fetchone()
         return request_result
