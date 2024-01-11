@@ -30,8 +30,8 @@ function setup() {
         let url = "/init";
         let data = JSON.stringify(user_telegram_id);
         ajaxRequest(data, url).then((value) => {
-            sessionStorage.setItem('user_role', value['user_role'])
-            resolve (value)
+            sessionStorage.setItem('user_role', value['user_role']);
+            resolve (value);
         });
     });
 }
@@ -40,14 +40,15 @@ function setup() {
 function appStart() {
     setup().then((value) => {
         if (value === 0) {
-            registrationOverlay.changeState();
-            return
+            registrationOverlay.openOverlay();
+            return;
         }
         if (value['user_role'] === "admin") {
-            document.getElementById('administration').style.display = 'flex'
+            document.getElementById('administration').style.display = 'flex';
         }
         document.getElementById("user_total_events").innerHTML = value['user_total_events'];
         document.getElementById("user_rank").innerHTML = value['user_rank'];
+        mainMenuOverlay.openOverlay();
     });
     showEvents();
 }
@@ -77,7 +78,6 @@ function userRegistration() {
     const request = JSON.stringify(jsonObject)
     const url = "/user_registration";
     ajaxRequest(request, url).then((value) => {
-        registrationOverlay.changeState();
         location.reload()
     })
 }
@@ -208,7 +208,7 @@ function addRowHandlers() {
         const current_row = rows[i];
         let create_click_handler = (row) => {
             return function () {
-                viewEventOverlay.changeState();
+                viewEventOverlay.openOverlay();
                 sessionStorage.setItem('open_event_author', current_row.cells[0].innerHTML);
                 sessionStorage.setItem('open_event_time', current_row.cells[1].innerHTML);
                 sessionStorage.setItem('open_event_id', current_row.cells[2].innerHTML);
@@ -223,7 +223,7 @@ function addRowHandlers() {
 
 
 function eventViewer() {
-    eventListOverlay.changeState();
+    viewEventOverlay.openOverlay()
     const table = document.getElementById("event_team_list");
     const event_id = sessionStorage.getItem('open_event_id');
     const date = new Date(sessionStorage.getItem('open_event_date'));
@@ -282,8 +282,7 @@ Telegram.WebApp.MainButton.onClick(function () {
             userRegistration();
             break;
         case "overlay_event_list":
-            eventCreateOverlay.changeState();
-            eventListOverlay.changeState();
+            eventCreateOverlay.openOverlay();
             break;
         case "event_creation":
             eventCreation()

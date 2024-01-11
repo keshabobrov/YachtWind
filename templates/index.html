@@ -12,20 +12,20 @@
 </head>
 <body>
     <div class="container">
-        <nav class="mainMenu">
+        <nav class="overlay" id="overlay_main_menu">
             <div class="header" id="main_header">
                 <div class="arrow_exit"><button type="button" style="display: none"><img src="/static/src/arrow_exit.png"></button></div>
                 <div class="header_text">YachtWind</div>
                 <div id="notification_indicator"><button type="button" id="notification_button" onclick=""><img src="/static/src/notification.png"></button></div>
             </div>
             <div class="rows" id="my_teams">
-                <button type="button" onclick="teamListOverlay.changeState()">Мои команды</button>
+                <button type="button" onclick="teamListOverlay.openOverlay()">Мои команды</button>
             </div>
             <div class="rows" id="enroll_training">
-                <button type="button" onclick="eventListOverlay.changeState()">Запись на выход</button>
+                <button type="button" onclick="eventListOverlay.openOverlay()">Запись на выход</button>
             </div>
             <div class="rows" id="statistics">
-                <button type="button" onclick="statisticsOverlay.changeState()">Мои тренировки</button>
+                <button type="button" onclick="statisticsOverlay.openOverlay()">Мои тренировки</button>
             </div>
             <div class="rows" id="feedback">
                 <button type="button" onclick="">Обратная связь</button>
@@ -58,7 +58,7 @@
         </div>
         <div class="overlay" id="overlay_teams">
             <div class="header">
-                <div class="arrow_exit"><button type="button" onclick="teamListOverlay.changeState()"><img src="/static/src/arrow_exit.png"></button></div>
+                <div class="arrow_exit"><button type="button" onclick="mainMenuOverlay.openOverlay()"><img src="/static/src/arrow_exit.png"></button></div>
                 <div class="header_text">Мои команды</div>
             </div>
             <div class="rows teams">
@@ -76,13 +76,12 @@
         </div>
         <div class="overlay" id="overlay_event_list">
             <div class="header">
-                <div class="arrow_exit"><button type="button" onclick="eventListOverlay.changeState()"><img src="/static/src/arrow_exit.png"></button></div>
+                <div class="arrow_exit"><button type="button" onclick="mainMenuOverlay.openOverlay()"><img src="/static/src/arrow_exit.png"></button></div>
                 <div class="header_text">Тренировки</div>
             </div>
             <table id="events_table">
                 <tr style="display: none"></tr>
             </table>
-{#            <button type="button" onclick="eventCreateOverlay.changeState()">Создать событие</button>#}
             <div id="date_picker">
                 <button type="button" id="arrow_date_left" onclick="listHandler('-')"><img src="/static/src/arrow_left.png"></button>
                 <div id="date_picker_text">Нет записей</div>
@@ -91,7 +90,7 @@
         </div>
         <div class="overlay" id="event_creation">
             <div class="header">
-                <div class="arrow_exit"><button type="button" onclick="eventCreateOverlay.changeState()"><img src="/static/src/arrow_exit.png"></button></div>
+                <div class="arrow_exit"><button type="button" onclick="eventListOverlay.openOverlay()"><img src="/static/src/arrow_exit.png"></button></div>
                 <div class="header_text">Создание события</div>
             </div>
             <div class="header" id="creation_form">
@@ -105,12 +104,11 @@
                         <div class="create_form_input"><input type="number" id="slot_form" name="slot_form" placeholder="1-8"></div>
                     </div>
                 </form>
-{#                <button type="button" onclick="eventCreation()">Создать событие</button>#}
             </div>
         </div>
         <div class="overlay" id="overlay_event">
             <div class="header">
-                <div class="arrow_exit"><button type="button" onclick="eventListOverlay.changeState()"><img src="/static/src/arrow_exit.png"></button></div>
+                <div class="arrow_exit"><button type="button" onclick="eventListOverlay.openOverlay()"><img src="/static/src/arrow_exit.png"></button></div>
                 <div class="header_text">Тренировки</div>
             </div>
             <div id="block_info">
@@ -140,11 +138,11 @@
         </div>
         <div class="overlay" id="overlay_stats">
             <div class="header">
-                <div class="arrow_exit"><button type="button" onclick="statisticsOverlay.changeState()"><img src="/static/src/arrow_exit.png"></button></div>
+                <div class="arrow_exit"><button type="button" onclick="mainMenuOverlay.openOverlay()"><img src="/static/src/arrow_exit.png"></button></div>
                 <div class="header_text">Мои тренировки</div>
             </div>
             <table id="statistics_table">
-                <tr onclick="console.log('button pressed 1')">
+                <tr onclick="">
                     <td>
                         <img src="/static/src/fire.png" class="icon">
                     </td>
@@ -158,7 +156,7 @@
                 <tr>
                     <td class="spacer"></td>
                 </tr>
-                <tr onclick="console.log('button pressed 2')">
+                <tr onclick="">
                     <td>
                         <img src="/static/src/histogram.png" class="icon">
                     </td>
