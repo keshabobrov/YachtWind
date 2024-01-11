@@ -227,6 +227,10 @@ function eventViewer() {
     const table = document.getElementById("event_team_list");
     const event_id = sessionStorage.getItem('open_event_id');
     const date = new Date(sessionStorage.getItem('open_event_date'));
+    const cells = document.querySelectorAll('.table_team');
+    cells.forEach((cell) => {
+        cell.innerHTML = '';
+    });
     document.getElementById("event_author_name").innerHTML = sessionStorage.getItem('open_event_author');
     document.getElementById("info_time").innerHTML = sessionStorage.getItem('open_event_time');
     document.getElementById("info_available").innerHTML = sessionStorage.getItem('open_event_remaining_slots');
