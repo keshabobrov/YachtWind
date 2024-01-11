@@ -7,15 +7,17 @@ class overlayManager {
         this.buttonVisibility = this.buttonName !== null;
         this.permissionLevel = permissionLevel;
     }
-    changeState() {
-        if (this.state === false) {
-            document.querySelector(`#${this.id}`).style.display = "flex";
-            this.setupButton();
-        }
-        else {
-            document.querySelector(`#${this.id}`).style.display = "none";
-        }
+    openOverlay() {
+        this.closeAllOverlays()
+        document.querySelector(`#${this.id}`).style.display = "flex";
+        this.setupButton();
         this.state = !this.state;
+    }
+    closeAllOverlays() {
+        const overlays = document.querySelectorAll('.overlay');
+        overlays.forEach((overlay) => {
+            overlay.style.display = 'none';
+        });
     }
     setupButton() {
         if (this.buttonVisibility !== false) {
@@ -27,6 +29,9 @@ class overlayManager {
                 is_visible: this.buttonVisibility
             });
             sessionStorage.setItem("button_overlay", this.id);
+        }
+        else {
+            Telegram.WebApp.MainButton.hide()
         }
     };
     checkPermissions() {
@@ -43,6 +48,14 @@ class overlayManager {
         return user_level
     };
 }
+
+
+const mainMenuOverlay = new overlayManager(
+    "overlay_main_menu",
+    null,
+    null,
+    0
+);
 
 
 const registrationOverlay = new overlayManager(
