@@ -20,10 +20,7 @@ class overlayManager {
         });
     }
     setupButton() {
-        if (this.buttonVisibility !== false) {
-            if (this.checkPermissions() < this.permissionLevel) {
-                return;
-            }
+        if (this.buttonVisibility !== false && this.checkPermissions() >= this.permissionLevel) {
             Telegram.WebApp.MainButton.setParams({
                 text: this.buttonName,
                 is_visible: this.buttonVisibility
