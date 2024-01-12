@@ -109,7 +109,7 @@
         <div class="overlay" id="overlay_event">
             <div class="header">
                 <div class="arrow_exit"><button type="button" onclick="eventListOverlay.openOverlay()"><img src="/static/src/arrow_exit.png"></button></div>
-                <div class="header_text">Тренировки</div>
+                <div class="header_text">Информация</div>
             </div>
             <div id="block_info">
                 <div class="rows event" style="display: none">
@@ -125,6 +125,11 @@
                     <div id="info_date">Дата</div>
                 </div>
                 <div id="info_time">Время</div>
+                <div class="rows event" id="boat_num_section">
+                    <div class="icon"><img src="/static/src/position.png"></div>
+                    <div>Номер лодки</div>
+                    <div class="number_blue_box" id="boat_num">—</div>
+                </div>
                 <div class="rows event">
                     <div class="icon"><img src="/static/src/users.png"></div>
                     <table id="event_team_list">

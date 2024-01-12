@@ -162,7 +162,6 @@ def event_request(cursor):
                           )
         cursor.execute(request_events)
         result = cursor.fetchall()
-        print(result)
         for event in result:
             event['event_datetime'] = event['event_datetime'].isoformat()
         return result
