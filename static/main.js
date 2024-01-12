@@ -122,6 +122,7 @@ function showEvents() {
             day: "numeric"
         })
         sessionStorage.setItem('page_date', page_date)
+        // TODO: Consider objects for this.
         for (let i = 0; i < events_results.length; i++) {
             const row = table.insertRow(i + 1);
             const event = events_results[i];
@@ -131,11 +132,13 @@ function showEvents() {
             row.insertCell(2).innerHTML = event.event_id;
             row.insertCell(3).innerHTML = date.toDateString();
             row.insertCell(4).innerHTML = event.event_remaining_slots;
+            row.insertCell(5).innerHTML = event.event_boat_num;
             row.cells[0].className = "trainer_td";
             row.cells[1].className = "number_blue_box";
             row.cells[2].style.display = "none";
             row.cells[3].style.display = "none";
             row.cells[4].style.display = "none";
+            row.cells[5].style.display = "none";
             if (date.toDateString() === page_date) {
                 row.className = "rows"
             }
@@ -214,6 +217,7 @@ function addRowHandlers() {
                 sessionStorage.setItem('open_event_id', current_row.cells[2].innerHTML);
                 sessionStorage.setItem('open_event_date', current_row.cells[3].innerHTML);
                 sessionStorage.setItem('open_event_remaining_slots', current_row.cells[4].innerHTML);
+                sessionStorage.setItem('open_event_boat_num', current_row.cells[5].innerHTML);
                 eventViewer();
             }
         }
@@ -239,6 +243,12 @@ function eventViewer() {
         day: "numeric",
         year: "numeric"
     })
+    if (sessionStorage.getItem('open_event_boat_num') !== "") {
+        document.getElementById("boat_num").innerHTML = sessionStorage.getItem('open_event_boat_num');
+    }
+    else {
+        document.getElementById("boat_num").innerHTML = "—"
+    }
     ajaxRequest(event_id, "/get_enrollment").then((value) => {
         const events_results = JSON.parse(value)
         for (let i = 0; i < events_results.length; i++) {
