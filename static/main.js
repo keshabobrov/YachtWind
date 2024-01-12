@@ -280,8 +280,7 @@ if (window.location.pathname === "/") {
 }
 
 Telegram.WebApp.MainButton.onClick(function () {
-    const button_overlay = sessionStorage.getItem('button_overlay')
-    switch (button_overlay) {
+    switch (overlayManager.currentOverlay) {
         case "overlay_registration":
             userRegistration();
             break;
@@ -289,10 +288,10 @@ Telegram.WebApp.MainButton.onClick(function () {
             eventCreateOverlay.openOverlay();
             break;
         case "event_creation":
-            eventCreation()
+            eventCreation();
             break;
         case "overlay_event":
-            enrollEvent()
+            enrollEvent();
             break;
     }
 })

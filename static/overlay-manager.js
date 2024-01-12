@@ -1,17 +1,17 @@
 class overlayManager {
     constructor(id, onLoadFunc, buttonName, permissionLevel) {
         this.id = id;
-        this.state = false;
         this.onLoadFunc = onLoadFunc;
         this.buttonName = buttonName;
         this.buttonVisibility = this.buttonName !== null;
         this.permissionLevel = permissionLevel;
     }
+    static currentOverlay = null;
     openOverlay() {
-        this.closeAllOverlays()
+        this.closeAllOverlays();
         document.querySelector(`#${this.id}`).style.display = "flex";
+        overlayManager.currentOverlay = this.id
         this.setupButton();
-        this.state = !this.state;
     }
     closeAllOverlays() {
         const overlays = document.querySelectorAll('.overlay');
@@ -25,10 +25,9 @@ class overlayManager {
                 text: this.buttonName,
                 is_visible: this.buttonVisibility
             });
-            sessionStorage.setItem("button_overlay", this.id);
         }
         else {
-            Telegram.WebApp.MainButton.hide()
+            Telegram.WebApp.MainButton.hide();
         }
     };
     checkPermissions() {
@@ -42,7 +41,7 @@ class overlayManager {
                 user_level = 2;
                 break;
         }
-        return user_level
+        return user_level;
     };
 }
 
