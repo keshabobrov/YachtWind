@@ -152,7 +152,8 @@ def event_request(cursor):
         today_date = date.today()
         formatted_date = today_date.strftime("%Y.%m.%d")
         request_events = ("SELECT events.event_id, events.event_datetime, users.user_name AS event_author_name, "
-                          "(events.event_slot_num - COUNT(enrollments.enrollment_id)) AS event_remaining_slots "
+                          "(events.event_slot_num - COUNT(enrollments.enrollment_id)) AS event_remaining_slots, "
+                          "events.event_boat_num "
                           "FROM events JOIN users ON events.event_author_id = users.user_id "
                           "LEFT JOIN enrollments ON events.event_id = enrollments.event_id "
                           f"WHERE events.event_datetime >= \"{formatted_date}\" "
@@ -161,6 +162,7 @@ def event_request(cursor):
                           )
         cursor.execute(request_events)
         result = cursor.fetchall()
+        print(result)
         for event in result:
             event['event_datetime'] = event['event_datetime'].isoformat()
         return result
