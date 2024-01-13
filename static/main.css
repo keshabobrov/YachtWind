@@ -57,13 +57,21 @@ body {
     color: #676AAA;
 }
 
+.row_text {
+    margin: auto 0;
+    min-width: 160px; /* Could affect small size devices. This block added for align objects in eventCreation overlay */
+}
+
 .arrow_exit {
     width: 15px;
     margin: auto 0 auto 37px;
 }
 
 .icon {
-    width: 30px;
+    min-width: 30px;
+    height: 30px;
+    margin: auto 0;
+
 }
 
 .inputBlock {
@@ -194,10 +202,6 @@ body {
     margin: auto 0 auto auto;
 }
 
-#info_trainer {
-    margin: auto 0 auto 0;
-}
-
 #info_available {
     padding: 3px 0 3px 0;
     margin-left: 16px;
@@ -259,7 +263,7 @@ img {
 input {
     width: 100%;
     box-sizing: border-box;
-    height: 50px;
+    height: 40px;
     background: none;
     border: 1px solid #676AAA;
     border-radius: 10px;
