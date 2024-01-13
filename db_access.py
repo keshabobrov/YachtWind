@@ -112,13 +112,14 @@ def user_initialization(user_telegram_id, cursor):
 @access_db
 def user_statistics(user, cursor):
     try:
-        request_get_statistics = ("SELECT RANK() OVER (ORDER BY total DESC) AS user_rank, "
+        request_get_statistics = ("SELECT user_rank, user_total_events FROM "
+                                  "(SELECT RANK() OVER (ORDER BY total DESC) AS user_rank, "
                                   "count.total AS user_total_events, user_id FROM "
                                   "(SELECT COUNT(enrollments.enrollment_id) AS total, users.user_id FROM users "
                                   "LEFT JOIN enrollments ON users.user_id = enrollments.user_id "
                                   "GROUP BY users.user_id ORDER BY total DESC ) AS count "
-                                  f"WHERE user_id = {user.user_id} "
-                                  "ORDER BY user_rank;")
+                                  "ORDER BY user_rank) AS rank_table "
+                                  f"WHERE user_id = {user.user_id};")
         cursor.execute(request_get_statistics)
         request_result = cursor.fetchone()
         return request_result
@@ -151,7 +152,8 @@ def event_request(cursor):
         today_date = date.today()
         formatted_date = today_date.strftime("%Y.%m.%d")
         request_events = ("SELECT events.event_id, events.event_datetime, users.user_name AS event_author_name, "
-                          "(events.event_slot_num - COUNT(enrollments.enrollment_id)) AS event_remaining_slots "
+                          "(events.event_slot_num - COUNT(enrollments.enrollment_id)) AS event_remaining_slots, "
+                          "events.event_boat_num "
                           "FROM events JOIN users ON events.event_author_id = users.user_id "
                           "LEFT JOIN enrollments ON events.event_id = enrollments.event_id "
                           f"WHERE events.event_datetime >= \"{formatted_date}\" "

@@ -30,8 +30,8 @@ function setup() {
         let url = "/init";
         let data = JSON.stringify(user_telegram_id);
         ajaxRequest(data, url).then((value) => {
-            sessionStorage.setItem('user_role', value['user_role'])
-            resolve (value)
+            sessionStorage.setItem('user_role', value['user_role']);
+            resolve (value);
         });
     });
 }
@@ -40,18 +40,15 @@ function setup() {
 function appStart() {
     setup().then((value) => {
         if (value === 0) {
-            document.getElementById('overlay_registration').style.display = 'flex'
-            Telegram.WebApp.MainButton.setParams({
-                text: 'Зарегистрироваться',
-                is_visible: true
-            })
-            return
+            registrationOverlay.openOverlay();
+            return;
         }
         if (value['user_role'] === "admin") {
-            document.getElementById('administration').style.display = 'flex'
+            document.getElementById('administration').style.display = 'flex';
         }
         document.getElementById("user_total_events").innerHTML = value['user_total_events'];
         document.getElementById("user_rank").innerHTML = value['user_rank'];
+        mainMenuOverlay.openOverlay();
     });
     showEvents();
 }
@@ -81,8 +78,6 @@ function userRegistration() {
     const request = JSON.stringify(jsonObject)
     const url = "/user_registration";
     ajaxRequest(request, url).then((value) => {
-        Telegram.WebApp.MainButton.hide()
-        document.getElementById('overlay_registration').style.display = 'none'
         location.reload()
     })
 }
@@ -127,6 +122,7 @@ function showEvents() {
             day: "numeric"
         })
         sessionStorage.setItem('page_date', page_date)
+        // TODO: Consider objects for this.
         for (let i = 0; i < events_results.length; i++) {
             const row = table.insertRow(i + 1);
             const event = events_results[i];
@@ -136,11 +132,13 @@ function showEvents() {
             row.insertCell(2).innerHTML = event.event_id;
             row.insertCell(3).innerHTML = date.toDateString();
             row.insertCell(4).innerHTML = event.event_remaining_slots;
+            row.insertCell(5).innerHTML = event.event_boat_num;
             row.cells[0].className = "trainer_td";
             row.cells[1].className = "number_blue_box";
             row.cells[2].style.display = "none";
             row.cells[3].style.display = "none";
             row.cells[4].style.display = "none";
+            row.cells[5].style.display = "none";
             if (date.toDateString() === page_date) {
                 row.className = "rows"
             }
@@ -213,12 +211,13 @@ function addRowHandlers() {
         const current_row = rows[i];
         let create_click_handler = (row) => {
             return function () {
-                overlayEvent(1)
+                viewEventOverlay.openOverlay();
                 sessionStorage.setItem('open_event_author', current_row.cells[0].innerHTML);
                 sessionStorage.setItem('open_event_time', current_row.cells[1].innerHTML);
                 sessionStorage.setItem('open_event_id', current_row.cells[2].innerHTML);
                 sessionStorage.setItem('open_event_date', current_row.cells[3].innerHTML);
                 sessionStorage.setItem('open_event_remaining_slots', current_row.cells[4].innerHTML);
+                sessionStorage.setItem('open_event_boat_num', current_row.cells[5].innerHTML);
                 eventViewer();
             }
         }
@@ -228,10 +227,14 @@ function addRowHandlers() {
 
 
 function eventViewer() {
-    overlayList(0);
+    viewEventOverlay.openOverlay()
     const table = document.getElementById("event_team_list");
     const event_id = sessionStorage.getItem('open_event_id');
     const date = new Date(sessionStorage.getItem('open_event_date'));
+    const cells = document.querySelectorAll('.table_team');
+    cells.forEach((cell) => {
+        cell.innerHTML = '';
+    });
     document.getElementById("event_author_name").innerHTML = sessionStorage.getItem('open_event_author');
     document.getElementById("info_time").innerHTML = sessionStorage.getItem('open_event_time');
     document.getElementById("info_available").innerHTML = sessionStorage.getItem('open_event_remaining_slots');
@@ -240,6 +243,12 @@ function eventViewer() {
         day: "numeric",
         year: "numeric"
     })
+    if (sessionStorage.getItem('open_event_boat_num') !== "") {
+        document.getElementById("boat_num").innerHTML = sessionStorage.getItem('open_event_boat_num');
+    }
+    else {
+        document.getElementById("boat_num").innerHTML = "—"
+    }
     ajaxRequest(event_id, "/get_enrollment").then((value) => {
         const events_results = JSON.parse(value)
         for (let i = 0; i < events_results.length; i++) {
@@ -248,10 +257,6 @@ function eventViewer() {
             row.insertCell(0).innerHTML = user_name;
             row.cells[0].className = "table_team";
         }
-        Telegram.WebApp.MainButton.setParams({
-            text: 'Записаться',
-            is_visible: true
-        })
     });
 }
 
@@ -282,37 +287,21 @@ function enrollEvent() {
 
 if (window.location.pathname === "/") {
     appStart()
-    Telegram.WebApp.MainButton.hide()
 }
 
 Telegram.WebApp.MainButton.onClick(function () {
-    // Telegram callback function for main buttons. Web Api couldn't let you use button as a simple event trigger.
-    // It's a callback. That's why I'm using this workaround.
-    const overlays = document.querySelectorAll(".overlay");
-    const getCurrentOverlay = () => {
-        for (let i = 0; i < overlays.length; i++) {
-            if (overlays[i].style.display === "flex") {
-                return overlays[i];
-            }
-        }
-    }
-    const currentOverlay = getCurrentOverlay().id;
-    switch (currentOverlay) {
+    switch (overlayManager.currentOverlay) {
+        case "overlay_registration":
+            userRegistration();
+            break;
         case "overlay_event_list":
-            Telegram.WebApp.MainButton.setParams({
-                text: 'Создать тренировку',
-                is_visible: true
-            })
-            overlayCreation(1);
-            overlayList(0);
+            eventCreateOverlay.openOverlay();
             break;
         case "event_creation":
-            eventCreation()
+            eventCreation();
             break;
         case "overlay_event":
-            enrollEvent()
+            enrollEvent();
             break;
-        case "overlay_registration":
-            userRegistration()
     }
 })
