@@ -91,17 +91,48 @@
         <div class="overlay" id="event_creation">
             <div class="header">
                 <div class="arrow_exit"><button type="button" onclick="eventListOverlay.openOverlay()"><img src="/static/src/arrow_exit.png"></button></div>
-                <div class="header_text">Создание события</div>
+                <div class="header_text">Новая тренировка</div>
             </div>
-            <div class="header" id="creation_form">
+            <div id="creation_form">
                 <form id="event_create_form">
-                    <div class="create_row">
-                        <div class="create_form_label"><label for="datetime_form">Дата и время:</label></div>
-                        <div class="create_form_input"><input type="datetime-local" id="datetime_form" name="datetime_form" max="2040-12-31"></div>
+                    <div>
+                        <div class="rows event">
+                            <div class="icon"><img src="/static/src/calendar.png"></div>
+                            <label for="datetime_form" class="row_text">Дата и время</label>
+                        </div>
+                        <div class="rows event">
+                            <input type="datetime-local" id="datetime_form" name="datetime_form" max="2040-12-31">
+                        </div>
                     </div>
-                    <div class="create_row">
-                        <div class="create_form_label"><label for="slot_form">Количество слотов:</label></div>
-                        <div class="create_form_input"><input type="number" id="slot_form" name="slot_form" placeholder="1-8"></div>
+                    <div>
+                        <div class="rows event">
+                            <div class="icon"><img src="/static/src/users.png"></div>
+                            <label for="slot_form" class="row_text">Места для записи</label>
+                        </div>
+                        <div class="rows event">
+                            <input type="number" id="slot_form" name="slot_form" placeholder="1-8">
+                        </div>
+                    </div>
+                    <div>
+                        <div class="rows event">
+                            <div class="icon"><img src="/static/src/time.png"></div>
+                            <div class="row_text"><label for="length_form" class="row_text">Длительность</label></div>
+                            <input type="number" id="length_form" name="length_form" placeholder="1-3">
+                        </div>
+                    </div>
+                    <div>
+                        <div class="rows event">
+                            <div class="icon"><img src="/static/src/position.png"></div>
+                            <div class="row_text"><label for="boat_num_form" class="row_text">Судно</label></div>
+                            <input type="number" id="boat_num_form" name="boat_num_form" placeholder="1-14">
+                        </div>
+                    </div>
+                    <div>
+                        <div class="rows event">
+                            <div class="icon"><img src="/static/src/lockOpen.png"></div>
+                            <div class="row_text"><label for="privacy_type_form" class="row_text">Приватность</label></div>
+                            <input type="number" id="privacy_type_form" name="privacy_type_form" placeholder="Open">
+                        </div>
                     </div>
                 </form>
             </div>
@@ -117,17 +148,17 @@
                 </div>
                 <div class="rows event">
                     <div class="icon"><img src="/static/src/user.png"></div>
-                    <div id="event_author_name">Тренер</div>
+                    <div id="event_author_name" class="row_text">Тренер</div>
                     <button type="button" id="enroll_access_lock" onclick=""><img src="/static/src/lockOpen.png"></button>
                 </div>
                 <div class="rows event" id="date_section">
                     <div class="icon"><img src="/static/src/calendar.png"></div>
-                    <div id="info_date">Дата</div>
+                    <div id="info_date" class="row_text">Дата</div>
                 </div>
                 <div id="info_time">Время</div>
                 <div class="rows event" id="boat_num_section">
                     <div class="icon"><img src="/static/src/position.png"></div>
-                    <div>Номер лодки</div>
+                    <div class="row_text">Судно</div>
                     <div class="number_blue_box" id="boat_num">—</div>
                 </div>
                 <div class="rows event">
