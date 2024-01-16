@@ -62,7 +62,6 @@ class Teams:
         self.team_name = None
         self.team_description = None
         self.team_creator_id = None
-        self.team_status = None
         self.team_users = None
 
 
@@ -224,11 +223,25 @@ def enrollment_create(user, event_id, cursor):
 @access_db
 def team_create(team, cursor):
     try:
-        creating_request = ("INSERT INTO teams (team_name, team_description, team_creator_id) "
+        team_create_request = ("INSERT INTO teams (team_name, team_description, team_creator_id) "
                             "VALUES (%s, %s, %s)")
         team_data = (team.team_name, team.team_description, team.team_creator_id)
-        cursor.execute(creating_request, team_data)
+        cursor.execute(team_create_request, team_data)
         return True
+    except:
+        logging.error("DB: Exit code 1: error in database - team_create", exc_info=True)
+        return False
+
+
+@access_db
+def team_request(user, cursor):
+    try:
+        team_request_prompt = ("SELECT team_id, team_name, team_description, team_creator_id "
+                               f"FROM teams WHERE team_creator_id={user.user_id}")
+        print(team_request_prompt)
+        cursor.execute(team_request_prompt)
+        request_result = cursor.fetchall()
+        return request_result
     except:
         logging.error("DB: Exit code 1: error in database - team_create", exc_info=True)
         return False
