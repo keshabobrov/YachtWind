@@ -69,7 +69,7 @@ def event_request():
 @app.route('/get_enrollment', methods=['POST'])
 def team_request():
     event_id = request.json
-    event_users = db_access.team_request(event_id)
+    event_users = db_access.enrollment_request(event_id)
     results = json.dumps(event_users, indent=1)
     return jsonify(results), 200
 
@@ -81,7 +81,7 @@ def event_enroll():
     user = db_access.Users(user_telegram_id)
     if not hasattr(user, 'user_id'):
         return jsonify('User not found'), 409
-    results = db_access.event_enrollment(user, event_id)
+    results = db_access.enrollment_create(user, event_id)
     if results == 'no more slots':
         return jsonify(results), 200
     if results == 'success':
