@@ -20,7 +20,7 @@ class Users:
 
     def __init__(self, user_telegram_id):
         self.user_telegram_id = user_telegram_id
-        user_data = user_initialization(self.user_telegram_id)
+        user_data = user_initialize(self.user_telegram_id)
         if user_data != 0:
             self.user_id = user_data['user_id']
             self.user_role = user_data['user_role']
@@ -31,7 +31,7 @@ class Users:
             self.user_total_events = statistics['user_total_events']
 
     def setup(self):
-        if create_user(self):
+        if user_create(self):
             return True
 
 
@@ -50,7 +50,7 @@ class Events:
             return 'User not logged in'
         if self.event_author.user_role != 'admin' and self.event_author.user_role != 'captain':
             return 'User not permitted'
-        result = event_creation(self)
+        result = event_create(self)
         if not result:
             return 'Some error'
         return 'Event has been created!'
@@ -76,7 +76,7 @@ def access_db(func):
 
 
 @access_db
-def create_user(user_data, cursor):
+def user_create(user_data, cursor):
     try:
         user_registration_date = date.today()
         new_user = ("INSERT INTO users "
@@ -89,11 +89,11 @@ def create_user(user_data, cursor):
         return True
 
     except:
-        logging.error("DB: Exit code 1: error in create_user", exc_info=True)
+        logging.error("DB: Exit code 1: error in user_create", exc_info=True)
 
 
 @access_db
-def user_initialization(user_telegram_id, cursor):
+def user_initialize(user_telegram_id, cursor):
     """Первичная инициализация пользователя"""
     try:
         request_find_user = f"SELECT * FROM users WHERE user_telegram_id = {user_telegram_id}"
@@ -106,7 +106,7 @@ def user_initialization(user_telegram_id, cursor):
         return request_result[0]
 
     except:
-        logging.error("DB: Exit code 2: error in user_initialization", exc_info=True)
+        logging.error("DB: Exit code 2: error in user_initialize", exc_info=True)
 
 
 @access_db
@@ -129,7 +129,7 @@ def user_statistics(user, cursor):
 
 
 @access_db
-def event_creation(event, cursor):
+def event_create(event, cursor):
     try:
         event_creation_date = date.today()
         new_event = ("INSERT INTO events "
@@ -142,7 +142,7 @@ def event_creation(event, cursor):
         return True
 
     except:
-        logging.error("DB: Exit code 1: error in event_creation", exc_info=True)
+        logging.error("DB: Exit code 1: error in event_create", exc_info=True)
         return False
 
 
@@ -171,7 +171,7 @@ def event_request(cursor):
 
 
 @access_db
-def team_request(event_id, cursor):
+def enrollment_request(event_id, cursor):
     try:
         request_teams = ("SELECT user_name FROM enrollments JOIN users ON enrollments.user_id=users.user_id "
                          f"WHERE event_id = {event_id}")
@@ -180,11 +180,11 @@ def team_request(event_id, cursor):
         return request_result
 
     except:
-        logging.error("DB: Exit code 1: error in read_db_training", exc_info=True)
+        logging.error("DB: Exit code 1: error in enrollment_request", exc_info=True)
 
 
 @access_db
-def event_enrollment(user, event_id, cursor):
+def enrollment_create(user, event_id, cursor):
     try:
         request_available = ("SELECT (events.event_slot_num - COUNT(enrollments.enrollment_id)) AS remaining_slots, "
                              f"MAX(CASE WHEN enrollments.user_id = {user.user_id} THEN 1 ELSE 0 END) AS user_already_enrolled "
