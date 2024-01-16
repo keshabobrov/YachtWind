@@ -56,6 +56,16 @@ class Events:
         return 'Event has been created!'
 
 
+class Teams:
+    def __init__(self):
+        self.team_id = None
+        self.team_name = None
+        self.team_description = None
+        self.team_creator_id = None
+        self.team_status = None
+        self.team_users = None
+
+
 def access_db(func):
     """
     Decorator for connection to mysql DB.
@@ -89,7 +99,7 @@ def user_create(user_data, cursor):
         return True
 
     except:
-        logging.error("DB: Exit code 1: error in user_create", exc_info=True)
+        logging.error("DB: Exit code 1: error in database - user_create", exc_info=True)
 
 
 @access_db
@@ -106,7 +116,7 @@ def user_initialize(user_telegram_id, cursor):
         return request_result[0]
 
     except:
-        logging.error("DB: Exit code 2: error in user_initialize", exc_info=True)
+        logging.error("DB: Exit code 2: error in database - user_initialize", exc_info=True)
 
 
 @access_db
@@ -125,7 +135,7 @@ def user_statistics(user, cursor):
         return request_result
 
     except:
-        logging.error("DB: Exit code 1: error in getting statistics", exc_info=True)
+        logging.error("DB: Exit code 1: error in database - user_statistics", exc_info=True)
 
 
 @access_db
@@ -142,7 +152,7 @@ def event_create(event, cursor):
         return True
 
     except:
-        logging.error("DB: Exit code 1: error in event_create", exc_info=True)
+        logging.error("DB: Exit code 1: error in database - event_create", exc_info=True)
         return False
 
 
@@ -167,7 +177,7 @@ def event_request(cursor):
         return result
 
     except:
-        logging.error("DB: Exit code 1: error in event_request", exc_info=True)
+        logging.error("DB: Exit code 1: error in database - event_request", exc_info=True)
 
 
 @access_db
@@ -180,14 +190,15 @@ def enrollment_request(event_id, cursor):
         return request_result
 
     except:
-        logging.error("DB: Exit code 1: error in enrollment_request", exc_info=True)
+        logging.error("DB: Exit code 1: error in database - enrollment_request", exc_info=True)
 
 
 @access_db
 def enrollment_create(user, event_id, cursor):
     try:
         request_available = ("SELECT (events.event_slot_num - COUNT(enrollments.enrollment_id)) AS remaining_slots, "
-                             f"MAX(CASE WHEN enrollments.user_id = {user.user_id} THEN 1 ELSE 0 END) AS user_already_enrolled "
+                             f"MAX(CASE WHEN enrollments.user_id = {user.user_id} THEN 1 ELSE 0 END) "
+                             "AS user_already_enrolled "
                              "FROM events LEFT JOIN enrollments ON events.event_id = enrollments.event_id "
                              f"WHERE events.event_id = {event_id} GROUP BY events.event_id;")
         cursor.execute(request_available)
@@ -207,4 +218,17 @@ def enrollment_create(user, event_id, cursor):
             return "error"
 
     except:
-        logging.error("DB: Exit code 1: error in database read/write enrollment", exc_info=True)
+        logging.error("DB: Exit code 1: error in database - read/write enrollment", exc_info=True)
+
+
+@access_db
+def team_create(team, cursor):
+    try:
+        creating_request = ("INSERT INTO teams (team_name, team_description, team_creator_id) "
+                            "VALUES (%s, %s, %s)")
+        team_data = (team.team_name, team.team_description, team.team_creator_id)
+        cursor.execute(creating_request, team_data)
+        return True
+    except:
+        logging.error("DB: Exit code 1: error in database - team_create", exc_info=True)
+        return False
