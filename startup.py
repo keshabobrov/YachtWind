@@ -91,6 +91,23 @@ def event_enroll():
     return jsonify(results), 500
 
 
+@app.route('/create_team', methods=['POST'])
+def create_team():
+    team_data = request.json
+    current_user = db_access.Users(request.cookies.get('user_telegram_id'))
+    if current_user.user_role != 'admin' or current_user != 'captain':
+        return jsonify('User not permitted!', 401)
+    new_team = db_access.Teams()
+    new_team.team_name = team_data['team_name']
+    new_team.team_description = team_data['team_description']
+    new_team.team_creator_id = current_user.user_id
+    result = db_access.team_create(new_team)
+    if result:
+        return jsonify('Team created!', 200)
+    else:
+        return jsonify("Some error getting teams"), 500
+
+
 @app.route('/get_teams', methods=['POST'])
 def get_teams():
     user_telegram_id = request.cookies.get('user_telegram_id')
