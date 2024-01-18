@@ -22,7 +22,7 @@ function ajaxRequest(formData, url) {
 
 function setup() {
     // TODO: REWRITE THIS LOGIC. TOO HEAVY.
-    /** Функция идентифицирования пользователя. Отправляет на сервер id пользователя и возвращает
+    /** User identification. Отправляет на сервер id пользователя и возвращает
      * роль пользователя в системе или сообщение об отсутствии пользователя в системе.*/
     const telegram = window.Telegram.WebApp;
     const user_telegram_id = telegram.initDataUnsafe.user.id;
