@@ -82,6 +82,24 @@ function userRegistration() {
     })
 }
 
+function requestTeams() {
+    ajaxRequest(null, '/get_teams').then((value) => {
+        if (!value) {
+            return
+        }
+        const block_teams = document.querySelector('#block_teams');
+        block_teams.replaceChildren(document.createElement('div'));
+        for (let i = 0; i < value.length; i++) {
+            const button_row = document.createElement('div');
+            const button = document.createElement('button');
+            button_row.className = 'rows teams';
+            button.type = 'button';
+            button.innerHTML = value[i]['team_name'];
+            block_teams.appendChild(button_row).appendChild(button);
+        }
+    })
+}
+
 
 function eventCreation() {
     /** Функция создания события. Отправляет данные формы и возвращает:
@@ -221,7 +239,7 @@ function addRowHandlers() {
                 eventViewer();
             }
         }
-        current_row.onclick = create_click_handler(current_row);
+        current_row.addEventListener('click', create_click_handler(current_row));
     }
 }
 

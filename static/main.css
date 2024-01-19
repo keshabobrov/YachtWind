@@ -102,7 +102,7 @@ body {
 }
 
 .rows.teams {
-    background-image: url("/static/src/users.png");
+    background-image: url("/static/src/users.png"), url("/static/src/arrow.png");
 }
 
 .rows.event {
@@ -156,10 +156,6 @@ body {
 
 #my_teams {
     background-image: url("/static/src/users.png"), url("/static/src/arrow.png");
-}
-
-#new_team {
-    background-image: url("/static/src/newUser.png"), url("/static/src/arrow.png")
 }
 
 #enroll_training {

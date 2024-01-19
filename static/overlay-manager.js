@@ -8,6 +8,9 @@ class overlayManager {
     }
     static currentOverlay = null;
     openOverlay() {
+        if (this.onLoadFunc) {
+            this.onLoadFunc()
+        }
         this.closeAllOverlays();
         document.querySelector(`#${this.id}`).style.display = "flex";
         overlayManager.currentOverlay = this.id
@@ -80,7 +83,7 @@ const eventCreateOverlay = new overlayManager(
 
 const teamListOverlay = new overlayManager(
     "overlay_teams",
-    null,
+    requestTeams,
     null,
     0
 );
