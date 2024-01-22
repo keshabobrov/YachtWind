@@ -106,6 +106,10 @@ function createTeam() {
     const jsonObject = Object.fromEntries(formData);
     const url = "/create_team";
     const request = JSON.stringify(jsonObject);
+    if (jsonObject['team_name_form'] === "") {
+        alert("Введите название команды")
+        return
+    }
     ajaxRequest(request, url).then(() => {
         window.Telegram.WebApp.HapticFeedback.notificationOccurred("success");
         alert("Команда создана!");
