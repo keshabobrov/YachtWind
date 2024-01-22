@@ -83,7 +83,7 @@ function userRegistration() {
 }
 
 function requestTeams() {
-    ajaxRequest(null, '/get_teams').then((value) => {
+    ajaxRequest(null, '/request_teams').then((value) => {
         if (!value) {
             return
         }
@@ -98,6 +98,22 @@ function requestTeams() {
             block_teams.appendChild(button_row).appendChild(button);
         }
     })
+}
+
+
+function createTeam() {
+    const formData = new FormData(document.querySelector('#team_creation_form'));
+    const jsonObject = Object.fromEntries(formData);
+    const url = "/create_team";
+    const request = JSON.stringify(jsonObject);
+    ajaxRequest(request, url).then(() => {
+        window.Telegram.WebApp.HapticFeedback.notificationOccurred("success");
+        alert("Команда создана!");
+        location.reload();
+    }).catch(() => {
+        window.Telegram.WebApp.HapticFeedback.notificationOccurred("error");
+        alert("Ошибка");
+    });
 }
 
 
@@ -120,9 +136,9 @@ function eventCreation() {
     const data = JSON.stringify(jsonObject)
     const url = "/create_event";
     ajaxRequest(data, url).then((value) => {
-        window.Telegram.WebApp.HapticFeedback.notificationOccurred("success")
-        alert("Событие создано!")
-        location.reload()
+        window.Telegram.WebApp.HapticFeedback.notificationOccurred("success");
+        alert("Событие создано!");
+        location.reload();
     });
 }
 
@@ -267,7 +283,7 @@ function eventViewer() {
     else {
         document.getElementById("boat_num").innerHTML = "—"
     }
-    ajaxRequest(event_id, "/get_enrollment").then((value) => {
+    ajaxRequest(event_id, "/request_enrollments").then((value) => {
         const events_results = JSON.parse(value)
         for (let i = 0; i < events_results.length; i++) {
             const user_name = events_results[i].user_name
@@ -311,6 +327,12 @@ Telegram.WebApp.MainButton.onClick(function () {
     switch (overlayManager.currentOverlay) {
         case "overlay_registration":
             userRegistration();
+            break;
+        case "overlay_team":
+            teamCreationOverlay.openOverlay();
+            break;
+        case "overlay_team_creation":
+            createTeam();
             break;
         case "overlay_event_list":
             eventCreateOverlay.openOverlay();

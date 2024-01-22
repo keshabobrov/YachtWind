@@ -82,9 +82,17 @@ const eventCreateOverlay = new overlayManager(
 
 
 const teamListOverlay = new overlayManager(
-    "overlay_teams",
+    "overlay_team",
     requestTeams,
+    "Создать",
+    1
+);
+
+
+const teamCreationOverlay = new overlayManager(
+    "overlay_team_creation",
     null,
+    "Создать",
     0
 );
 

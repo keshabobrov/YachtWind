@@ -242,7 +242,7 @@ def team_request(current_user, cursor):
     try:
         teams_request_prompt = ("SELECT DISTINCT team_participations.team_id, team_name,"
                                 "team_description, team_creator_id "
-                                "FROM teams JOIN team_participations ON team_participations.team_id=teams.team_id "
+                                "FROM teams LEFT JOIN team_participations ON team_participations.team_id=teams.team_id "
                                 f"WHERE team_creator_id={current_user.user_id} "
                                 f"OR team_participations.user_id={current_user.user_id};")
         cursor.execute(teams_request_prompt)  # Getting list of user's teams and general info about them
