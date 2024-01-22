@@ -105,7 +105,7 @@ body {
     background-image: url("/static/src/users.png"), url("/static/src/arrow.png");
 }
 
-.rows.event {
+.rows.event, .rows.team_creation {
     column-gap: 20px;
 }
 
@@ -228,6 +228,10 @@ body {
 
 #reg_header {
     margin: auto 20px;
+}
+
+#team_add_users_row {
+    background-image: url("/static/src/newUser.png"), url("/static/src/arrow.png");
 }
 
 

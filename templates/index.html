@@ -56,12 +56,33 @@
                 </form>
             </div>
         </div>
-        <div class="overlay" id="overlay_teams">
+        <div class="overlay" id="overlay_team">
             <div class="header">
                 <div class="arrow_exit"><button type="button" onclick="mainMenuOverlay.openOverlay()"><img src="/static/src/arrow_exit.png"></button></div>
                 <div class="header_text">Мои команды</div>
             </div>
             <div id="block_teams">У вас нет команд!</div>
+        </div>
+        <div class="overlay" id="overlay_team_creation">
+            <div class="header">
+                <div class="arrow_exit"><button type="button" onclick="teamListOverlay.openOverlay()"><img src="/static/src/arrow_exit.png"></button></div>
+                <div class="header_text">Создание команды</div>
+            </div>
+            <form action="" id="team_creation_form" method="post">
+                <div class="rows team_creation">
+                    <div class="icon"><img src="/static/src/users.png"></div>
+                    <label for="team_name_form" style="display: none">Название команды</label>
+                    <input type="text" id="team_name_form" name="team_name_form" placeholder="Название команды">
+                </div>
+                <div class="rows team_creation">
+                    <div class="icon"><img src="/static/src/edit.png"></div>
+                    <label for="team_description_form" style="display: none">Описание команды</label>
+                    <input type="text" id="team_description_form" name="team_description_form" placeholder="Описание команды">
+                </div>
+                <div class="rows team_creation" id="team_add_users_row">
+                    <button type="button" id="team_add_users_button">Добавить участников</button>
+                </div>
+            </form>
         </div>
         <div class="overlay" id="overlay_event_list">
             <div class="header">
