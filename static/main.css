@@ -94,7 +94,7 @@ body {
     background-size: 30px, 14px;
     background-position: 0 50%, 100% 50%;
     -webkit-tap-highlight-color: rgba(126, 126, 133, 0.3);
-    width: 100%;
+    /*width: 100%; removed because of team rectangle. Could break something */
 }
 
 .rows.invisible {
@@ -105,7 +105,7 @@ body {
     background-image: url("/static/src/users.png"), url("/static/src/arrow.png");
 }
 
-.rows.event, .rows.team_creation {
+.rows.event, .rows.team_creation, .rows.team_view {
     column-gap: 20px;
 }
 
@@ -232,6 +232,17 @@ body {
 
 #team_add_users_row {
     background-image: url("/static/src/newUser.png"), url("/static/src/arrow.png");
+}
+
+#team_description_rectangle {
+    padding: 10px 0 100px 10px;
+    border-radius: 10px;
+    border: 1px solid #676AAA;
+    word-wrap: normal;
+}
+
+#team_show_users, #team_schedule_training {
+    background-image: url("/static/src/user.png"), url("/static/src/arrow.png");
 }
 
 
