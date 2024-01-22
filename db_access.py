@@ -240,11 +240,12 @@ def team_request(current_user, cursor):
     #       Contains: team_id, team_name, team_description, team_creator_id, dictionary of participants:
     #           Dictionary of participants in the following format: 'order number': 'user_name'.
     try:
-        teams_request_prompt = ("SELECT DISTINCT team_participations.team_id, team_name,"
-                                "team_description, team_creator_id "
+        teams_request_prompt = ("SELECT DISTINCT teams.team_id, team_name,"
+                                "team_description, team_creator_id, teams.team_date_created "
                                 "FROM teams LEFT JOIN team_participations ON team_participations.team_id=teams.team_id "
                                 f"WHERE team_creator_id={current_user.user_id} "
-                                f"OR team_participations.user_id={current_user.user_id};")
+                                f"OR team_participations.user_id={current_user.user_id} "
+                                "ORDER BY teams.team_date_created DESC;")
         cursor.execute(teams_request_prompt)  # Getting list of user's teams and general info about them
         teams = cursor.fetchall()
         if not teams:  # If teams not found

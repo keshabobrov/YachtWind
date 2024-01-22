@@ -51,6 +51,7 @@ function appStart() {
         mainMenuOverlay.openOverlay();
     });
     showEvents();
+    requestTeams();
 }
 
 
@@ -82,6 +83,7 @@ function userRegistration() {
     })
 }
 
+
 function requestTeams() {
     ajaxRequest(null, '/request_teams').then((value) => {
         if (!value) {
@@ -95,9 +97,19 @@ function requestTeams() {
             button_row.className = 'rows teams';
             button.type = 'button';
             button.innerHTML = value[i]['team_name'];
+            button.addEventListener('click', viewTeam(value[i]));
             block_teams.appendChild(button_row).appendChild(button);
         }
     })
+}
+
+
+function viewTeam(teamData) {
+    return () => {
+        document.querySelector('#team_view_name').innerHTML = teamData['team_name'];
+        document.querySelector('#team_description_rectangle').innerHTML = teamData['team_description'];
+        teamViewOverlay.openOverlay()
+    }
 }
 
 

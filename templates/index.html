@@ -63,6 +63,23 @@
             </div>
             <div id="block_teams">У вас нет команд!</div>
         </div>
+        <div class="overlay" id="overlay_team_view">
+            <div class="header">
+                <div class="arrow_exit"><button type="button" onclick="teamListOverlay.openOverlay()"><img src="/static/src/arrow_exit.png"></button></div>
+                <div class="header_text" id="team_view_name"></div>
+            </div>
+            <div class="rows team_view">
+                <div class="icon"><img src="/static/src/edit.png"></div>
+                <div class="row_text">Описание команды</div>
+            </div>
+            <div class="rows" id="team_description_rectangle"></div>
+            <div class="rows team_view" id="team_show_users">
+                <button type="button">Просмотр участников</button>
+            </div>
+            <div class="rows team_view" id="team_schedule_training">
+                <button type="button">Создать тренировку</button>
+            </div>
+        </div>
         <div class="overlay" id="overlay_team_creation">
             <div class="header">
                 <div class="arrow_exit"><button type="button" onclick="teamListOverlay.openOverlay()"><img src="/static/src/arrow_exit.png"></button></div>
