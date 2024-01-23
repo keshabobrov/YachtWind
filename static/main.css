@@ -239,6 +239,8 @@ body {
     border-radius: 10px;
     border: 1px solid #676AAA;
     word-wrap: normal;
+    font-style: italic;
+    font-weight: 400;
 }
 
 #team_show_users, #team_schedule_training {
