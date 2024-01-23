@@ -171,13 +171,13 @@ function showEvents() {
             month: "long",
             day: "numeric"
         })
-        sessionStorage.setItem('page_date', page_date)
+        sessionStorage.setItem('page_date', page_date);
         // TODO: Consider objects for this.
         for (let i = 0; i < events_results.length; i++) {
             const row = table.insertRow(i + 1);
             const event = events_results[i];
-            const date = new Date(event.event_datetime)
-            row.insertCell(0).innerHTML = event.event_author_name.split(' ').slice(0, 2).join(' ');
+            const date = new Date(event.event_datetime);
+            row.insertCell(0).innerHTML = event.event_author_last_name + " " + event.event_author_first_name;
             row.insertCell(1).innerHTML = date.toLocaleTimeString("ru", {hour: "2-digit", minute: "2-digit"})
             row.insertCell(2).innerHTML = event.event_id;
             row.insertCell(3).innerHTML = date.toDateString();
@@ -190,13 +190,13 @@ function showEvents() {
             row.cells[4].style.display = "none";
             row.cells[5].style.display = "none";
             if (date.toDateString() === page_date) {
-                row.className = "rows"
+                row.className = "rows";
             }
             else {
-                row.className = "rows invisible"
+                row.className = "rows invisible";
             }
         }
-        addRowHandlers()
+        addRowHandlers();
     })
 }
 
@@ -302,9 +302,10 @@ function eventViewer() {
     ajaxRequest(event_id, "/request_enrollments").then((value) => {
         const events_results = JSON.parse(value)
         for (let i = 0; i < events_results.length; i++) {
-            const user_name = events_results[i].user_name
+            const user_last_name = events_results[i].user_last_name;
+            const user_first_name = events_results[i].user_first_name;
             const row = table.insertRow(i +1);
-            row.insertCell(0).innerHTML = user_name;
+            row.insertCell(0).innerHTML = user_last_name + " " + user_first_name;
             row.cells[0].className = "table_team";
         }
     });
