@@ -302,8 +302,8 @@ def team_add_user(current_user, team_id, user_input, cursor):
                                f"AND LOWER(user_first_name) = LOWER(\"{input_first_name}\");")
         cursor.execute(user_request_prompt)
         user_to_add = cursor.fetchone()
-        team_participation_prompt = ("SELECT team_participations.user_id, teams.team_creator_id "
-                                     "FROM team_participations RIGHT JOIN teams ON "
+        team_participation_prompt = ("SELECT team_participations.participation_id, team_participations.user_id, "
+                                     "teams.team_creator_id FROM team_participations RIGHT JOIN teams ON "
                                      "team_participations.team_id = teams.team_id "
                                      f"WHERE team_participations.team_id = {team_id};")
         cursor.execute(team_participation_prompt)
@@ -316,7 +316,10 @@ def team_add_user(current_user, team_id, user_input, cursor):
             return "Adding user has no access to system"
         for team_user in team_users:
             if team_user['user_id'] == user_to_add['user_id']:
-                return "User already added"
+                team_participation_remove = ("DELETE FROM team_participations "
+                                             f"WHERE participation_id = {team_user['participation_id']};")
+                cursor.execute(team_participation_remove)
+                return "Participation was removed"
         team_participation_add = "INSERT INTO team_participations (user_id, team_id) VALUES (%s, %s);"
         cursor.execute(team_participation_add, (user_to_add['user_id'], team_id))
         return "User successfully added"
