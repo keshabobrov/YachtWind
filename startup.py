@@ -119,5 +119,27 @@ def request_teams():
         return jsonify("Some error in request teams"), 500
 
 
+@app.route('/add_team_user', methods=['POST'])
+def add_team_user():
+    json_input = request.json
+    user_telegram_id = request.cookies.get('user_telegram_id')
+    current_user = db_access.Users(user_telegram_id)
+    team_id = json_input['team_id']
+    user_input = json_input['user_input']
+    result = db_access.team_add_user(current_user, team_id, user_input)
+    if result == "Insufficient privileges":
+        return jsonify(result), 401
+    elif result == "User not found":
+        return jsonify(result), 409
+    elif result == "Adding user has no access to system":
+        return jsonify(result), 409
+    elif result == "User already added":
+        return jsonify(result), 409
+    elif result == "User successfully added":
+        return jsonify(result), 200
+    else:
+        return jsonify("Some error in adding to team"), 500
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080, debug=False)
