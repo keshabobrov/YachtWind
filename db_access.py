@@ -280,3 +280,46 @@ def team_request(current_user, cursor):
     except:
         logging.error("DB: Exit code 1: error in database - team_request", exc_info=True)
         return False
+
+
+@access_db
+def team_add_user(current_user, team_id, user_input, cursor):
+    # Function for adding user to team.
+    # Input data:
+    #   1. object 'current_user' of class 'Users',
+    #   2. 'team_id' from user selection on site.
+    #   3. 'user_input' with last and first name of user to add.
+    # Output data:
+    #   1. Insufficient privileges (user not creator of team)
+    #   2. User for adding not found
+    #   3. User already added
+    #   4. User successfully added
+    try:
+        input_last_name = user_input.split(" ")[0]
+        input_first_name = user_input.split(" ")[1]
+        user_request_prompt = ("SELECT user_id, user_access_flag FROM users "
+                               f"WHERE LOWER(user_last_name) = LOWER(\"{input_last_name}\") "
+                               f"AND LOWER(user_first_name) = LOWER(\"{input_first_name}\");")
+        cursor.execute(user_request_prompt)
+        user_to_add = cursor.fetchone()
+        team_participation_prompt = ("SELECT team_participations.user_id, teams.team_creator_id "
+                                     "FROM team_participations RIGHT JOIN teams ON "
+                                     "team_participations.team_id = teams.team_id "
+                                     f"WHERE team_participations.team_id = {team_id};")
+        cursor.execute(team_participation_prompt)
+        team_users = cursor.fetchall()
+        if current_user.user_id != int(team_users[0]['team_creator_id']):
+            return "Insufficient privileges"
+        if user_to_add == "":
+            return "User not found"
+        if user_to_add['user_access_flag'] == 0:
+            return "Adding user has no access to system"
+        for team_user in team_users:
+            if team_user['user_id'] == user_to_add['user_id']:
+                return "User already added"
+        team_participation_add = "INSERT INTO team_participations (user_id, team_id) VALUES (%s, %s);"
+        cursor.execute(team_participation_add, (user_to_add['user_id'], team_id))
+        return "User successfully added"
+    except:
+        logging.error("DB: Exit code 1: error in database - team_add_user", exc_info=True)
+        return False
