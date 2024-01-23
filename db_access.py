@@ -22,7 +22,9 @@ class Users:
         if user_data != 0:
             self.user_id = user_data['user_id']
             self.user_role = user_data['user_role']
-            self.user_name = user_data['user_name']
+            self.user_last_name = user_data['user_last_name']
+            self.user_first_name = user_data['user_first_name']
+            self.user_middle_name = user_data['user_middle_name']
             self.user_access_flag = user_data['user_access_flag']
             statistics = user_statistics(self)
             self.user_rank = statistics['user_rank']
@@ -87,10 +89,11 @@ def user_create(user_data, cursor):
     try:
         user_registration_date = date.today()
         prompt = ("INSERT INTO users "
-                  "(user_telegram_id, user_name, user_registration_date) "
-                  "VALUES (%s, %s, %s)")
+                  "(user_telegram_id, user_last_name, user_first_name, user_middle_name, user_registration_date) "
+                  "VALUES (%s, %s, %s, %s, %s)")
 
-        user_data = (user_data.user_telegram_id, user_data.user_name, user_registration_date)
+        user_data = (user_data.user_telegram_id, user_data.user_last_name,
+                     user_data.user_first_name, user_data.user_middle_name, user_registration_date)
         cursor.execute(prompt, user_data)
         logging.info('DB: User has been created!')
         return True
@@ -158,13 +161,15 @@ def event_request(cursor):
     try:
         today_date = date.today()
         formatted_date = today_date.strftime("%Y.%m.%d")
-        prompt = ("SELECT events.event_id, events.event_datetime, users.user_name AS event_author_name, "
+        prompt = ("SELECT events.event_id, events.event_datetime, users.user_last_name AS event_author_last_name, "
+                  "users.user_first_name AS event_author_first_name, "
+                  "users.user_middle_name AS event_author_middle_name, "
                   "(events.event_slot_num - COUNT(enrollments.enrollment_id)) AS event_remaining_slots, "
                   "events.event_boat_num "
                   "FROM events JOIN users ON events.event_author_id = users.user_id "
                   "LEFT JOIN enrollments ON events.event_id = enrollments.event_id "
                   f"WHERE events.event_datetime >= \"{formatted_date}\" "
-                  "GROUP BY events.event_id, users.user_name "
+                  "GROUP BY events.event_id, users.user_last_name "
                   "ORDER BY events.event_datetime;")
         cursor.execute(prompt)
         result = cursor.fetchall()
@@ -179,7 +184,8 @@ def event_request(cursor):
 @access_db
 def enrollment_request(event_id, cursor):
     try:
-        prompt = ("SELECT user_name FROM enrollments JOIN users ON enrollments.user_id=users.user_id "
+        prompt = ("SELECT user_last_name, user_first_name, user_middle_name FROM enrollments "
+                  "JOIN users ON enrollments.user_id=users.user_id "
                   f"WHERE event_id = {event_id}")
         cursor.execute(prompt)
         request_result = cursor.fetchall()
@@ -252,7 +258,8 @@ def team_request(current_user, cursor):
             return None
         team_ids = [single_id['team_id'] for single_id in teams]  # Ejecting pure team IDs from dictionary
         placeholders = ', '.join(['%s'] * len(team_ids))  # Variable with %s signs to use in query
-        participants_request_prompt = ("SELECT users.user_name, team_participations.team_id FROM team_participations "
+        participants_request_prompt = ("SELECT users.user_last_name, users.user_first_name, users.user_middle_name, "
+                                       "team_participations.team_id FROM team_participations "
                                        "JOIN users ON team_participations.user_id = users.user_id "
                                        f"WHERE team_participations.team_id IN ({placeholders});")
         cursor.execute(participants_request_prompt, tuple(team_ids))  # Getting list of participants for all user teams
@@ -264,7 +271,9 @@ def team_request(current_user, cursor):
             result['users'] = {}
             for team_id in participants:
                 if team_id['team_id'] == result['team_id']:
-                    result['users'][str(index)] = team_id['user_name']
+                    result['users'][str(index)] = (team_id['user_last_name'] + " " +
+                                                   team_id['user_first_name'] + " " +
+                                                   team_id['user_middle_name'])
                     index += 1
             teams_result.append(result)
         return teams_result

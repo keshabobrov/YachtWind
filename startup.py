@@ -34,7 +34,9 @@ def user_registration():
     current_user = db_access.Users(user_telegram_id)
     if hasattr(current_user, 'user_id'):
         return jsonify("User already in system! user_id: " + str(current_user.user_id)), 409
-    current_user.user_name = json_input['lastName'] + " " + json_input['firstName'] + " " + json_input['middleName']
+    current_user.user_last_name = json_input['lastName']
+    current_user.user_first_name = json_input['firstName']
+    current_user.user_middle_name = json_input['middleName']
     if current_user.setup():
         return jsonify("User has been created!"), 200
     else:
