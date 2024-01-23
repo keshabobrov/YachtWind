@@ -133,8 +133,8 @@ def add_team_user():
         return jsonify(result), 409
     elif result == "Adding user has no access to system":
         return jsonify(result), 409
-    elif result == "User already added":
-        return jsonify(result), 409
+    elif result == "Participation was removed":
+        return jsonify(result), 200
     elif result == "User successfully added":
         return jsonify(result), 200
     else:
