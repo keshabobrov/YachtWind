@@ -312,11 +312,13 @@ def team_add_user(current_user, team_id, user_input, cursor):
                                      f"WHERE team_participations.team_id = {team_id};")
         cursor.execute(team_participation_prompt)
         team_users = cursor.fetchall()
-        if current_user.user_id != int(team_users[0]['team_creator_id']):
+        if not team_users:
+            pass
+        elif current_user.user_id != int(team_users[0]['team_creator_id']):
             return "Insufficient privileges"
-        if user_to_add == "":
+        elif not user_to_add:
             return "User not found"
-        if user_to_add['user_access_flag'] == 0:
+        elif user_to_add['user_access_flag'] == 0:
             return "Adding user has no access to system"
         for team_user in team_users:
             if team_user['user_id'] == user_to_add['user_id']:

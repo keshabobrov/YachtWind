@@ -89,7 +89,7 @@ const teamListOverlay = new overlayManager(
 );
 
 
-teamViewOverlay = new overlayManager(
+teamDetailsOverlay = new overlayManager(
     "overlay_team_view",
     null,
     null,
