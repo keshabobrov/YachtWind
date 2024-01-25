@@ -224,7 +224,7 @@ body {
 
 #user_search_button {
     max-height: 40px;
-    width: auto;
+    width: 40px;
 }
 
 #lookup_icon {
@@ -268,4 +268,20 @@ input {
     font-style: italic;
     font-family: inherit;
     padding-left: 15px;
+}
+
+input[type="checkbox"] {
+    -webkit-appearance: none;
+    appearance: none;
+    margin: auto 0 auto auto;
+    width: 30px;
+    height: 30px;
+    border-radius: 100%;
+    border: 3px solid #474B9A;
+}
+
+input[type="checkbox"]:checked {
+    background-image: url("/static/src/checkCircle.svg");
+    background-repeat: no-repeat;
+    background-position: center;
 }

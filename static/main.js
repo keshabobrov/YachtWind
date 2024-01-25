@@ -85,6 +85,11 @@ function userRegistration() {
 
 
 function requestTeams() {
+    // Function for getting JSON object of Teams of current user.
+    // Triggered on application startup.
+    // Output:
+    // HTML clickable rows for every Team found.
+    //  EventListener triggering viewTeamDetails(clicked element) function.
     ajaxRequest(null, '/request_teams').then((value) => {
         if (!value) {
             return
@@ -97,57 +102,121 @@ function requestTeams() {
             button_row.className = 'rows teams';
             button.type = 'button';
             button.innerHTML = value[i]['team_name'];
-            button.addEventListener('click', viewTeam(value[i]));
+            button.addEventListener('click', viewTeamDetails(value[i]));
             block_teams.appendChild(button_row).appendChild(button);
         }
     })
 }
 
 
-function viewTeam(teamData) {
+function viewTeamDetails(teamData) {
+    // Function for showing details in HTML about selected Team.
+    // Trigger: click on teamRow - requestTeams.
+    // Input: JSON object with selected Team.
+    // Output:
+    //  1.EventListener for opening overlay with list of users in this Team:
+    //      Call viewTeamUsers(team_id) function to show users in Team and add search button and checkboxes.
+    //  2. EventListener for click on searchUser button: triggering searchUser() function.
+    //     Passing userInput value from inputBox, team_id.
+    //     Logically it should be in viewTeamUsers function, but when it's rerunning it's also creating new eventListeners.
     return () => {
-        const openOverlayButton = document.querySelector('#change_team_participants_button');
         const searchUserButton = document.querySelector('#user_search_button');
+        teamDetailsOverlay.openOverlay();
+        const openOverlayButton = document.querySelector('#change_team_participants_button');
         document.querySelector('#team_view_name').innerHTML = teamData['team_name'];
         document.querySelector('#team_description_rectangle').innerHTML = teamData['team_description'];
         openOverlayButton.addEventListener('click', () => {
+            viewTeamUsers(teamData['team_id']);
             teamParticipantsOverlay.openOverlay();
         });
         searchUserButton.addEventListener('click', () => {
-            const jsonObject = {};
-            jsonObject['user_input'] = document.querySelector('#new_user_input').value;
-            jsonObject['team_id'] = teamData['team_id'];
-            const request = JSON.stringify(jsonObject);
-            ajaxRequest(request, '/add_team_user').then((value) => {
-                if (value === "User not found") {
-                    window.Telegram.WebApp.HapticFeedback.notificationOccurred("error");
-                    alert("Такой пользователь не найден");
-                }
-                if (value === "User successfully added") {
-                    window.Telegram.WebApp.HapticFeedback.notificationOccurred("success");
-                    alert("Пользователь добавлен в команду")
-                }
-                if (value === "Participation was removed") {
-                    window.Telegram.WebApp.HapticFeedback.notificationOccurred("success");
-                    alert("Пользователь удален из команды")
-                }
-            }).catch((value) => {
-                if (value === "Adding user has no access to system") {
-                    window.Telegram.WebApp.HapticFeedback.notificationOccurred("error");
-                    alert("Введенный пользователь заблокирован")
-                }
-                if (value === "Insufficient privileges") {
-                    window.Telegram.WebApp.HapticFeedback.notificationOccurred("error");
-                    alert("У вас нет доступа к управлению командой")
-                }
-                else {
-                    window.Telegram.WebApp.HapticFeedback.notificationOccurred("error");
-                    alert("Неизвестная ошибка")
-                }
-            });
+            searchUser(document.querySelector('#new_user_input').value, teamData['team_id']);
         });
-        teamViewOverlay.openOverlay()
-    }
+    };
+}
+
+
+function viewTeamUsers(team_id) {
+    // This function showing everytime updated results with participants of viewing Team.
+    // Trigger:
+    //  1. ViewTeamDetails to load initial block with users,
+    //  2. Result of searchUser to update table with users.
+    // Input: int(team_id).
+    // Output:
+    //  1. EventListener for click on searchUser button: triggering searchUser() function.
+    //      Passing userInput value from inputBox, team_id
+    //  2. EventListener for click on checkbox: triggering searchUser() function.
+    //      Passing div text value with selected user for deletion.
+    ajaxRequest(null, '/request_teams').then((value) => {
+        const team_list_block = document.querySelector('#team_list_block');
+        let current_team = [];
+        for (let i = 0; i < value.length; i++) { // Getting single Team with team_id from updated results.
+            if (value[i]['team_id'] === team_id) {
+                current_team = value[i];
+            }
+        }
+        team_list_block.replaceChildren(document.createElement('div')); // Updating whole block with team_list
+        for (let i = 0; i < Object.keys(current_team['users']).length; i++) {
+            // Adding users to team_block one-by-one and assigning them an eventListener on checkbox click.
+            const user_row = document.createElement('div');
+            const text_box = document.createElement('div');
+            const check_box = document.createElement('input');
+            user_row.className = 'rows team_view';
+            user_row.id = i;
+            text_box.className = 'row_text';
+            text_box.innerHTML = current_team['users'][i].substring(0, current_team['users'][i].lastIndexOf(" "));
+            check_box.type = 'checkbox';
+            check_box.checked = true;
+            check_box.addEventListener('click', () => {
+                searchUser(text_box.innerHTML, current_team['team_id']);
+            });
+            team_list_block.appendChild(user_row).appendChild(text_box);
+            user_row.appendChild(check_box);
+        }
+    });
+}
+
+
+function searchUser(username, team_id) {
+    // This function used to send request to backend to add/delete users from Team.
+    // Trigger:
+    //  1. EventListener on checkbox in row added in viewTeamUser - delete user.
+    //  2. EventListener on searchButton added in viewTeamDetails - to add user.
+    // Input: userInput (2 words with LastName, FirstName, not case-sensitive, word-order sensitive); team_id.
+    // Output: call viewTeamUsers function to update existing list of users.
+    const jsonObject = {};
+    jsonObject['user_input'] = username
+    jsonObject['team_id'] = team_id
+    const request = JSON.stringify(jsonObject);
+    ajaxRequest(request, '/add_team_user').then((value) => {
+        if (value === "User not found") {
+            window.Telegram.WebApp.HapticFeedback.notificationOccurred("error");
+            alert("Такой пользователь не найден");
+        }
+        if (value === "User successfully added") {
+            window.Telegram.WebApp.HapticFeedback.notificationOccurred("success");
+            alert("Пользователь добавлен в команду");
+            viewTeamUsers(team_id);
+        }
+        if (value === "Participation was removed") {
+            window.Telegram.WebApp.HapticFeedback.notificationOccurred("success");
+            alert("Пользователь удален из команды");
+            viewTeamUsers(team_id);
+        }
+    }).catch((value) => {
+        if (value === "Adding user has no access to system") {
+            window.Telegram.WebApp.HapticFeedback.notificationOccurred("error");
+            alert("Введенный пользователь заблокирован");
+        }
+        if (value === "Insufficient privileges") {
+            window.Telegram.WebApp.HapticFeedback.notificationOccurred("error");
+            alert("У вас нет доступа к управлению командой");
+        }
+        else {
+            window.Telegram.WebApp.HapticFeedback.notificationOccurred("error");
+            alert("Неизвестная ошибка");
+        }
+    });
 }
 
 
