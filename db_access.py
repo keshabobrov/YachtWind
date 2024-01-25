@@ -284,7 +284,8 @@ def team_request(current_user, cursor):
 
 @access_db
 def team_add_user(current_user, team_id, user_input, cursor):
-    # Function for adding user to team.
+    # Function for adding user to team and removing users from team.
+    # If user already added - remove them.
     # Input data:
     #   1. object 'current_user' of class 'Users',
     #   2. 'team_id' from user selection on site.
@@ -292,11 +293,14 @@ def team_add_user(current_user, team_id, user_input, cursor):
     # Output data:
     #   1. Insufficient privileges (user not creator of team)
     #   2. User for adding not found
-    #   3. User already added
+    #   3. User removed
     #   4. User successfully added
     try:
-        input_last_name = user_input.split(" ")[0]
-        input_first_name = user_input.split(" ")[1]
+        try:
+            input_last_name = user_input.split(" ")[0]
+            input_first_name = user_input.split(" ")[1]
+        except:
+            return "User not found"
         user_request_prompt = ("SELECT user_id, user_access_flag FROM users "
                                f"WHERE LOWER(user_last_name) = LOWER(\"{input_last_name}\") "
                                f"AND LOWER(user_first_name) = LOWER(\"{input_first_name}\");")
