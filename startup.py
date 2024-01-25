@@ -130,7 +130,7 @@ def add_team_user():
     if result == "Insufficient privileges":
         return jsonify(result), 401
     elif result == "User not found":
-        return jsonify(result), 409
+        return jsonify(result), 200
     elif result == "Adding user has no access to system":
         return jsonify(result), 409
     elif result == "Participation was removed":

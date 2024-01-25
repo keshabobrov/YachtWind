@@ -74,18 +74,6 @@ body {
 
 }
 
-.inputBlock {
-    margin-bottom: 27px;
-}
-
-.textInput {
-    margin-bottom: 10px;
-}
-
-.mainMenu {
-    width: 100%;
-}
-
 .rows {
     display: flex;
     margin-bottom: 36px;
@@ -121,19 +109,6 @@ body {
 
 .number_blue_box.stats_number {
     display: block;
-}
-
-.trainer_td {
-    margin: auto 0;
-}
-
-.cell_logo_team {
-    max-width: 10px;
-    background-image: url("/static/src/users.png");
-}
-
-.table_team {
-    padding-top: 10px;
 }
 
 .spacer {
@@ -247,6 +222,14 @@ body {
     background-image: url("/static/src/user.png"), url("/static/src/arrow.png");
 }
 
+#user_search_button {
+    max-height: 40px;
+    width: auto;
+}
+
+#lookup_icon {
+    margin: auto;
+}
 
 button {
     display: flex;
