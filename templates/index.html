@@ -41,17 +41,17 @@
             </div>
             <div class="registrationForm">
                 <form action="" id="user_register_form" method="post">
-                    <div class="inputBlock">
-                        <div class="textInput"><label for="lastName">Фамилия:</label></div>
-                        <div class="inputBoxes"><input type="text" id="lastName" name="lastName" placeholder="Type.."></div>
+                    <div class="rows">
+                        <label for="lastName" class="row_text">Фамилия:</label>
+                        <input type="text" id="lastName" name="lastName" placeholder="Type..">
                     </div>
-                    <div class="inputBlock">
-                        <div class="textInput"><label for="firstName">Имя:</label></div>
-                        <div class="inputBoxes"><input type="text" id="firstName" name="firstName" placeholder="Type.."></div>
+                    <div class="rows">
+                        <label for="firstName" class="row_text">Имя:</label>
+                        <input type="text" id="firstName" name="firstName" placeholder="Type..">
                     </div>
-                    <div class="inputBlock">
-                        <div class="textInput"><label for="middleName">Отчество:</label></div>
-                        <div class="inputBoxes"><input type="text" id="middleName" name="middleName" placeholder="Type.."></div>
+                    <div class="rows">
+                        <label for="middleName" class="row_text">Отчество:</label>
+                        <input type="text" id="middleName" name="middleName" placeholder="Type..">
                     </div>
                 </form>
             </div>
@@ -73,11 +73,24 @@
                 <div class="row_text">Описание команды</div>
             </div>
             <div class="rows" id="team_description_rectangle"></div>
-            <div class="rows team_view" id="team_show_users">
-                <button type="button">Просмотр участников</button>
+            <div class="rows" id="team_show_users">
+                <button type="button" id="change_team_participants_button">Просмотр участников</button>
             </div>
-            <div class="rows team_view" id="team_schedule_training">
+            <div class="rows" id="team_schedule_training">
                 <button type="button">Создать тренировку</button>
+            </div>
+        </div>
+        <div class="overlay" id="overlay_team_participants">
+            <div class="header">
+                <div class="arrow_exit"><button type="button" onclick="teamViewOverlay.openOverlay()"><img src="/static/src/arrow_exit.png"></button></div>
+                <div class="header_text">Список участников</div>
+            </div>
+            <div class="rows team_view">
+                <label for="new_user_input" style="display: none">Добавить пользователя</label>
+                <input type="text" id="new_user_input" name="new_user_input" placeholder="Фамилия Имя">
+                <button type="submit" id="user_search_button">
+                        <img src="/static/src/lookup.png" id="lookup_icon">
+                </button>
             </div>
         </div>
         <div class="overlay" id="overlay_team_creation">

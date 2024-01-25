@@ -106,8 +106,46 @@ function requestTeams() {
 
 function viewTeam(teamData) {
     return () => {
+        const openOverlayButton = document.querySelector('#change_team_participants_button');
+        const searchUserButton = document.querySelector('#user_search_button');
         document.querySelector('#team_view_name').innerHTML = teamData['team_name'];
         document.querySelector('#team_description_rectangle').innerHTML = teamData['team_description'];
+        openOverlayButton.addEventListener('click', () => {
+            teamParticipantsOverlay.openOverlay();
+        });
+        searchUserButton.addEventListener('click', () => {
+            const jsonObject = {};
+            jsonObject['user_input'] = document.querySelector('#new_user_input').value;
+            jsonObject['team_id'] = teamData['team_id'];
+            const request = JSON.stringify(jsonObject);
+            ajaxRequest(request, '/add_team_user').then((value) => {
+                if (value === "User not found") {
+                    window.Telegram.WebApp.HapticFeedback.notificationOccurred("error");
+                    alert("Такой пользователь не найден");
+                }
+                if (value === "User successfully added") {
+                    window.Telegram.WebApp.HapticFeedback.notificationOccurred("success");
+                    alert("Пользователь добавлен в команду")
+                }
+                if (value === "Participation was removed") {
+                    window.Telegram.WebApp.HapticFeedback.notificationOccurred("success");
+                    alert("Пользователь удален из команды")
+                }
+            }).catch((value) => {
+                if (value === "Adding user has no access to system") {
+                    window.Telegram.WebApp.HapticFeedback.notificationOccurred("error");
+                    alert("Введенный пользователь заблокирован")
+                }
+                if (value === "Insufficient privileges") {
+                    window.Telegram.WebApp.HapticFeedback.notificationOccurred("error");
+                    alert("У вас нет доступа к управлению командой")
+                }
+                else {
+                    window.Telegram.WebApp.HapticFeedback.notificationOccurred("error");
+                    alert("Неизвестная ошибка")
+                }
+            });
+        });
         teamViewOverlay.openOverlay()
     }
 }
