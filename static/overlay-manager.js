@@ -67,7 +67,7 @@ const registrationOverlay = new overlayManager(
 
 const eventListOverlay = new overlayManager(
     "overlay_event_list",
-    null,
+    window.Telegram.WebApp.expand,
     "Новая тренировка",
     1
 );
@@ -83,7 +83,7 @@ const eventCreateOverlay = new overlayManager(
 
 const teamListOverlay = new overlayManager(
     "overlay_team",
-    null,
+    window.Telegram.WebApp.expand,
     "Создать",
     1
 );
@@ -91,6 +91,14 @@ const teamListOverlay = new overlayManager(
 
 teamViewOverlay = new overlayManager(
     "overlay_team_view",
+    null,
+    null,
+    0
+);
+
+
+teamParticipantsOverlay = new overlayManager(
+    "overlay_team_participants",
     null,
     null,
     0
