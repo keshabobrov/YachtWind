@@ -12,17 +12,17 @@ def home():
 @app.route('/init', methods=['POST'])
 def user_initialization():
     user_telegram_id = request.json
-    user = db_access.Users(user_telegram_id)
-    if hasattr(user, 'user_id'):
+    current_user = db_access.Users(user_telegram_id)
+    if hasattr(current_user, 'user_id'):
         dictionary = {
-            'user_role': user.user_role,
-            'user_rank': user.user_rank,
-            'user_total_events': user.user_total_events,
-            'user_access_flag': user.user_access_flag
+            'user_role': current_user.user_role,
+            'user_rank': current_user.user_rank,
+            'user_total_events': current_user.user_total_events,
+            'user_access_flag': current_user.user_access_flag
         }
         results = json.dumps(dictionary, indent=1)
         response = app.make_response(results)
-        response.set_cookie('user_telegram_id', str(user.user_telegram_id))
+        response.set_cookie('user_telegram_id', str(current_user.user_telegram_id))
         return response, 200
     return jsonify(0), 200
 
@@ -31,11 +31,13 @@ def user_initialization():
 def user_registration():
     json_input = request.json
     user_telegram_id = json_input['user_telegram_id']
-    user = db_access.Users(user_telegram_id)
-    if hasattr(user, 'user_id'):
-        return jsonify("User already in system! user_id: " + str(user.user_id)), 409
-    user.user_name = json_input['lastName'] + " " + json_input['firstName'] + " " + json_input['middleName']
-    if user.setup():
+    current_user = db_access.Users(user_telegram_id)
+    if hasattr(current_user, 'user_id'):
+        return jsonify("User already in system! user_id: " + str(current_user.user_id)), 409
+    current_user.user_last_name = json_input['lastName']
+    current_user.user_first_name = json_input['firstName']
+    current_user.user_middle_name = json_input['middleName']
+    if current_user.setup():
         return jsonify("User has been created!"), 200
     else:
         return jsonify("Some error writing user"), 500
@@ -66,10 +68,10 @@ def event_request():
     return jsonify(results), 200
 
 
-@app.route('/get_enrollment', methods=['POST'])
-def team_request():
+@app.route('/request_enrollments', methods=['POST'])
+def request_enrollments():
     event_id = request.json
-    event_users = db_access.team_request(event_id)
+    event_users = db_access.enrollment_request(event_id)
     results = json.dumps(event_users, indent=1)
     return jsonify(results), 200
 
@@ -78,10 +80,10 @@ def team_request():
 def event_enroll():
     event_id = request.json
     user_telegram_id = request.cookies.get('user_telegram_id')
-    user = db_access.Users(user_telegram_id)
-    if not hasattr(user, 'user_id'):
+    current_user = db_access.Users(user_telegram_id)
+    if not hasattr(current_user, 'user_id'):
         return jsonify('User not found'), 409
-    results = db_access.event_enrollment(user, event_id)
+    results = db_access.enrollment_create(current_user, event_id)
     if results == 'no more slots':
         return jsonify(results), 200
     if results == 'success':
@@ -89,6 +91,54 @@ def event_enroll():
     if results == 'removed':
         return jsonify(results), 200
     return jsonify(results), 500
+
+
+@app.route('/create_team', methods=['POST'])
+def create_team():
+    team_data = request.json
+    current_user = db_access.Users(request.cookies.get('user_telegram_id'))
+    new_team = db_access.Teams()
+    new_team.team_name = team_data['team_name_form']
+    new_team.team_description = team_data['team_description_form']
+    new_team.team_creator_id = current_user.user_id
+    result = db_access.team_create(new_team)
+    if result:
+        return jsonify('Team created!'), 200
+    else:
+        return jsonify("Some error creating team"), 500
+
+
+@app.route('/request_teams', methods=['POST'])
+def request_teams():
+    user_telegram_id = request.cookies.get('user_telegram_id')
+    current_user = db_access.Users(user_telegram_id)
+    teams = db_access.team_request(current_user)
+    if teams:
+        return jsonify(teams), 200
+    else:
+        return jsonify("Some error in request teams"), 500
+
+
+@app.route('/add_team_user', methods=['POST'])
+def add_team_user():
+    json_input = request.json
+    user_telegram_id = request.cookies.get('user_telegram_id')
+    current_user = db_access.Users(user_telegram_id)
+    team_id = json_input['team_id']
+    user_input = json_input['user_input']
+    result = db_access.team_add_user(current_user, team_id, user_input)
+    if result == "Insufficient privileges":
+        return jsonify(result), 401
+    elif result == "User not found":
+        return jsonify(result), 200
+    elif result == "Adding user has no access to system":
+        return jsonify(result), 409
+    elif result == "Participation was removed":
+        return jsonify(result), 200
+    elif result == "User successfully added":
+        return jsonify(result), 200
+    else:
+        return jsonify("Some error in adding to team"), 500
 
 
 if __name__ == "__main__":

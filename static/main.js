@@ -22,7 +22,7 @@ function ajaxRequest(formData, url) {
 
 function setup() {
     // TODO: REWRITE THIS LOGIC. TOO HEAVY.
-    /** Функция идентифицирования пользователя. Отправляет на сервер id пользователя и возвращает
+    /** User identification. Отправляет на сервер id пользователя и возвращает
      * роль пользователя в системе или сообщение об отсутствии пользователя в системе.*/
     const telegram = window.Telegram.WebApp;
     const user_telegram_id = telegram.initDataUnsafe.user.id;
@@ -51,6 +51,7 @@ function appStart() {
         mainMenuOverlay.openOverlay();
     });
     showEvents();
+    requestTeams();
 }
 
 
@@ -83,6 +84,162 @@ function userRegistration() {
 }
 
 
+function requestTeams() {
+    // Function for getting JSON object of Teams of current user.
+    // Triggered on application startup.
+    // Output:
+    // HTML clickable rows for every Team found.
+    //  EventListener triggering viewTeamDetails(clicked element) function.
+    ajaxRequest(null, '/request_teams').then((value) => {
+        if (!value) {
+            return
+        }
+        const block_teams = document.querySelector('#block_teams');
+        block_teams.replaceChildren(document.createElement('div'));
+        for (let i = 0; i < value.length; i++) {
+            const button_row = document.createElement('div');
+            const button = document.createElement('button');
+            button_row.className = 'rows teams';
+            button.type = 'button';
+            button.innerHTML = value[i]['team_name'];
+            button.addEventListener('click', viewTeamDetails(value[i]));
+            block_teams.appendChild(button_row).appendChild(button);
+        }
+    })
+}
+
+
+function viewTeamDetails(teamData) {
+    // Function for showing details in HTML about selected Team.
+    // Trigger: click on teamRow - requestTeams.
+    // Input: JSON object with selected Team.
+    // Output:
+    //  1.EventListener for opening overlay with list of users in this Team:
+    //      Call viewTeamUsers(team_id) function to show users in Team and add search button and checkboxes.
+    //  2. EventListener for click on searchUser button: triggering searchUser() function.
+    //     Passing userInput value from inputBox, team_id.
+    //     Logically it should be in viewTeamUsers function, but when it's rerunning it's also creating new eventListeners.
+    return () => {
+        const searchUserButton = document.querySelector('#user_search_button');
+        teamDetailsOverlay.openOverlay();
+        const openOverlayButton = document.querySelector('#change_team_participants_button');
+        document.querySelector('#team_view_name').innerHTML = teamData['team_name'];
+        document.querySelector('#team_description_rectangle').innerHTML = teamData['team_description'];
+        openOverlayButton.addEventListener('click', () => {
+            viewTeamUsers(teamData['team_id']);
+            teamParticipantsOverlay.openOverlay();
+        });
+        searchUserButton.addEventListener('click', () => {
+            searchUser(document.querySelector('#new_user_input').value, teamData['team_id']);
+        });
+    };
+}
+
+
+function viewTeamUsers(team_id) {
+    // This function showing everytime updated results with participants of viewing Team.
+    // Trigger:
+    //  1. ViewTeamDetails to load initial block with users,
+    //  2. Result of searchUser to update table with users.
+    // Input: int(team_id).
+    // Output:
+    //  1. EventListener for click on searchUser button: triggering searchUser() function.
+    //      Passing userInput value from inputBox, team_id
+    //  2. EventListener for click on checkbox: triggering searchUser() function.
+    //      Passing div text value with selected user for deletion.
+    ajaxRequest(null, '/request_teams').then((value) => {
+        const team_list_block = document.querySelector('#team_list_block');
+        let current_team = [];
+        for (let i = 0; i < value.length; i++) { // Getting single Team with team_id from updated results.
+            if (value[i]['team_id'] === team_id) {
+                current_team = value[i];
+            }
+        }
+        team_list_block.replaceChildren(document.createElement('div')); // Updating whole block with team_list
+        for (let i = 0; i < Object.keys(current_team['users']).length; i++) {
+            // Adding users to team_block one-by-one and assigning them an eventListener on checkbox click.
+            const user_row = document.createElement('div');
+            const text_box = document.createElement('div');
+            const check_box = document.createElement('input');
+            user_row.className = 'rows team_view';
+            user_row.id = i;
+            text_box.className = 'row_text';
+            text_box.innerHTML = current_team['users'][i].substring(0, current_team['users'][i].lastIndexOf(" "));
+            check_box.type = 'checkbox';
+            check_box.checked = true;
+            check_box.addEventListener('click', () => {
+                searchUser(text_box.innerHTML, current_team['team_id']);
+            });
+            team_list_block.appendChild(user_row).appendChild(text_box);
+            user_row.appendChild(check_box);
+        }
+    });
+}
+
+
+function searchUser(username, team_id) {
+    // This function used to send request to backend to add/delete users from Team.
+    // Trigger:
+    //  1. EventListener on checkbox in row added in viewTeamUser - delete user.
+    //  2. EventListener on searchButton added in viewTeamDetails - to add user.
+    // Input: userInput (2 words with LastName, FirstName, not case-sensitive, word-order sensitive); team_id.
+    // Output: call viewTeamUsers function to update existing list of users.
+    const jsonObject = {};
+    jsonObject['user_input'] = username
+    jsonObject['team_id'] = team_id
+    const request = JSON.stringify(jsonObject);
+    ajaxRequest(request, '/add_team_user').then((value) => {
+        if (value === "User not found") {
+            window.Telegram.WebApp.HapticFeedback.notificationOccurred("error");
+            alert("Такой пользователь не найден");
+        }
+        if (value === "User successfully added") {
+            window.Telegram.WebApp.HapticFeedback.notificationOccurred("success");
+            alert("Пользователь добавлен в команду");
+            viewTeamUsers(team_id);
+        }
+        if (value === "Participation was removed") {
+            window.Telegram.WebApp.HapticFeedback.notificationOccurred("success");
+            alert("Пользователь удален из команды");
+            viewTeamUsers(team_id);
+        }
+    }).catch((value) => {
+        if (value === "Adding user has no access to system") {
+            window.Telegram.WebApp.HapticFeedback.notificationOccurred("error");
+            alert("Введенный пользователь заблокирован");
+        }
+        if (value === "Insufficient privileges") {
+            window.Telegram.WebApp.HapticFeedback.notificationOccurred("error");
+            alert("У вас нет доступа к управлению командой");
+        }
+        else {
+            window.Telegram.WebApp.HapticFeedback.notificationOccurred("error");
+            alert("Неизвестная ошибка");
+        }
+    });
+}
+
+
+function createTeam() {
+    const formData = new FormData(document.querySelector('#team_creation_form'));
+    const jsonObject = Object.fromEntries(formData);
+    const url = "/create_team";
+    const request = JSON.stringify(jsonObject);
+    if (jsonObject['team_name_form'] === "") {
+        alert("Введите название команды")
+        return
+    }
+    ajaxRequest(request, url).then(() => {
+        window.Telegram.WebApp.HapticFeedback.notificationOccurred("success");
+        alert("Команда создана!");
+        location.reload();
+    }).catch(() => {
+        window.Telegram.WebApp.HapticFeedback.notificationOccurred("error");
+        alert("Ошибка");
+    });
+}
+
+
 function eventCreation() {
     /** Функция создания события. Отправляет данные формы и возвращает:
      * 1. Юзер не в системе 409
@@ -102,9 +259,9 @@ function eventCreation() {
     const data = JSON.stringify(jsonObject)
     const url = "/create_event";
     ajaxRequest(data, url).then((value) => {
-        window.Telegram.WebApp.HapticFeedback.notificationOccurred("success")
-        alert("Событие создано!")
-        location.reload()
+        window.Telegram.WebApp.HapticFeedback.notificationOccurred("success");
+        alert("Событие создано!");
+        location.reload();
     });
 }
 
@@ -121,13 +278,13 @@ function showEvents() {
             month: "long",
             day: "numeric"
         })
-        sessionStorage.setItem('page_date', page_date)
+        sessionStorage.setItem('page_date', page_date);
         // TODO: Consider objects for this.
         for (let i = 0; i < events_results.length; i++) {
             const row = table.insertRow(i + 1);
             const event = events_results[i];
-            const date = new Date(event.event_datetime)
-            row.insertCell(0).innerHTML = event.event_author_name.split(' ').slice(0, 2).join(' ');
+            const date = new Date(event.event_datetime);
+            row.insertCell(0).innerHTML = event.event_author_last_name + " " + event.event_author_first_name;
             row.insertCell(1).innerHTML = date.toLocaleTimeString("ru", {hour: "2-digit", minute: "2-digit"})
             row.insertCell(2).innerHTML = event.event_id;
             row.insertCell(3).innerHTML = date.toDateString();
@@ -140,13 +297,13 @@ function showEvents() {
             row.cells[4].style.display = "none";
             row.cells[5].style.display = "none";
             if (date.toDateString() === page_date) {
-                row.className = "rows"
+                row.className = "rows";
             }
             else {
-                row.className = "rows invisible"
+                row.className = "rows invisible";
             }
         }
-        addRowHandlers()
+        addRowHandlers();
     })
 }
 
@@ -221,7 +378,7 @@ function addRowHandlers() {
                 eventViewer();
             }
         }
-        current_row.onclick = create_click_handler(current_row);
+        current_row.addEventListener('click', create_click_handler(current_row));
     }
 }
 
@@ -249,12 +406,13 @@ function eventViewer() {
     else {
         document.getElementById("boat_num").innerHTML = "—"
     }
-    ajaxRequest(event_id, "/get_enrollment").then((value) => {
+    ajaxRequest(event_id, "/request_enrollments").then((value) => {
         const events_results = JSON.parse(value)
         for (let i = 0; i < events_results.length; i++) {
-            const user_name = events_results[i].user_name
+            const user_last_name = events_results[i].user_last_name;
+            const user_first_name = events_results[i].user_first_name;
             const row = table.insertRow(i +1);
-            row.insertCell(0).innerHTML = user_name;
+            row.insertCell(0).innerHTML = user_last_name + " " + user_first_name;
             row.cells[0].className = "table_team";
         }
     });
@@ -293,6 +451,12 @@ Telegram.WebApp.MainButton.onClick(function () {
     switch (overlayManager.currentOverlay) {
         case "overlay_registration":
             userRegistration();
+            break;
+        case "overlay_team":
+            teamCreationOverlay.openOverlay();
+            break;
+        case "overlay_team_creation":
+            createTeam();
             break;
         case "overlay_event_list":
             eventCreateOverlay.openOverlay();
