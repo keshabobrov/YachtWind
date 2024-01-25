@@ -74,18 +74,6 @@ body {
 
 }
 
-.inputBlock {
-    margin-bottom: 27px;
-}
-
-.textInput {
-    margin-bottom: 10px;
-}
-
-.mainMenu {
-    width: 100%;
-}
-
 .rows {
     display: flex;
     margin-bottom: 36px;
@@ -94,7 +82,7 @@ body {
     background-size: 30px, 14px;
     background-position: 0 50%, 100% 50%;
     -webkit-tap-highlight-color: rgba(126, 126, 133, 0.3);
-    width: 100%;
+    /*width: 100%; removed because of team rectangle. Could break something */
 }
 
 .rows.invisible {
@@ -102,10 +90,10 @@ body {
 }
 
 .rows.teams {
-    background-image: url("/static/src/users.png");
+    background-image: url("/static/src/users.png"), url("/static/src/arrow.png");
 }
 
-.rows.event {
+.rows.event, .rows.team_creation, .rows.team_view {
     column-gap: 20px;
 }
 
@@ -121,19 +109,6 @@ body {
 
 .number_blue_box.stats_number {
     display: block;
-}
-
-.trainer_td {
-    margin: auto 0;
-}
-
-.cell_logo_team {
-    max-width: 10px;
-    background-image: url("/static/src/users.png");
-}
-
-.table_team {
-    padding-top: 10px;
 }
 
 .spacer {
@@ -156,10 +131,6 @@ body {
 
 #my_teams {
     background-image: url("/static/src/users.png"), url("/static/src/arrow.png");
-}
-
-#new_team {
-    background-image: url("/static/src/newUser.png"), url("/static/src/arrow.png")
 }
 
 #enroll_training {
@@ -234,6 +205,31 @@ body {
     margin: auto 20px;
 }
 
+#team_add_users_row {
+    background-image: url("/static/src/newUser.png"), url("/static/src/arrow.png");
+}
+
+#team_description_rectangle {
+    padding: 10px 0 100px 10px;
+    border-radius: 10px;
+    border: 1px solid #676AAA;
+    word-wrap: normal;
+    font-style: italic;
+    font-weight: 400;
+}
+
+#team_show_users, #team_schedule_training {
+    background-image: url("/static/src/user.png"), url("/static/src/arrow.png");
+}
+
+#user_search_button {
+    max-height: 40px;
+    width: 40px;
+}
+
+#lookup_icon {
+    margin: auto;
+}
 
 button {
     display: flex;
@@ -272,4 +268,20 @@ input {
     font-style: italic;
     font-family: inherit;
     padding-left: 15px;
+}
+
+input[type="checkbox"] {
+    -webkit-appearance: none;
+    appearance: none;
+    margin: auto 0 auto auto;
+    width: 30px;
+    height: 30px;
+    border-radius: 100%;
+    border: 3px solid #474B9A;
+}
+
+input[type="checkbox"]:checked {
+    background-image: url("/static/src/checkCircle.svg");
+    background-repeat: no-repeat;
+    background-position: center;
 }

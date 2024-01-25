@@ -16,22 +16,22 @@ logging.basicConfig(filename='srv.log',
 
 
 class Users:
-    """Обработка пользовательских данных: инициализация, создание, чтение и т.д."""
-
     def __init__(self, user_telegram_id):
         self.user_telegram_id = user_telegram_id
-        user_data = user_initialization(self.user_telegram_id)
+        user_data = user_initialize(self.user_telegram_id)
         if user_data != 0:
             self.user_id = user_data['user_id']
             self.user_role = user_data['user_role']
-            self.user_name = user_data['user_name']
+            self.user_last_name = user_data['user_last_name']
+            self.user_first_name = user_data['user_first_name']
+            self.user_middle_name = user_data['user_middle_name']
             self.user_access_flag = user_data['user_access_flag']
             statistics = user_statistics(self)
             self.user_rank = statistics['user_rank']
             self.user_total_events = statistics['user_total_events']
 
     def setup(self):
-        if create_user(self):
+        if user_create(self):
             return True
 
 
@@ -50,10 +50,19 @@ class Events:
             return 'User not logged in'
         if self.event_author.user_role != 'admin' and self.event_author.user_role != 'captain':
             return 'User not permitted'
-        result = event_creation(self)
+        result = event_create(self)
         if not result:
             return 'Some error'
         return 'Event has been created!'
+
+
+class Teams:
+    def __init__(self):
+        self.team_id = None
+        self.team_name = None
+        self.team_description = None
+        self.team_creator_id = None
+        self.team_users = None
 
 
 def access_db(func):
@@ -76,28 +85,29 @@ def access_db(func):
 
 
 @access_db
-def create_user(user_data, cursor):
+def user_create(user_data, cursor):
     try:
         user_registration_date = date.today()
-        new_user = ("INSERT INTO users "
-                    "(user_telegram_id, user_name, user_registration_date) "
-                    "VALUES (%s, %s, %s)")
+        prompt = ("INSERT INTO users "
+                  "(user_telegram_id, user_last_name, user_first_name, user_middle_name, user_registration_date) "
+                  "VALUES (%s, %s, %s, %s, %s)")
 
-        user_data = (user_data.user_telegram_id, user_data.user_name, user_registration_date)
-        cursor.execute(new_user, user_data)
+        user_data = (user_data.user_telegram_id, user_data.user_last_name,
+                     user_data.user_first_name, user_data.user_middle_name, user_registration_date)
+        cursor.execute(prompt, user_data)
         logging.info('DB: User has been created!')
         return True
 
     except:
-        logging.error("DB: Exit code 1: error in create_user", exc_info=True)
+        logging.error("DB: Exit code 1: error in database - user_create", exc_info=True)
 
 
 @access_db
-def user_initialization(user_telegram_id, cursor):
+def user_initialize(user_telegram_id, cursor):
     """Первичная инициализация пользователя"""
     try:
-        request_find_user = f"SELECT * FROM users WHERE user_telegram_id = {user_telegram_id}"
-        cursor.execute(request_find_user)
+        prompt = f"SELECT * FROM users WHERE user_telegram_id = {user_telegram_id}"
+        cursor.execute(prompt)
         request_result = cursor.fetchall()
         if not request_result:
             return 0
@@ -106,43 +116,43 @@ def user_initialization(user_telegram_id, cursor):
         return request_result[0]
 
     except:
-        logging.error("DB: Exit code 2: error in user_initialization", exc_info=True)
+        logging.error("DB: Exit code 2: error in database - user_initialize", exc_info=True)
 
 
 @access_db
-def user_statistics(user, cursor):
+def user_statistics(current_user, cursor):
     try:
-        request_get_statistics = ("SELECT user_rank, user_total_events FROM "
-                                  "(SELECT RANK() OVER (ORDER BY total DESC) AS user_rank, "
-                                  "count.total AS user_total_events, user_id FROM "
-                                  "(SELECT COUNT(enrollments.enrollment_id) AS total, users.user_id FROM users "
-                                  "LEFT JOIN enrollments ON users.user_id = enrollments.user_id "
-                                  "GROUP BY users.user_id ORDER BY total DESC ) AS count "
-                                  "ORDER BY user_rank) AS rank_table "
-                                  f"WHERE user_id = {user.user_id};")
-        cursor.execute(request_get_statistics)
+        prompt = ("SELECT user_rank, user_total_events FROM "
+                  "(SELECT RANK() OVER (ORDER BY total DESC) AS user_rank, "
+                  "count.total AS user_total_events, user_id FROM "
+                  "(SELECT COUNT(enrollments.enrollment_id) AS total, users.user_id FROM users "
+                  "LEFT JOIN enrollments ON users.user_id = enrollments.user_id "
+                  "GROUP BY users.user_id ORDER BY total DESC ) AS count "
+                  "ORDER BY user_rank) AS rank_table "
+                  f"WHERE user_id = {current_user.user_id};")
+        cursor.execute(prompt)
         request_result = cursor.fetchone()
         return request_result
 
     except:
-        logging.error("DB: Exit code 1: error in getting statistics", exc_info=True)
+        logging.error("DB: Exit code 1: error in database - user_statistics", exc_info=True)
 
 
 @access_db
-def event_creation(event, cursor):
+def event_create(event, cursor):
     try:
         event_creation_date = date.today()
-        new_event = ("INSERT INTO events "
-                     "(event_datetime, event_author_id, event_creation_date, event_slot_num) "
-                     "VALUES (%s, %s, %s, %s)")
+        prompt = ("INSERT INTO events "
+                  "(event_datetime, event_author_id, event_creation_date, event_slot_num) "
+                  "VALUES (%s, %s, %s, %s)")
 
         event_data = (event.event_datetime, event.event_author.user_id, event_creation_date, event.event_slot_num)
-        cursor.execute(new_event, event_data)
+        cursor.execute(prompt, event_data)
         logging.info('DB: Event has been created!')
         return True
 
     except:
-        logging.error("DB: Exit code 1: error in event_creation", exc_info=True)
+        logging.error("DB: Exit code 1: error in database - event_create", exc_info=True)
         return False
 
 
@@ -151,60 +161,174 @@ def event_request(cursor):
     try:
         today_date = date.today()
         formatted_date = today_date.strftime("%Y.%m.%d")
-        request_events = ("SELECT events.event_id, events.event_datetime, users.user_name AS event_author_name, "
-                          "(events.event_slot_num - COUNT(enrollments.enrollment_id)) AS event_remaining_slots, "
-                          "events.event_boat_num "
-                          "FROM events JOIN users ON events.event_author_id = users.user_id "
-                          "LEFT JOIN enrollments ON events.event_id = enrollments.event_id "
-                          f"WHERE events.event_datetime >= \"{formatted_date}\" "
-                          "GROUP BY events.event_id, users.user_name "
-                          "ORDER BY events.event_datetime;"
-                          )
-        cursor.execute(request_events)
+        prompt = ("SELECT events.event_id, events.event_datetime, users.user_last_name AS event_author_last_name, "
+                  "users.user_first_name AS event_author_first_name, "
+                  "users.user_middle_name AS event_author_middle_name, "
+                  "(events.event_slot_num - COUNT(enrollments.enrollment_id)) AS event_remaining_slots, "
+                  "events.event_boat_num "
+                  "FROM events JOIN users ON events.event_author_id = users.user_id "
+                  "LEFT JOIN enrollments ON events.event_id = enrollments.event_id "
+                  f"WHERE events.event_datetime >= \"{formatted_date}\" "
+                  "GROUP BY events.event_id, users.user_last_name "
+                  "ORDER BY events.event_datetime;")
+        cursor.execute(prompt)
         result = cursor.fetchall()
         for event in result:
             event['event_datetime'] = event['event_datetime'].isoformat()
         return result
 
     except:
-        logging.error("DB: Exit code 1: error in event_request", exc_info=True)
+        logging.error("DB: Exit code 1: error in database - event_request", exc_info=True)
 
 
 @access_db
-def team_request(event_id, cursor):
+def enrollment_request(event_id, cursor):
     try:
-        request_teams = ("SELECT user_name FROM enrollments JOIN users ON enrollments.user_id=users.user_id "
-                         f"WHERE event_id = {event_id}")
-        cursor.execute(request_teams)
+        prompt = ("SELECT user_last_name, user_first_name, user_middle_name FROM enrollments "
+                  "JOIN users ON enrollments.user_id=users.user_id "
+                  f"WHERE event_id = {event_id}")
+        cursor.execute(prompt)
         request_result = cursor.fetchall()
         return request_result
 
     except:
-        logging.error("DB: Exit code 1: error in read_db_training", exc_info=True)
+        logging.error("DB: Exit code 1: error in database - enrollment_request", exc_info=True)
 
 
 @access_db
-def event_enrollment(user, event_id, cursor):
+def enrollment_create(current_user, event_id, cursor):
     try:
-        request_available = ("SELECT (events.event_slot_num - COUNT(enrollments.enrollment_id)) AS remaining_slots, "
-                             f"MAX(CASE WHEN enrollments.user_id = {user.user_id} THEN 1 ELSE 0 END) AS user_already_enrolled "
-                             "FROM events LEFT JOIN enrollments ON events.event_id = enrollments.event_id "
-                             f"WHERE events.event_id = {event_id} GROUP BY events.event_id;")
-        cursor.execute(request_available)
+        prompt = ("SELECT (events.event_slot_num - COUNT(enrollments.enrollment_id)) AS remaining_slots, "
+                  f"MAX(CASE WHEN enrollments.user_id = {current_user.user_id} THEN 1 ELSE 0 END) "
+                  "AS user_already_enrolled "
+                  "FROM events LEFT JOIN enrollments ON events.event_id = enrollments.event_id "
+                  f"WHERE events.event_id = {event_id} GROUP BY events.event_id;")
+        cursor.execute(prompt)
         request_result = cursor.fetchone()
         if request_result['user_already_enrolled'] == 1:
-            request_remove = f"DELETE FROM enrollments WHERE user_id={user.user_id} AND event_id={event_id}"
+            request_remove = f"DELETE FROM enrollments WHERE user_id={current_user.user_id} AND event_id={event_id}"
             cursor.execute(request_remove)
             return "removed"
         elif request_result['remaining_slots'] == 0:
             return "no more slots"
         elif request_result['user_already_enrolled'] == 0:
             request_enroll = ("INSERT INTO enrollments (user_id, event_id) "
-                              f"VALUES ({user.user_id}, {event_id})")
+                              f"VALUES ({current_user.user_id}, {event_id})")
             cursor.execute(request_enroll)
             return "success"
         else:
             return "error"
 
     except:
-        logging.error("DB: Exit code 1: error in database read/write enrollment", exc_info=True)
+        logging.error("DB: Exit code 1: error in database - read/write enrollment", exc_info=True)
+
+
+@access_db
+def team_create(team, cursor):
+    try:
+        prompt = ("INSERT INTO teams (team_name, team_description, team_creator_id) "
+                  "VALUES (%s, %s, %s)")
+        team_data = (team.team_name, team.team_description, team.team_creator_id)
+        cursor.execute(prompt, team_data)
+        return True
+    except:
+        logging.error("DB: Exit code 1: error in database - team_create", exc_info=True)
+        return False
+
+
+@access_db
+def team_request(current_user, cursor):
+    # Function for requesting the teams associated with current_user.
+    #   User is considered associated through team creation OR team participation.
+    # Input data: object 'current_user' of class 'Users'.
+    # Output data: List with dictionaries.
+    #   Every dictionary is one Team.
+    #       Contains: team_id, team_name, team_description, team_creator_id, dictionary of participants:
+    #           Dictionary of participants in the following format: 'order number': 'user_name'.
+    try:
+        teams_request_prompt = ("SELECT DISTINCT teams.team_id, team_name,"
+                                "team_description, team_creator_id, teams.team_date_created "
+                                "FROM teams LEFT JOIN team_participations ON team_participations.team_id=teams.team_id "
+                                f"WHERE team_creator_id={current_user.user_id} "
+                                f"OR team_participations.user_id={current_user.user_id} "
+                                "ORDER BY teams.team_date_created DESC;")
+        cursor.execute(teams_request_prompt)  # Getting list of user's teams and general info about them
+        teams = cursor.fetchall()
+        if not teams:  # If teams not found
+            return None
+        team_ids = [single_id['team_id'] for single_id in teams]  # Ejecting pure team IDs from dictionary
+        placeholders = ', '.join(['%s'] * len(team_ids))  # Variable with %s signs to use in query
+        participants_request_prompt = ("SELECT users.user_last_name, users.user_first_name, users.user_middle_name, "
+                                       "team_participations.team_id FROM team_participations "
+                                       "JOIN users ON team_participations.user_id = users.user_id "
+                                       f"WHERE team_participations.team_id IN ({placeholders});")
+        cursor.execute(participants_request_prompt, tuple(team_ids))  # Getting list of participants for all user teams
+        participants = cursor.fetchall()
+        teams_result = []  # List of dictionaries with all collected data about user's teams
+        for result in teams:
+            # Parsing general teams info and appending to dictionaries user_names that are participating in team.
+            index = 0
+            result['users'] = {}
+            for team_id in participants:
+                if team_id['team_id'] == result['team_id']:
+                    result['users'][str(index)] = (team_id['user_last_name'] + " " +
+                                                   team_id['user_first_name'] + " " +
+                                                   team_id['user_middle_name'])
+                    index += 1
+            teams_result.append(result)
+        return teams_result
+    except:
+        logging.error("DB: Exit code 1: error in database - team_request", exc_info=True)
+        return False
+
+
+@access_db
+def team_add_user(current_user, team_id, user_input, cursor):
+    # Function for adding user to team and removing users from team.
+    # If user already added - remove them.
+    # Input data:
+    #   1. object 'current_user' of class 'Users',
+    #   2. 'team_id' from user selection on site.
+    #   3. 'user_input' with last and first name of user to add.
+    # Output data:
+    #   1. Insufficient privileges (user not creator of team)
+    #   2. User for adding not found
+    #   3. User removed
+    #   4. User successfully added
+    try:
+        try:
+            input_last_name = user_input.split(" ")[0]
+            input_first_name = user_input.split(" ")[1]
+        except:
+            return "User not found"
+        user_request_prompt = ("SELECT user_id, user_access_flag FROM users "
+                               f"WHERE LOWER(user_last_name) = LOWER(\"{input_last_name}\") "
+                               f"AND LOWER(user_first_name) = LOWER(\"{input_first_name}\");")
+        cursor.execute(user_request_prompt)
+        user_to_add = cursor.fetchone()
+        team_participation_prompt = ("SELECT team_participations.participation_id, team_participations.user_id, "
+                                     "teams.team_creator_id FROM team_participations RIGHT JOIN teams ON "
+                                     "team_participations.team_id = teams.team_id "
+                                     f"WHERE team_participations.team_id = {team_id};")
+        cursor.execute(team_participation_prompt)
+        team_users = cursor.fetchall()
+        if not team_users:
+            pass
+        elif current_user.user_id != int(team_users[0]['team_creator_id']):
+            return "Insufficient privileges"
+        elif not user_to_add:
+            return "User not found"
+        elif user_to_add['user_access_flag'] == 0:
+            return "Adding user has no access to system"
+        for team_user in team_users:
+            if team_user['user_id'] == user_to_add['user_id']:
+                team_participation_remove = ("DELETE FROM team_participations "
+                                             f"WHERE participation_id = {team_user['participation_id']};")
+                cursor.execute(team_participation_remove)
+                return "Participation was removed"
+        team_participation_add = "INSERT INTO team_participations (user_id, team_id) VALUES (%s, %s);"
+        cursor.execute(team_participation_add, (user_to_add['user_id'], team_id))
+        return "User successfully added"
+    except:
+        logging.error("DB: Exit code 1: error in database - team_add_user", exc_info=True)
+        return False

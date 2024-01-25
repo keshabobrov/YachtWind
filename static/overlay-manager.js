@@ -8,6 +8,9 @@ class overlayManager {
     }
     static currentOverlay = null;
     openOverlay() {
+        if (this.onLoadFunc) {
+            this.onLoadFunc()
+        }
         this.closeAllOverlays();
         document.querySelector(`#${this.id}`).style.display = "flex";
         overlayManager.currentOverlay = this.id
@@ -64,7 +67,7 @@ const registrationOverlay = new overlayManager(
 
 const eventListOverlay = new overlayManager(
     "overlay_event_list",
-    null,
+    window.Telegram.WebApp.expand,
     "Новая тренировка",
     1
 );
@@ -79,9 +82,33 @@ const eventCreateOverlay = new overlayManager(
 
 
 const teamListOverlay = new overlayManager(
-    "overlay_teams",
+    "overlay_team",
+    window.Telegram.WebApp.expand,
+    "Создать",
+    1
+);
+
+
+teamDetailsOverlay = new overlayManager(
+    "overlay_team_view",
     null,
     null,
+    0
+);
+
+
+teamParticipantsOverlay = new overlayManager(
+    "overlay_team_participants",
+    null,
+    null,
+    0
+);
+
+
+const teamCreationOverlay = new overlayManager(
+    "overlay_team_creation",
+    null,
+    "Создать",
     0
 );
 
