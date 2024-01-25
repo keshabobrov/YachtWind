@@ -213,7 +213,7 @@ def enrollment_create(current_user, event_id, cursor):
             return "no more slots"
         elif request_result['user_already_enrolled'] == 0:
             request_enroll = ("INSERT INTO enrollments (user_id, event_id) "
-                              f"VALUES ({user.user_id}, {event_id})")
+                              f"VALUES ({current_user.user_id}, {event_id})")
             cursor.execute(request_enroll)
             return "success"
         else:
