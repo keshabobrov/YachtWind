@@ -49,9 +49,9 @@ function appStart() {
         document.getElementById("user_total_events").innerHTML = value['user_total_events'];
         document.getElementById("user_rank").innerHTML = value['user_rank'];
         mainMenuOverlay.openOverlay();
+        showEvents();
+        requestTeams();
     });
-    showEvents();
-    requestTeams();
 }
 
 
