@@ -50,6 +50,7 @@ def event_create():
     event = db_access.Events()
     event.event_datetime = json_input['datetime_form']
     event.event_slot_num = json_input['slot_form']
+    event.event_boat_num = json_input['boat_num_form']
     event.event_author = db_access.Users(user_telegram_id)
     results = event.create()
     if results == "User not permitted":
