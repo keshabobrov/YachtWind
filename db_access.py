@@ -44,6 +44,7 @@ class Events:
         self.event_datetime = None
         self.event_slot_num = None
         self.event_slot_available = None
+        self.event_boat_num = None
 
     def create(self):
         if not hasattr(self.event_author, 'user_id'):
@@ -142,11 +143,13 @@ def user_statistics(current_user, cursor):
 def event_create(event, cursor):
     try:
         event_creation_date = date.today()
+        if event.event_boat_num == "":
+            event.event_boat_num = None
         prompt = ("INSERT INTO events "
-                  "(event_datetime, event_author_id, event_creation_date, event_slot_num) "
-                  "VALUES (%s, %s, %s, %s)")
+                  "(event_datetime, event_author_id, event_creation_date, event_slot_num, event_boat_num) "
+                  "VALUES (%s, %s, %s, %s, %s)")
 
-        event_data = (event.event_datetime, event.event_author.user_id, event_creation_date, event.event_slot_num)
+        event_data = (event.event_datetime, event.event_author.user_id, event_creation_date, event.event_slot_num, event.event_boat_num)
         cursor.execute(prompt, event_data)
         logging.info('DB: Event has been created!')
         return True
