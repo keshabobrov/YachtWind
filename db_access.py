@@ -241,13 +241,28 @@ def team_create(team, cursor):
 
 @access_db
 def team_request(current_user, cursor):
-    # Function for requesting the teams associated with current_user.
-    #   User is considered associated through team creation OR team participation.
-    # Input data: object 'current_user' of class 'Users'.
-    # Output data: List with dictionaries.
-    #   Every dictionary is one Team.
-    #       Contains: team_id, team_name, team_description, team_creator_id, dictionary of participants:
-    #           Dictionary of participants in the following format: 'order number': 'user_name'.
+    """
+    Retrieve the teams associated with the current user.
+
+    Users are considered associated with a team based on team creation or team participation.
+
+    Args:
+        current_user (User): An object representing the current user.
+
+    Returns:
+        list of dictionaries or None: 
+            A list of dictionaries representing teams associated with the current user. 
+            Each dictionary contains the following keys:
+                - team_id (int): The ID of the team.
+                - team_name (str): The name of the team.
+                - team_description (str): Description of the team.
+                - team_creator_id (int): The ID of the user who created the team.
+                - team_date_created (datetime): The date and time when the team was created.
+            Returns None if no teams are associated with the user.
+
+    Raises:
+        Exception: Any unexpected error during the execution of the function will be logged with details.
+    """
     try:
         teams_request_prompt = ("SELECT DISTINCT teams.team_id, team_name,"
                                 "team_description, team_creator_id, teams.team_date_created "
@@ -255,83 +270,132 @@ def team_request(current_user, cursor):
                                 f"WHERE team_creator_id={current_user.user_id} "
                                 f"OR team_participations.user_id={current_user.user_id} "
                                 "ORDER BY teams.team_date_created DESC;")
-        cursor.execute(teams_request_prompt)  # Getting list of user's teams and general info about them
+        cursor.execute(teams_request_prompt)
         teams = cursor.fetchall()
-        if not teams:  # If teams not found
+        if not teams:
             return None
-        team_ids = [single_id['team_id'] for single_id in teams]  # Ejecting pure team IDs from dictionary
-        placeholders = ', '.join(['%s'] * len(team_ids))  # Variable with %s signs to use in query
-        participants_request_prompt = ("SELECT users.user_last_name, users.user_first_name, users.user_middle_name, "
-                                       "team_participations.team_id FROM team_participations "
-                                       "JOIN users ON team_participations.user_id = users.user_id "
-                                       f"WHERE team_participations.team_id IN ({placeholders});")
-        cursor.execute(participants_request_prompt, tuple(team_ids))  # Getting list of participants for all user teams
-        participants = cursor.fetchall()
-        teams_result = []  # List of dictionaries with all collected data about user's teams
-        for result in teams:
-            # Parsing general teams info and appending to dictionaries user_names that are participating in team.
-            index = 0
-            result['users'] = {}
-            for team_id in participants:
-                if team_id['team_id'] == result['team_id']:
-                    result['users'][str(index)] = (team_id['user_last_name'] + " " +
-                                                   team_id['user_first_name'] + " " +
-                                                   team_id['user_middle_name'])
-                    index += 1
-            teams_result.append(result)
-        return teams_result
+        return teams
     except:
         logging.error("DB: Exit code 1: error in database - team_request", exc_info=True)
         return False
 
 
 @access_db
-def team_add_user(current_user, team_id, user_input, cursor):
-    # Function for adding user to team and removing users from team.
-    # If user already added - remove them.
-    # Input data:
-    #   1. object 'current_user' of class 'Users',
-    #   2. 'team_id' from user selection on site.
-    #   3. 'user_input' with last and first name of user to add.
-    # Output data:
-    #   1. Insufficient privileges (user not creator of team)
-    #   2. User for adding not found
-    #   3. User removed
-    #   4. User successfully added
+def team_update_user(current_user, json_input, cursor):
+    """
+    Add or remove a user from a team based on the provided information.
+
+    Args:
+        current_user (User): An object representing the current user performing the action.
+        json_input (dict): A dictionary containing the following keys:
+            - eventType (str): Type of event indicating the purpose of the request.
+            - eventProperty: The ID of the team to which the user will be added or removed.
+            - user_input (str): The full name of the user to be added or removed, formatted as "Last Name First Name".
+        cursor: A database cursor object used to execute SQL queries.
+
+    Returns:
+        str or False:
+            - If the current user does not have sufficient privileges to perform the action, returns "Insufficient privileges".
+            - If the specified user is not found in the database, returns "User not found".
+            - If the specified user has no access to the system, returns "Specified user has no access to system".
+            - If the user is already a member of the team and is removed, returns "Participation removed".
+            - If the user is successfully added to the team, returns "Participation created".
+
+    Raises:
+        Exception: Any unexpected error during the execution of the function will be logged with details.
+    
+    Potencial issues:
+        HACK: Any user can add first user to team, even not team creator. But this isn't implemented in frontend.
+    """
     try:
         try:
-            input_last_name = user_input.split(" ")[0]
-            input_first_name = user_input.split(" ")[1]
+            input_last_name = json_input['user_input'].split(" ")[0]
+            input_first_name = json_input['user_input'].split(" ")[1]
         except:
             return "User not found"
         user_request_prompt = ("SELECT user_id, user_access_flag FROM users "
                                f"WHERE LOWER(user_last_name) = LOWER(\"{input_last_name}\") "
                                f"AND LOWER(user_first_name) = LOWER(\"{input_first_name}\");")
-        cursor.execute(user_request_prompt)
+        cursor.execute(user_request_prompt) # Requesting list of users with matching last + first names.
         user_to_add = cursor.fetchone()
+        if not user_to_add:
+            return "User not found"
+        elif user_to_add['user_access_flag'] == 0:
+            logging.warning("User trying to add blocked user to team", exc_info=False)
+            return "Specified user has no access to system"
+        else: pass
         team_participation_prompt = ("SELECT team_participations.participation_id, team_participations.user_id, "
                                      "teams.team_creator_id FROM team_participations RIGHT JOIN teams ON "
                                      "team_participations.team_id = teams.team_id "
-                                     f"WHERE team_participations.team_id = {team_id};")
-        cursor.execute(team_participation_prompt)
+                                     f"WHERE team_participations.team_id = {json_input['eventProperty']};")
+        cursor.execute(team_participation_prompt) # Finding all records in team_participations for provided team.
         team_users = cursor.fetchall()
-        if not team_users:
-            pass
+        if not team_users: pass # Continue if no participations in provided team. Any user potencially can add first user to team!
         elif current_user.user_id != int(team_users[0]['team_creator_id']):
+            logging.error("User trying to reach forbidden feature - add_to_team", exc_info=False)
             return "Insufficient privileges"
-        elif not user_to_add:
-            return "User not found"
-        elif user_to_add['user_access_flag'] == 0:
-            return "Adding user has no access to system"
         for team_user in team_users:
             if team_user['user_id'] == user_to_add['user_id']:
                 team_participation_remove = ("DELETE FROM team_participations "
                                              f"WHERE participation_id = {team_user['participation_id']};")
                 cursor.execute(team_participation_remove)
-                return "Participation was removed"
+                logging.info("User removed from some team", exc_info=False)
+                return "Participation removed"
         team_participation_add = "INSERT INTO team_participations (user_id, team_id) VALUES (%s, %s);"
-        cursor.execute(team_participation_add, (user_to_add['user_id'], team_id))
-        return "User successfully added"
+        cursor.execute(team_participation_add, (user_to_add['user_id'], json_input['eventProperty']))
+        logging.info("User added to some team", exc_info=False)
+        return "Participation created"
     except:
         logging.error("DB: Exit code 1: error in database - team_add_user", exc_info=True)
         return False
+
+
+@access_db
+def get_user_list(json_input, current_user, cursor):
+    """
+    Retrieve a list of users based on the provided criteria.
+
+    Args:
+        json_input (dict): A dictionary containing the following keys:
+            - eventType (str): Type of event indicating the purpose of the request.
+            - eventProperty: Data needed for the request, dependent on the eventType.
+
+        current_user (User): An object representing the current user accessing the function.
+
+        cursor: A database cursor object used to execute SQL queries.
+
+    Returns:
+        list of dictionaries or error str: 
+            - If eventType is 'teamView', returns a list of users along with their participation status in a specific team.
+            - If eventType is 'adminPanel' and current user has admin privileges, returns a list of all users with their roles and access flags.
+            - If the current user does not have admin privileges in the 'adminPanel' eventType, returns a string indicating lack of permission.
+
+    Raises:
+        Exception: Any unexpected error during the execution of the function will be logged with details.
+    """
+    try:
+        if json_input['eventType'] == 'teamView':
+            prompt = ("SELECT CONCAT(user_last_name, \" \", user_first_name) AS user_name, "
+                          f"MAX(IF(team_participations.team_id = {json_input['eventProperty']}, True, False)) as in_results " 
+                          "FROM users JOIN team_participations ON users.user_id = team_participations.user_id "
+                          "GROUP BY users.user_id;")
+        elif json_input['eventType'] == 'adminPanel':
+            if current_user.user_role != 'admin':
+                logging.critical("DB: Exit code 3: error in user_permission. User trying to access forbidden data.", exc_info=False)
+                return "User not permitted. Incident will be reported."
+            prompt = ("SELECT CONCAT(user_last_name, \" \", user_first_name) AS user_name, "
+                      "user_access_flag, user_id, user_role FROM users;")
+        cursor.execute(prompt)
+        users = cursor.fetchall()
+        if current_user.user_role != 'admin':
+            i = 0
+            while i < len(users):
+                if users[i]['in_results'] == 0: 
+                    users.remove(users[i])
+                    continue
+                else:
+                    i += 1
+        return users
+    except:
+        logging.error("DB: Exit code 1: error in database - get_user_list", exc_info=True)
+        return "Some error"
