@@ -142,5 +142,14 @@ def add_team_user():
         return jsonify("Some error in adding to team"), 500
 
 
+@app.route('/get_user_list', methods=['POST'])
+def get_user_list():
+    json_input = request.json
+    user_telegram_id = request.cookies.get('user_telegram_id')
+    current_user = db_access.Users(user_telegram_id)
+    users = db_access.get_user_list(json_input, current_user)
+    return jsonify(users), 200
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080, debug=False)
