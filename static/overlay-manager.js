@@ -5,23 +5,27 @@ class overlayManager {
         this.buttonName = buttonName;
         this.buttonVisibility = this.buttonName !== null;
         this.permissionLevel = permissionLevel;
-    }
+    };
+    
     static currentOverlay = null;
+    
     openOverlay() {
         if (this.onLoadFunc) {
-            this.onLoadFunc()
+            this.onLoadFunc();
         }
         this.closeAllOverlays();
         document.querySelector(`#${this.id}`).style.display = "flex";
-        overlayManager.currentOverlay = this.id
+        overlayManager.currentOverlay = this.id;
         this.setupButton();
-    }
+    };
+
     closeAllOverlays() {
         const overlays = document.querySelectorAll('.overlay');
         overlays.forEach((overlay) => {
             overlay.style.display = 'none';
         });
-    }
+    };
+
     setupButton() {
         if (this.buttonVisibility !== false && this.checkPermissions() >= this.permissionLevel) {
             Telegram.WebApp.MainButton.setParams({
@@ -33,6 +37,7 @@ class overlayManager {
             Telegram.WebApp.MainButton.hide();
         }
     };
+
     checkPermissions() {
         const user_role = sessionStorage.getItem("user_role");
         let user_level = 0;
@@ -97,8 +102,8 @@ teamDetailsOverlay = new overlayManager(
 );
 
 
-teamParticipantsOverlay = new overlayManager(
-    "overlay_team_participants",
+userManagerOverlay = new overlayManager(
+    "overlay_user_manager",
     null,
     null,
     0
