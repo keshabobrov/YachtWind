@@ -377,7 +377,7 @@ def get_user_list(json_input, current_user, cursor):
         if json_input['eventType'] == 'teamView':
             prompt = ("SELECT CONCAT(user_last_name, \" \", user_first_name) AS user_name, "
                           f"MAX(IF(team_participations.team_id = {json_input['eventProperty']}, True, False)) as in_results " 
-                          "FROM users JOIN team_participations ON users.user_id = team_participations.user_id "
+                          "FROM users LEFT JOIN team_participations ON users.user_id = team_participations.user_id "
                           "GROUP BY users.user_id;")
         elif json_input['eventType'] == 'adminPanel':
             if current_user.user_role != 'admin':
