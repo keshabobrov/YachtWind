@@ -120,28 +120,6 @@ def request_teams():
         return jsonify("Some error in request teams"), 500
 
 
-@app.route('/add_team_user', methods=['POST'])
-def add_team_user():
-    json_input = request.json
-    user_telegram_id = request.cookies.get('user_telegram_id')
-    current_user = db_access.Users(user_telegram_id)
-    team_id = json_input['team_id']
-    user_input = json_input['user_input']
-    result = db_access.team_add_user(current_user, team_id, user_input)
-    if result == "Insufficient privileges":
-        return jsonify(result), 401
-    elif result == "User not found":
-        return jsonify(result), 200
-    elif result == "Adding user has no access to system":
-        return jsonify(result), 409
-    elif result == "Participation was removed":
-        return jsonify(result), 200
-    elif result == "User successfully added":
-        return jsonify(result), 200
-    else:
-        return jsonify("Some error in adding to team"), 500
-
-
 @app.route('/get_user_list', methods=['POST'])
 def get_user_list():
     json_input = request.json
@@ -149,6 +127,25 @@ def get_user_list():
     current_user = db_access.Users(user_telegram_id)
     users = db_access.get_user_list(json_input, current_user)
     return jsonify(users), 200
+
+
+@app.route('/change_user_state', methods=['POST'])
+def change_user_state():
+    json_input = request.json
+    user_telegram_id = request.cookies.get('user_telegram_id')
+    current_user = db_access.Users(user_telegram_id)
+    if json_input['eventType'] == 'teamView':
+        result = db_access.team_update_user(current_user, json_input)
+        if result == 'Insufficient privileges':
+            return jsonify(result), 401
+        if result == 'User not found':
+            return jsonify(result), 200
+        if result == 'Specified user has no access to system':
+            return jsonify(result), 409
+        if result == 'Participation removed' or result == 'Participation created':
+            return jsonify(result), 200
+    else:
+        return jsonify('Some error in change_user_state'), 500
 
 
 if __name__ == "__main__":

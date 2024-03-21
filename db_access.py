@@ -281,61 +281,70 @@ def team_request(current_user, cursor):
 
 
 @access_db
-def team_add_user(current_user, team_id, user_input, cursor):
+def team_update_user(current_user, json_input, cursor):
     """
     Add or remove a user from a team based on the provided information.
 
     Args:
         current_user (User): An object representing the current user performing the action.
-        team_id (int): The ID of the team to which the user will be added or removed.
-        user_input (str): The full name of the user to be added or removed, formatted as "Last Name First Name".
+        json_input (dict): A dictionary containing the following keys:
+            - eventType (str): Type of event indicating the purpose of the request.
+            - eventProperty: The ID of the team to which the user will be added or removed.
+            - user_input (str): The full name of the user to be added or removed, formatted as "Last Name First Name".
         cursor: A database cursor object used to execute SQL queries.
 
     Returns:
         str or False:
             - If the current user does not have sufficient privileges to perform the action, returns "Insufficient privileges".
             - If the specified user is not found in the database, returns "User not found".
-            - If the specified user has no access to the system, returns "Adding user has no access to system".
-            - If the user is already a member of the team and is removed, returns "Participation was removed".
-            - If the user is successfully added to the team, returns "User successfully added".
+            - If the specified user has no access to the system, returns "Specified user has no access to system".
+            - If the user is already a member of the team and is removed, returns "Participation removed".
+            - If the user is successfully added to the team, returns "Participation created".
 
     Raises:
         Exception: Any unexpected error during the execution of the function will be logged with details.
+    
+    Potencial issues:
+        HACK: Any user can add first user to team, even not team creator. But this isn't implemented in frontend.
     """
     try:
         try:
-            input_last_name = user_input.split(" ")[0]
-            input_first_name = user_input.split(" ")[1]
+            input_last_name = json_input['user_input'].split(" ")[0]
+            input_first_name = json_input['user_input'].split(" ")[1]
         except:
             return "User not found"
         user_request_prompt = ("SELECT user_id, user_access_flag FROM users "
                                f"WHERE LOWER(user_last_name) = LOWER(\"{input_last_name}\") "
                                f"AND LOWER(user_first_name) = LOWER(\"{input_first_name}\");")
-        cursor.execute(user_request_prompt)
+        cursor.execute(user_request_prompt) # Requesting list of users with matching last + first names.
         user_to_add = cursor.fetchone()
+        if not user_to_add:
+            return "User not found"
+        elif user_to_add['user_access_flag'] == 0:
+            logging.warning("User trying to add blocked user to team", exc_info=False)
+            return "Specified user has no access to system"
+        else: pass
         team_participation_prompt = ("SELECT team_participations.participation_id, team_participations.user_id, "
                                      "teams.team_creator_id FROM team_participations RIGHT JOIN teams ON "
                                      "team_participations.team_id = teams.team_id "
-                                     f"WHERE team_participations.team_id = {team_id};")
-        cursor.execute(team_participation_prompt)
+                                     f"WHERE team_participations.team_id = {json_input['eventProperty']};")
+        cursor.execute(team_participation_prompt) # Finding all records in team_participations for provided team.
         team_users = cursor.fetchall()
-        if not team_users:
-            pass
+        if not team_users: pass # Continue if no participations in provided team. Any user potencially can add first user to team!
         elif current_user.user_id != int(team_users[0]['team_creator_id']):
+            logging.error("User trying to reach forbidden feature - add_to_team", exc_info=False)
             return "Insufficient privileges"
-        elif not user_to_add:
-            return "User not found"
-        elif user_to_add['user_access_flag'] == 0:
-            return "Adding user has no access to system"
         for team_user in team_users:
             if team_user['user_id'] == user_to_add['user_id']:
                 team_participation_remove = ("DELETE FROM team_participations "
                                              f"WHERE participation_id = {team_user['participation_id']};")
                 cursor.execute(team_participation_remove)
-                return "Participation was removed"
+                logging.info("User removed from some team", exc_info=False)
+                return "Participation removed"
         team_participation_add = "INSERT INTO team_participations (user_id, team_id) VALUES (%s, %s);"
-        cursor.execute(team_participation_add, (user_to_add['user_id'], team_id))
-        return "User successfully added"
+        cursor.execute(team_participation_add, (user_to_add['user_id'], json_input['eventProperty']))
+        logging.info("User added to some team", exc_info=False)
+        return "Participation created"
     except:
         logging.error("DB: Exit code 1: error in database - team_add_user", exc_info=True)
         return False
