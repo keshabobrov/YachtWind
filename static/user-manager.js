@@ -64,17 +64,21 @@ class userManager {
             }
             this.showAttachedUsers();
         }).catch((value) => {
-            if (value === "Specified user has no access to system") {
+            if (value.responseJSON === "Specified user has no access to system") {
                 window.Telegram.WebApp.HapticFeedback.notificationOccurred("error");
                 alert("Добавляемый пользователь заблокирован");
             }
-            if (value === "Insufficient privileges") {
+            if (value.responseJSON === "Insufficient privileges") {
                 window.Telegram.WebApp.HapticFeedback.notificationOccurred("error");
                 alert("У вас нет доступа к управлению командой");
             }
+            if (value.responseJSON === "Multiple results found. Not implemeted yet") {
+                window.Telegram.WebApp.HapticFeedback.notificationOccurred("error");
+                alert("Найдено несколько пользователей. Вы не сможете добавить такого пользователя");
+            }
             else {
                 window.Telegram.WebApp.HapticFeedback.notificationOccurred("error");
-                alert("Неизвестная ошибка: " + toString(value));
+                alert("Неизвестная ошибка: " + toString(value.responseJSON));
             }
         });
     }

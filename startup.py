@@ -138,14 +138,16 @@ def change_user_state():
         result = db_access.team_update_user(current_user, json_input)
         if result == 'Insufficient privileges':
             return jsonify(result), 401
-        if result == 'User not found':
+        elif result == 'User not found':
             return jsonify(result), 200
-        if result == 'Specified user has no access to system':
+        elif result == 'Specified user has no access to system':
             return jsonify(result), 409
-        if result == 'Participation removed' or result == 'Participation created':
+        elif result == 'Participation removed' or result == 'Participation created':
             return jsonify(result), 200
-    else:
-        return jsonify('Some error in change_user_state'), 500
+        elif result == 'Multiple results found. Not implemeted yet':
+            return jsonify(result), 500
+        else:
+            return jsonify('Some error in change_user_state', result), 500
 
 
 if __name__ == "__main__":

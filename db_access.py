@@ -300,12 +300,14 @@ def team_update_user(current_user, json_input, cursor):
             - If the specified user has no access to the system, returns "Specified user has no access to system".
             - If the user is already a member of the team and is removed, returns "Participation removed".
             - If the user is successfully added to the team, returns "Participation created".
+            - If multiple users were found, returns "Multiple results found. Not implemeted yet"
 
     Raises:
         Exception: Any unexpected error during the execution of the function will be logged with details.
     
     Potencial issues:
         HACK: Any user can add first user to team, even not team creator. But this isn't implemented in frontend.
+        HACK: If multiple users with same last_name, first_name were found, they couldn't be added to team.
     """
     try:
         try:
@@ -317,13 +319,15 @@ def team_update_user(current_user, json_input, cursor):
                                f"WHERE LOWER(user_last_name) = LOWER(\"{input_last_name}\") "
                                f"AND LOWER(user_first_name) = LOWER(\"{input_first_name}\");")
         cursor.execute(user_request_prompt) # Requesting list of users with matching last + first names.
-        user_to_add = cursor.fetchone()
-        if not user_to_add:
+        user_to_add = cursor.fetchall()
+        if not user_to_add: 
             return "User not found"
+        elif len(user_to_add) > 1: 
+            logging.error("Multiple users found.", exc_info=False)
+            return 'Multiple results found. Not implemeted yet'
         elif user_to_add['user_access_flag'] == 0:
             logging.warning("User trying to add blocked user to team", exc_info=False)
             return "Specified user has no access to system"
-        else: pass
         team_participation_prompt = ("SELECT team_participations.participation_id, team_participations.user_id, "
                                      "teams.team_creator_id FROM team_participations RIGHT JOIN teams ON "
                                      "team_participations.team_id = teams.team_id "

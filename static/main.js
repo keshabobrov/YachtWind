@@ -13,7 +13,7 @@ function ajaxRequest(formData, url) {
             },
             error: function (response) {
             console.log("RQ: Error has been occurred");
-                reject();
+                reject(response);
             }
         });
     });
