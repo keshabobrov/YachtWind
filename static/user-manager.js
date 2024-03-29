@@ -30,11 +30,14 @@ class userManager {
                 const user_container = document.createElement('div');
                 const text_box = document.createElement('div');
                 const check_box = document.createElement('input');
-                user_container.className = 'rows team_view';
+                user_container.className = 'rows users_view';
                 user_container.id = i;
                 text_box.className = 'row_text';
                 text_box.innerHTML = value[i]['user_name'];
                 check_box.type = 'checkbox';
+                if (value[i]['is_editable'] == 0) {
+                    check_box.disabled = true;
+                }
                 if (value[i]['in_results'] == 1) {
                     check_box.checked = true;
                 }

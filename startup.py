@@ -15,6 +15,7 @@ def user_initialization():
     current_user = db_access.Users(user_telegram_id)
     if hasattr(current_user, 'user_id'):
         dictionary = {
+            'user_id': current_user.user_id,
             'user_role': current_user.user_role,
             'user_rank': current_user.user_rank,
             'user_total_events': current_user.user_total_events,

@@ -93,7 +93,7 @@ body {
     background-image: url("/static/src/users.png"), url("/static/src/arrow.png");
 }
 
-.rows.event, .rows.team_creation, .rows.team_view {
+.rows.event, .rows.team_creation, .rows.users_view {
     column-gap: 20px;
 }
 
@@ -278,4 +278,8 @@ input[type="checkbox"]:checked {
     background-image: url("/static/src/checkCircle.svg");
     background-repeat: no-repeat;
     background-position: center;
+}
+
+input[type="checkbox"]:disabled {
+    opacity: 0.75;
 }

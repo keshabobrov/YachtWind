@@ -325,7 +325,7 @@ def team_update_user(current_user, json_input, cursor):
         elif len(user_to_add) > 1: 
             logging.error("Multiple users found.", exc_info=False)
             return 'Multiple results found. Not implemeted yet'
-        elif user_to_add['user_access_flag'] == 0:
+        elif user_to_add[0]['user_access_flag'] == 0:
             logging.warning("User trying to add blocked user to team", exc_info=False)
             return "Specified user has no access to system"
         team_participation_prompt = ("SELECT team_participations.participation_id, team_participations.user_id, "
@@ -339,14 +339,14 @@ def team_update_user(current_user, json_input, cursor):
             logging.error("User trying to reach forbidden feature - add_to_team", exc_info=False)
             return "Insufficient privileges"
         for team_user in team_users:
-            if team_user['user_id'] == user_to_add['user_id']:
+            if team_user['user_id'] == user_to_add[0]['user_id']:
                 team_participation_remove = ("DELETE FROM team_participations "
                                              f"WHERE participation_id = {team_user['participation_id']};")
                 cursor.execute(team_participation_remove)
                 logging.info("User removed from some team", exc_info=False)
                 return "Participation removed"
         team_participation_add = "INSERT INTO team_participations (user_id, team_id) VALUES (%s, %s);"
-        cursor.execute(team_participation_add, (user_to_add['user_id'], json_input['eventProperty']))
+        cursor.execute(team_participation_add, (user_to_add[0]['user_id'], json_input['eventProperty']))
         logging.info("User added to some team", exc_info=False)
         return "Participation created"
     except:
@@ -380,9 +380,10 @@ def get_user_list(json_input, current_user, cursor):
     try:
         if json_input['eventType'] == 'teamView':
             prompt = ("SELECT CONCAT(user_last_name, \" \", user_first_name) AS user_name, "
-                          f"MAX(IF(team_participations.team_id = {json_input['eventProperty']}, True, False)) as in_results " 
-                          "FROM users LEFT JOIN team_participations ON users.user_id = team_participations.user_id "
-                          "GROUP BY users.user_id;")
+                      f"MAX(IF(team_participations.team_id = {json_input['eventProperty']}, True, False)) as in_results, "
+                      f"(SELECT IF(team_creator_id = {current_user.user_id}, True, False) FROM teams WHERE team_id = {json_input['eventProperty']}) as is_editable " 
+                      "FROM users LEFT JOIN team_participations ON users.user_id = team_participations.user_id "
+                      "GROUP BY users.user_id;")
         elif json_input['eventType'] == 'adminPanel':
             if current_user.user_role != 'admin':
                 logging.critical("DB: Exit code 3: error in user_permission. User trying to access forbidden data.", exc_info=False)
