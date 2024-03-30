@@ -216,9 +216,14 @@ body {
     background-image: url("/static/src/user.png"), url("/static/src/arrow.png");
 }
 
-#user_search_button {
+#searchbox_button {
     max-height: 40px;
     width: 40px;
+    margin-left: 10px;
+    background-image: url("/static/src/lookup.png");
+    background-repeat: no-repeat, no-repeat;
+    background-size: 30px, 14px;
+    background-position: center;
 }
 
 #lookup_icon {
@@ -281,5 +286,5 @@ input[type="checkbox"]:checked {
 }
 
 input[type="checkbox"]:disabled {
-    opacity: 0.75;
+    opacity: 0.5;
 }

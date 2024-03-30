@@ -12,19 +12,66 @@ class userManager {
     }
 
     load() {
+        this.userSearch();
         this.showAttachedUsers();
         this.controllingButton.addEventListener('click', () => {
             userManagerOverlay.openOverlay();
         });
-        document.querySelector('#user_search_button').addEventListener('click', () => {
-            this.changeUserState(document.querySelector('#new_user_input').value);
-        });
+    }
+
+    userSearch() {
+        /** 
+         * Initializes a search box and sets up search functionalities.
+        */
+        const searchbox_container = document.querySelector('#searchbox_container');
+        searchbox_container.className = 'rows team_view';
+        searchbox_container.replaceChildren(document.createElement('div'));
+        // Create the search box input element
+        const searchbox = document.createElement('input');
+        searchbox.type = 'input';
+        searchbox.id = 'searchbox';
+        searchbox.placeholder = 'Фамилия Имя';
+        // Add event listeners for input changes and "Enter" key presses
+        searchbox.addEventListener('input', userSearch);
+        searchbox.addEventListener('keyup', (event) => {
+            if (event.key === 'Enter') {
+                this.changeUserState(searchbox.value);
+            }
+        })
+        searchbox_container.appendChild(searchbox);
+        // Create and append a submit button
+        const submit_button = document.createElement('button');
+        submit_button.id = 'searchbox_button';
+        submit_button.type = 'submit';
+        submit_button.addEventListener('click', () => {
+            this.changeUserState(searchbox.value);
+        })
+        searchbox_container.appendChild(submit_button);
+        /**
+         * Executes a search operation on the user list based on the input in the search box.
+        */
+        function userSearch() {
+            const user_list_container = document.querySelector('#user_list_container');
+            const rows = user_list_container.querySelectorAll('div');
+            rows.forEach((row) => {
+                const name_box = row.querySelector('.row_text');
+                if (!name_box) {return};
+                const search_string = name_box.innerHTML.substring(0, searchbox.value.length);
+                // Compare the search string with the input value in a case-insensitive manner
+                if (search_string.toLowerCase() == searchbox.value.toLowerCase()) {
+                    row.style.display = 'flex'; // Show the row if the search string matches
+                }
+                else {
+                    row.style.display = 'none'; // Hide the row if the search string doesn't match
+                }
+            });
+        }
     }
 
     showAttachedUsers() {
         ajaxRequest(JSON.stringify(this.propertyContainer), '/get_user_list').then((value) => {
             const user_list_container = document.querySelector('#user_list_container');
-            user_list_container.replaceChildren(document.createElement('div')); // Updating users container with team_list
+            user_list_container.replaceChildren(); // Updating users container with team_list
             for (let i = 0; i < Object.keys(value).length; i++) {
                 // Adding users to team_list_container one-by-one and assigning them an eventListener on checkbox click.
                 const user_container = document.createElement('div');

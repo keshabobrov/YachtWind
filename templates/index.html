@@ -83,13 +83,7 @@
                 <div class="arrow_exit"><button type="button" onclick="teamDetailsOverlay.openOverlay()"><img src="/static/src/arrow_exit.png"></button></div>
                 <div class="header_text">Список участников</div>
             </div>
-            <div class="rows team_view">
-                <label for="new_user_input" style="display: none">Добавить пользователя</label>
-                <input type="text" id="new_user_input" name="new_user_input" placeholder="Фамилия Имя">
-                <button type="submit" id="user_search_button">
-                        <img src="/static/src/lookup.png" id="lookup_icon">
-                </button>
-            </div>
+            <div id="searchbox_container"></div>
             <div id="user_list_container"></div>
         </div>
         <div class="overlay" id="overlay_team_creation">
